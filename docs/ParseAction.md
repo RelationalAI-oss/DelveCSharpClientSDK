@@ -1,0 +1,15 @@
+
+# Ai.Relational.Model.ParseAction
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**Objtp** | **string** |  | [default to ""]
+**Nonterm** | **string** |  | [optional] [default to ""]
+**Source** | [**Source**](Source.md) |  | 
+
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to README]](../README.md)
+
