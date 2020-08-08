@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.Cons
+# Com.RelationalAI.Model.Cons
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Head** | [**SyntaxNode**](SyntaxNode.md) |  | 
 **Tail** | [**LinkedList**](LinkedList.md) |  | 
 

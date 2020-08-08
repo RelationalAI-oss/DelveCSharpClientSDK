@@ -1,14 +1,14 @@
 
-# Ai.Relational.Model.SyntaxError
+# Com.RelationalAI.Model.SyntaxError
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
+**Next** | [**SyntaxNode**](SyntaxNode.md) |  | 
 **Node** | [**SyntaxNode**](SyntaxNode.md) |  | 
 **Trace** | [**LinkedList**](LinkedList.md) |  | 
-**Next** | [**SyntaxNode**](SyntaxNode.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to API list]](../README.md#documentation-for-api-endpoints)

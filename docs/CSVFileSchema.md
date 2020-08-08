@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.CSVFileSchema
+# Com.RelationalAI.Model.CSVFileSchema
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Types** | **List&lt;string&gt;** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models)

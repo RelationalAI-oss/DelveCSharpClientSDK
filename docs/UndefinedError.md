@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.UndefinedError
+# Com.RelationalAI.Model.UndefinedError
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Range** | [**Range**](Range.md) |  | 
 **Var** | **string** |  | [optional] [default to ""]
 

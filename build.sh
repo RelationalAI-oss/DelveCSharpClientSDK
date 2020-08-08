@@ -40,7 +40,7 @@ if ! type nuget &>/dev/null; then
 fi
 
 mozroots --import --sync
-${nuget_cmd} install src/Ai.Relational/packages.config -o packages;
+${nuget_cmd} install src/Com.RelationalAI/packages.config -o packages;
 
 echo "[INFO] Copy DLLs to the 'bin' folder"
 mkdir -p bin;
@@ -48,15 +48,15 @@ cp packages/Newtonsoft.Json.12.0.3/lib/net45/Newtonsoft.Json.dll bin/Newtonsoft.
 cp packages/RestSharp.105.1.0/lib/net45/RestSharp.dll bin/RestSharp.dll;
 cp packages/JsonSubTypes.1.6.0/lib/net45/JsonSubTypes.dll bin/JsonSubTypes.dll
 
-echo "[INFO] Run 'mcs' to build bin/Ai.Relational.dll"
+echo "[INFO] Run 'mcs' to build bin/Com.RelationalAI.dll"
 mcs -langversion:${langversion} -sdk:${sdk} -r:bin/Newtonsoft.Json.dll,bin/JsonSubTypes.dll,\
 bin/RestSharp.dll,\
 System.ComponentModel.DataAnnotations.dll,\
 System.Runtime.Serialization.dll \
 -target:library \
--out:bin/Ai.Relational.dll \
--recurse:'src/Ai.Relational/*.cs' \
--doc:bin/Ai.Relational.xml \
+-out:bin/Com.RelationalAI.dll \
+-recurse:'src/Com.RelationalAI/*.cs' \
+-doc:bin/Com.RelationalAI.xml \
 -platform:anycpu
 
 if [ $? -ne 0 ]
@@ -64,5 +64,5 @@ then
   echo "[ERROR] Compilation failed with exit code $?"
   exit 1
 else
-  echo "[INFO] bin/Ai.Relational.dll was created successfully"
+  echo "[INFO] bin/Com.RelationalAI.dll was created successfully"
 fi

@@ -1,4 +1,4 @@
-# Ai.Relational.Api.DefaultApi
+# Com.RelationalAI.Api.DefaultApi
 
 All URIs are relative to *http://127.0.0.1:8010*
 
@@ -19,9 +19,9 @@ Issues a transaction to be executed
 ```csharp
 using System.Collections.Generic;
 using System.Diagnostics;
-using Ai.Relational.Api;
-using Ai.Relational.Client;
-using Ai.Relational.Model;
+using Com.RelationalAI.Api;
+using Com.RelationalAI.Client;
+using Com.RelationalAI.Model;
 
 namespace Example
 {

@@ -1,13 +1,13 @@
 
-# Ai.Relational.Model.Area
+# Com.RelationalAI.Model.Area
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**StartPoint** | [**Point**](Point.md) |  | 
 **EndPoint** | [**Point**](Point.md) |  | 
-**Objtp** | **string** |  | [default to ObjtpEnum.Area]
+**StartPoint** | [**Point**](Point.md) |  | 
+**Type** | **string** |  | [default to TypeEnum.Area]
 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to API list]](../README.md#documentation-for-api-endpoints)

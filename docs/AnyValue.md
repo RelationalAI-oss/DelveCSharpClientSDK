@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.AnyValue
+# Com.RelationalAI.Model.AnyValue
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ObjtpEnum.AnyValue]
+**Type** | **string** |  | [default to TypeEnum.AnyValue]
 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to API list]](../README.md#documentation-for-api-endpoints)

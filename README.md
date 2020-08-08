@@ -1,4 +1,4 @@
-# Ai.Relational - the C# library for the Delve Client SDK
+# Com.RelationalAI - the C# library for the Delve Client SDK
 
 This is a Client SDK for Delve API
 
@@ -42,9 +42,9 @@ Run the following command to generate the DLL
 Then include the DLL (under the `bin` folder) in the C# project, and use the namespaces:
 
 ```csharp
-using Ai.Relational.Api;
-using Ai.Relational.Client;
-using Ai.Relational.Model;
+using Com.RelationalAI.Api;
+using Com.RelationalAI.Client;
+using Com.RelationalAI.Model;
 
 ```
 
@@ -56,7 +56,7 @@ A `.nuspec` is included with the project. You can follow the Nuget quickstart to
 This `.nuspec` uses placeholders from the `.csproj`, so build the `.csproj` directly:
 
 ```
-nuget pack -Build -OutputDirectory out Ai.Relational.csproj
+nuget pack -Build -OutputDirectory out Com.RelationalAI.csproj
 ```
 
 Then, publish to a [local feed](https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds) or [other host](https://docs.microsoft.com/en-us/nuget/hosting-packages/overview) and consume the new package via Nuget as usual.
@@ -67,9 +67,9 @@ Then, publish to a [local feed](https://docs.microsoft.com/en-us/nuget/hosting-p
 ```csharp
 using System.Collections.Generic;
 using System.Diagnostics;
-using Ai.Relational.Api;
-using Ai.Relational.Client;
-using Ai.Relational.Model;
+using Com.RelationalAI.Api;
+using Com.RelationalAI.Client;
+using Com.RelationalAI.Model;
 
 namespace Example
 {
@@ -127,7 +127,6 @@ Class | Method | HTTP request | Description
  - [Model.Cons](docs/Cons.md)
  - [Model.ConstantType](docs/ConstantType.md)
  - [Model.DBType](docs/DBType.md)
- - [Model.DictElementRelKeyAnyValue](docs/DictElementRelKeyAnyValue.md)
  - [Model.ExceptionProblem](docs/ExceptionProblem.md)
  - [Model.FileSchema](docs/FileSchema.md)
  - [Model.FileSyntax](docs/FileSyntax.md)
@@ -155,7 +154,6 @@ Class | Method | HTTP request | Description
  - [Model.Nil](docs/Nil.md)
  - [Model.OutputProblem](docs/OutputProblem.md)
  - [Model.PairAnyValueAnyValue](docs/PairAnyValueAnyValue.md)
- - [Model.PairRelKeyAnyValue](docs/PairRelKeyAnyValue.md)
  - [Model.ParseAction](docs/ParseAction.md)
  - [Model.ParseActionResult](docs/ParseActionResult.md)
  - [Model.PersistProblem](docs/PersistProblem.md)
@@ -163,8 +161,8 @@ Class | Method | HTTP request | Description
  - [Model.QueryAction](docs/QueryAction.md)
  - [Model.QueryActionResult](docs/QueryActionResult.md)
  - [Model.Range](docs/Range.md)
- - [Model.RelDict](docs/RelDict.md)
  - [Model.RelKey](docs/RelKey.md)
+ - [Model.Relation](docs/Relation.md)
  - [Model.SetOptionsAction](docs/SetOptionsAction.md)
  - [Model.SetOptionsActionResult](docs/SetOptionsActionResult.md)
  - [Model.Source](docs/Source.md)

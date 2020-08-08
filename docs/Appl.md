@@ -1,16 +1,16 @@
 
-# Ai.Relational.Model.Appl
+# Com.RelationalAI.Model.Appl
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
-**Symbol** | **string** |  | [optional] [default to ""]
+**Type** | **string** |  | [default to ""]
 **Arguments** | [**List&lt;SyntaxNode&gt;**](SyntaxNode.md) |  | [optional] 
-**Range** | [**Range**](Range.md) |  | 
-**Missing** | **bool** |  | [optional] [default to false]
 **Error** | **bool** |  | [optional] [default to false]
+**Missing** | **bool** |  | [optional] [default to false]
+**Range** | [**Range**](Range.md) |  | 
+**Symbol** | **string** |  | [optional] [default to ""]
 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to API list]](../README.md#documentation-for-api-endpoints)

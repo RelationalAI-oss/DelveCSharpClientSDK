@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.CardinalityAction
+# Com.RelationalAI.Model.CardinalityAction
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Relname** | **string** |  | [optional] [default to ""]
 
 [[Back to Model list]](../README.md#documentation-for-models)

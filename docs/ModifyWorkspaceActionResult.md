@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.ModifyWorkspaceActionResult
+# Com.RelationalAI.Model.ModifyWorkspaceActionResult
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **DeleteEdbResult** | [**List&lt;RelKey&gt;**](RelKey.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models)

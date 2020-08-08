@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.IntegrityConstraintProblem
+# Com.RelationalAI.Model.IntegrityConstraintProblem
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Exception** | **string** |  | [optional] [default to ""]
 
 [[Back to Model list]](../README.md#documentation-for-models)

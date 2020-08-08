@@ -1,14 +1,14 @@
 
-# Ai.Relational.Model.OutputProblem
+# Com.RelationalAI.Model.OutputProblem
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
-**Name** | **string** |  | [optional] [default to ""]
+**Type** | **string** |  | [default to ""]
 **Exception** | **string** |  | [optional] [default to ""]
 **ExceptionStacktrace** | **string** |  | [optional] [default to ""]
+**Name** | **string** |  | [optional] [default to ""]
 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to API list]](../README.md#documentation-for-api-endpoints)

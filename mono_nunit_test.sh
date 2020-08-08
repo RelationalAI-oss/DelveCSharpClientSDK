@@ -6,17 +6,17 @@
 wget -nc https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
 mozroots --import --sync
 
-echo "[INFO] remove bin/Debug/Ai.Relational.Test.dll"
-rm src/Ai.Relational.Test/bin/Debug/Ai.Relational.Test.dll 2> /dev/null
+echo "[INFO] remove bin/Debug/Com.RelationalAI.Test.dll"
+rm src/Com.RelationalAI.Test/bin/Debug/Com.RelationalAI.Test.dll 2> /dev/null
 
 echo "[INFO] install NUnit runners via NuGet"
 wget -nc https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
 mozroots --import --sync
-mono nuget.exe install src/Ai.Relational.Test/packages.config -o packages
+mono nuget.exe install src/Com.RelationalAI.Test/packages.config -o packages
 
 echo "[INFO] Install NUnit Console 3.x runners via NuGet"
 mono nuget.exe install NUnit.ConsoleRunner -Version 3.10.0 -OutputDirectory packages
 
 echo "[INFO] Build the solution and run the unit test"
-xbuild Ai.Relational.sln && \
-    mono ./packages/NUnit.ConsoleRunner.3.10.0/tools/nunit3-console.exe src/Ai.Relational.Test/bin/Debug/Ai.Relational.Test.dll
+xbuild Com.RelationalAI.sln && \
+    mono ./packages/NUnit.ConsoleRunner.3.10.0/tools/nunit3-console.exe src/Com.RelationalAI.Test/bin/Debug/Com.RelationalAI.Test.dll

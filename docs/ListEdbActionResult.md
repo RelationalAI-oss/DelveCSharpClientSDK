@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.ListEdbActionResult
+# Com.RelationalAI.Model.ListEdbActionResult
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Rels** | [**List&lt;RelKey&gt;**](RelKey.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models)

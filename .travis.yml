@@ -4,6 +4,6 @@
 language: csharp
 mono:
   - latest
-solution: Ai.Relational.sln
+solution: Com.RelationalAI.sln
 script:
   - /bin/sh ./mono_nunit_test.sh

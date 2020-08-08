@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.ExceptionProblem
+# Com.RelationalAI.Model.ExceptionProblem
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Exception** | **string** |  | [optional] [default to ""]
 **ExceptionStacktrace** | **string** |  | [optional] [default to ""]
 

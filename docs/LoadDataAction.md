@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.LoadDataAction
+# Com.RelationalAI.Model.LoadDataAction
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Rel** | **string** |  | [optional] [default to ""]
 **Value** | [**LoadData**](LoadData.md) |  | 
 

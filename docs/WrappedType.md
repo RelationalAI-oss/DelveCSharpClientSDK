@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.WrappedType
+# Com.RelationalAI.Model.WrappedType
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Value** | **string** |  | [optional] [default to ""]
 
 [[Back to Model list]](../README.md#documentation-for-models)

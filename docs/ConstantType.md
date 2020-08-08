@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.ConstantType
+# Com.RelationalAI.Model.ConstantType
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Constant** | [**AnyValue**](AnyValue.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models)

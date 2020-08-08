@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.WorkspaceLoadProblem
+# Com.RelationalAI.Model.WorkspaceLoadProblem
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Exception** | **string** |  | [optional] [default to ""]
 
 [[Back to Model list]](../README.md#documentation-for-models)

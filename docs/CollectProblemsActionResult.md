@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.CollectProblemsActionResult
+# Com.RelationalAI.Model.CollectProblemsActionResult
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Problems** | [**List&lt;AbstractProblem&gt;**](AbstractProblem.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models)

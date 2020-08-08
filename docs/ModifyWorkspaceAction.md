@@ -1,13 +1,13 @@
 
-# Ai.Relational.Model.ModifyWorkspaceAction
+# Com.RelationalAI.Model.ModifyWorkspaceAction
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
-**DeleteSource** | **List&lt;string&gt;** |  | [optional] 
+**Type** | **string** |  | [default to ""]
 **DeleteEdb** | **string** |  | [optional] [default to ""]
+**DeleteSource** | **List&lt;string&gt;** |  | [optional] 
 **EnableLibrary** | **string** |  | [optional] [default to ""]
 
 [[Back to Model list]](../README.md#documentation-for-models)

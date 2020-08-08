@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.IntegrityConstraintViolation
+# Com.RelationalAI.Model.IntegrityConstraintViolation
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Sources** | [**List&lt;ICViolation&gt;**](ICViolation.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models)

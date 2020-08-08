@@ -1,15 +1,15 @@
 
-# Ai.Relational.Model.TransactionResult
+# Com.RelationalAI.Model.TransactionResult
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Output** | [**RelDict**](RelDict.md) |  | [optional] 
-**Problems** | [**List&lt;AbstractProblem&gt;**](AbstractProblem.md) |  | [optional] 
-**Actions** | [**List&lt;LabeledActionResult&gt;**](LabeledActionResult.md) |  | [optional] 
 **Aborted** | **bool** |  | [optional] [default to false]
-**Objtp** | **string** |  | [default to ObjtpEnum.TransactionResult]
+**Actions** | [**List&lt;LabeledActionResult&gt;**](LabeledActionResult.md) |  | [optional] 
+**Output** | [**List&lt;Relation&gt;**](Relation.md) |  | [optional] 
+**Problems** | [**List&lt;AbstractProblem&gt;**](AbstractProblem.md) |  | [optional] 
+**Type** | **string** |  | [default to TypeEnum.TransactionResult]
 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to API list]](../README.md#documentation-for-api-endpoints)

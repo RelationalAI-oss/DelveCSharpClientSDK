@@ -1,12 +1,12 @@
 
-# Ai.Relational.Model.CardinalityActionResult
+# Com.RelationalAI.Model.CardinalityActionResult
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
-**Result** | [**RelDict**](RelDict.md) |  | [optional] 
+**Type** | **string** |  | [default to ""]
+**Result** | [**List&lt;Relation&gt;**](Relation.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models)
 [[Back to API list]](../README.md#documentation-for-api-endpoints)

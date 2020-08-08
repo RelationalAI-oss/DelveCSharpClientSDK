@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.PersistProblem
+# Com.RelationalAI.Model.PersistProblem
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Exception** | **string** |  | [optional] [default to ""]
 **ExceptionStacktrace** | **string** |  | [optional] [default to ""]
 

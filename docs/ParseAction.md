@@ -1,11 +1,11 @@
 
-# Ai.Relational.Model.ParseAction
+# Com.RelationalAI.Model.ParseAction
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Objtp** | **string** |  | [default to ""]
+**Type** | **string** |  | [default to ""]
 **Nonterm** | **string** |  | [optional] [default to ""]
 **Source** | [**Source**](Source.md) |  | 
 
