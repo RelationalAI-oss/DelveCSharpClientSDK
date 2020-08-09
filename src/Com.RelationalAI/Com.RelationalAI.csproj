@@ -12,7 +12,7 @@ Contact: support@relational.ai
     
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9D68F49F-17F8-4E87-B851-3102B231A63A}</ProjectGuid>
+    <ProjectGuid>{9A28CC8D-B38D-4567-84AA-4454A5C46150}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Com.RelationalAI</RootNamespace>

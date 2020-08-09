@@ -117,7 +117,7 @@ namespace Com.RelationalAI.Client
             UserAgent = "OpenAPI-Generator/1.0.0/csharp";
             BasePath = "http://127.0.0.1:8010";
             DefaultHeader = new ConcurrentDictionary<string, string>();
-            ApiKey = new ConcurrentDictionary<string, string>(); //pragma: allowlist secret
+            ApiKey = new ConcurrentDictionary<string, string>();
             ApiKeyPrefix = new ConcurrentDictionary<string, string>();
 
             // Setting Timeout has side effects (forces ApiClient creation).
@@ -383,7 +383,7 @@ namespace Com.RelationalAI.Client
                 {
                     throw new InvalidOperationException("ApiKey collection may not be null.");
                 }
-                _apiKey = value; //pragma: allowlist secret
+                _apiKey = value;
             }
         }
 

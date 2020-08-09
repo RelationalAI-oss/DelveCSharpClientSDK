@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Area** | [**Area**](Area.md) |  | 
 **EndByte** | [**ModelInt**](ModelInt.md) |  | [optional] 
-**Input** | [**AnyValue**](AnyValue.md) |  | [optional] 
+**Input** | [**AnyType**](.md) |  | [optional] 
 **StartByte** | [**ModelInt**](ModelInt.md) |  | [optional] 
 **Type** | **string** |  | [default to TypeEnum.Range]
 

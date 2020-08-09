@@ -60,8 +60,9 @@ namespace Com.RelationalAI.Model
         /// <param name="columns">columns.</param>
         /// <param name="relKey">relKey (required).</param>
         /// <param name="type">type (required) (default to TypeEnum.Relation).</param>
-        public Relation(AnyValue columns = default(AnyValue), RelKey relKey = default(RelKey), TypeEnum type = TypeEnum.Relation)
+        public Relation(AnyType columns = default(AnyType), RelKey relKey = default(RelKey), TypeEnum type = TypeEnum.Relation)
         {
+            this.Columns = columns;
             // to ensure "relKey" is required (not null)
             if (relKey == null)
             {
@@ -88,8 +89,8 @@ namespace Com.RelationalAI.Model
         /// <summary>
         /// Gets or Sets Columns
         /// </summary>
-        [DataMember(Name="columns", EmitDefaultValue=false)]
-        public AnyValue Columns { get; set; }
+        [DataMember(Name="columns", EmitDefaultValue=true)]
+        public AnyType Columns { get; set; }
 
         /// <summary>
         /// Gets or Sets RelKey

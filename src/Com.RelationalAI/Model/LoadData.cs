@@ -64,7 +64,7 @@ namespace Com.RelationalAI.Model
         /// <param name="key">key.</param>
         /// <param name="path">path (default to &quot;&quot;).</param>
         /// <param name="type">type (required) (default to TypeEnum.LoadData).</param>
-        public LoadData(string contentType = "", string data = "", FileSchema fileSchema = default(FileSchema), FileSyntax fileSyntax = default(FileSyntax), AnyValue key = default(AnyValue), string path = "", TypeEnum type = TypeEnum.LoadData)
+        public LoadData(string contentType = "", string data = "", FileSchema fileSchema = default(FileSchema), FileSyntax fileSyntax = default(FileSyntax), AnyType key = default(AnyType), string path = "", TypeEnum type = TypeEnum.LoadData)
         {
             // to ensure "fileSchema" is required (not null)
             if (fileSchema == null)
@@ -86,6 +86,7 @@ namespace Com.RelationalAI.Model
                 this.FileSyntax = fileSyntax;
             }
             
+            this.Key = key;
             // to ensure "type" is required (not null)
             if (type == null)
             {
@@ -153,8 +154,8 @@ namespace Com.RelationalAI.Model
         /// <summary>
         /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name="key", EmitDefaultValue=false)]
-        public AnyValue Key { get; set; }
+        [DataMember(Name="key", EmitDefaultValue=true)]
+        public AnyType Key { get; set; }
 
         /// <summary>
         /// Gets or Sets Path

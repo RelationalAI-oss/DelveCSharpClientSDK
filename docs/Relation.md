@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Columns** | [**AnyValue**](AnyValue.md) |  | [optional] 
+**Columns** | [**AnyType**](.md) |  | [optional] 
 **RelKey** | [**RelKey**](RelKey.md) |  | 
 **Type** | **string** |  | [default to TypeEnum.Relation]
 

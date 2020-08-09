@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **Data** | **string** |  | [optional] [default to ""]
 **FileSchema** | [**FileSchema**](FileSchema.md) |  | 
 **FileSyntax** | [**FileSyntax**](FileSyntax.md) |  | 
-**Key** | [**AnyValue**](AnyValue.md) |  | [optional] 
+**Key** | [**AnyType**](.md) |  | [optional] 
 **Path** | **string** |  | [optional] [default to ""]
 **Type** | **string** |  | [default to TypeEnum.LoadData]
 

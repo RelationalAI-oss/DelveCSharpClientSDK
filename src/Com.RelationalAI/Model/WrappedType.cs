@@ -38,26 +38,10 @@ namespace Com.RelationalAI.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="WrappedType" /> class.
         /// </summary>
-        /// <param name="value">value (default to &quot;&quot;).</param>
-        public WrappedType(string value = "", string type = "") : base(type)
+        public WrappedType(string type = "") : base(type)
         {
-            // use default value if no "value" provided
-            if (value == null)
-            {
-                this.Value = "";
-            }
-            else
-            {
-                this.Value = value;
-            }
         }
         
-        /// <summary>
-        /// Gets or Sets Value
-        /// </summary>
-        [DataMember(Name="_value", EmitDefaultValue=false)]
-        public string Value { get; set; }
-
         /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
@@ -67,7 +51,6 @@ namespace Com.RelationalAI.Model
             var sb = new StringBuilder();
             sb.Append("class WrappedType {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -101,12 +84,7 @@ namespace Com.RelationalAI.Model
             if (input == null)
                 return false;
 
-            return base.Equals(input) && 
-                (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -118,8 +96,6 @@ namespace Com.RelationalAI.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Value != null)
-                    hashCode = hashCode * 59 + this.Value.GetHashCode();
                 return hashCode;
             }
         }

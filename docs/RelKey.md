@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Keys** | [**List&lt;DBType&gt;**](DBType.md) |  | [optional] 
+**Keys** | **List&lt;string&gt;** |  | [optional] 
 **Name** | **string** |  | [optional] [default to ""]
-**Values** | [**List&lt;DBType&gt;**](DBType.md) |  | [optional] 
+**Values** | **List&lt;string&gt;** |  | [optional] 
 **Type** | **string** |  | [default to TypeEnum.RelKey]
 
 [[Back to Model list]](../README.md#documentation-for-models)
