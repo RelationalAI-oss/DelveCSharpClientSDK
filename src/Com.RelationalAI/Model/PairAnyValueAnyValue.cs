@@ -60,8 +60,10 @@ namespace Com.RelationalAI.Model
         /// <param name="first">first.</param>
         /// <param name="second">second.</param>
         /// <param name="type">type (required) (default to TypeEnum.PairAnyValueAnyValue).</param>
-        public PairAnyValueAnyValue(AnyValue first = default(AnyValue), AnyValue second = default(AnyValue), TypeEnum type = TypeEnum.PairAnyValueAnyValue)
+        public PairAnyValueAnyValue(AnyType first = default(AnyType), AnyType second = default(AnyType), TypeEnum type = TypeEnum.PairAnyValueAnyValue)
         {
+            this.First = first;
+            this.Second = second;
             // to ensure "type" is required (not null)
             if (type == null)
             {
@@ -79,14 +81,14 @@ namespace Com.RelationalAI.Model
         /// <summary>
         /// Gets or Sets First
         /// </summary>
-        [DataMember(Name="first", EmitDefaultValue=false)]
-        public AnyValue First { get; set; }
+        [DataMember(Name="first", EmitDefaultValue=true)]
+        public AnyType First { get; set; }
 
         /// <summary>
         /// Gets or Sets Second
         /// </summary>
-        [DataMember(Name="second", EmitDefaultValue=false)]
-        public AnyValue Second { get; set; }
+        [DataMember(Name="second", EmitDefaultValue=true)]
+        public AnyType Second { get; set; }
 
 
         /// <summary>

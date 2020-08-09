@@ -114,7 +114,6 @@ Class | Method | HTTP request | Description
  - [Model.AbstractProblem](docs/AbstractProblem.md)
  - [Model.Action](docs/Action.md)
  - [Model.ActionResult](docs/ActionResult.md)
- - [Model.AnyValue](docs/AnyValue.md)
  - [Model.Appl](docs/Appl.md)
  - [Model.Area](docs/Area.md)
  - [Model.CSVFileSchema](docs/CSVFileSchema.md)
@@ -125,8 +124,6 @@ Class | Method | HTTP request | Description
  - [Model.CollectProblemsAction](docs/CollectProblemsAction.md)
  - [Model.CollectProblemsActionResult](docs/CollectProblemsActionResult.md)
  - [Model.Cons](docs/Cons.md)
- - [Model.ConstantType](docs/ConstantType.md)
- - [Model.DBType](docs/DBType.md)
  - [Model.ExceptionProblem](docs/ExceptionProblem.md)
  - [Model.FileSchema](docs/FileSchema.md)
  - [Model.FileSyntax](docs/FileSyntax.md)
@@ -175,7 +172,6 @@ Class | Method | HTTP request | Description
  - [Model.UpdateAction](docs/UpdateAction.md)
  - [Model.UpdateActionResult](docs/UpdateActionResult.md)
  - [Model.WorkspaceLoadProblem](docs/WorkspaceLoadProblem.md)
- - [Model.WrappedType](docs/WrappedType.md)
 
 
 ## Documentation for Authorization

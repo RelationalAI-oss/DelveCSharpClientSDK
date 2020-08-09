@@ -81,7 +81,7 @@ Contact: support@relational.ai
   <Import Project="$(MsBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
       <ProjectReference Include="..\Com.RelationalAI\Com.RelationalAI.csproj">
-          <Project>{9D68F49F-17F8-4E87-B851-3102B231A63A}</Project>
+          <Project>{9A28CC8D-B38D-4567-84AA-4454A5C46150}</Project>
           <Name>Com.RelationalAI</Name>
       </ProjectReference>
   </ItemGroup>

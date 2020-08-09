@@ -62,7 +62,7 @@ namespace Com.RelationalAI.Model
         /// <param name="input">input.</param>
         /// <param name="startByte">startByte.</param>
         /// <param name="type">type (required) (default to TypeEnum.Range).</param>
-        public Range(Area area = default(Area), ModelInt endByte = default(ModelInt), AnyValue input = default(AnyValue), ModelInt startByte = default(ModelInt), TypeEnum type = TypeEnum.Range)
+        public Range(Area area = default(Area), ModelInt endByte = default(ModelInt), AnyType input = default(AnyType), ModelInt startByte = default(ModelInt), TypeEnum type = TypeEnum.Range)
         {
             // to ensure "area" is required (not null)
             if (area == null)
@@ -74,6 +74,7 @@ namespace Com.RelationalAI.Model
                 this.Area = area;
             }
             
+            this.Input = input;
             // to ensure "type" is required (not null)
             if (type == null)
             {
@@ -104,8 +105,8 @@ namespace Com.RelationalAI.Model
         /// <summary>
         /// Gets or Sets Input
         /// </summary>
-        [DataMember(Name="input", EmitDefaultValue=false)]
-        public AnyValue Input { get; set; }
+        [DataMember(Name="input", EmitDefaultValue=true)]
+        public AnyType Input { get; set; }
 
         /// <summary>
         /// Gets or Sets StartByte

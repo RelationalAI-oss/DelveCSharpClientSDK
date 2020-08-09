@@ -61,7 +61,7 @@ namespace Com.RelationalAI.Model
         /// <param name="name">name (default to &quot;&quot;).</param>
         /// <param name="values">values.</param>
         /// <param name="type">type (required) (default to TypeEnum.RelKey).</param>
-        public RelKey(List<DBType> keys = default(List<DBType>), string name = "", List<DBType> values = default(List<DBType>), TypeEnum type = TypeEnum.RelKey)
+        public RelKey(List<string> keys = default(List<string>), string name = "", List<string> values = default(List<string>), TypeEnum type = TypeEnum.RelKey)
         {
             // to ensure "type" is required (not null)
             if (type == null)
@@ -90,7 +90,7 @@ namespace Com.RelationalAI.Model
         /// Gets or Sets Keys
         /// </summary>
         [DataMember(Name="keys", EmitDefaultValue=false)]
-        public List<DBType> Keys { get; set; }
+        public List<string> Keys { get; set; }
 
         /// <summary>
         /// Gets or Sets Name
@@ -102,7 +102,7 @@ namespace Com.RelationalAI.Model
         /// Gets or Sets Values
         /// </summary>
         [DataMember(Name="values", EmitDefaultValue=false)]
-        public List<DBType> Values { get; set; }
+        public List<string> Values { get; set; }
 
 
         /// <summary>
