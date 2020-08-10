@@ -70,7 +70,7 @@ namespace Com.RelationalAI.Api
         /// <param name="transaction">Optional description in *Markdown*</param>
         /// <param name="cancellationToken">Cancellation Token to cancel request (optional) </param>
         /// <returns>Task of ApiResponse (TransactionResult)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionResult>> TransactionPostAsyncWithHttpInfo (Transaction transaction, CancellationToken cancellationToken = default(CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<TransactionResult>> TransactionPostWithHttpInfoAsync (Transaction transaction, CancellationToken cancellationToken = default(CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -265,7 +265,7 @@ namespace Com.RelationalAI.Api
         /// <returns>Task of TransactionResult</returns>
         public async System.Threading.Tasks.Task<TransactionResult> TransactionPostAsync (Transaction transaction, CancellationToken cancellationToken = default(CancellationToken))
         {
-             ApiResponse<TransactionResult> localVarResponse = await TransactionPostAsyncWithHttpInfo(transaction, cancellationToken);
+             ApiResponse<TransactionResult> localVarResponse = await TransactionPostWithHttpInfoAsync(transaction, cancellationToken);
              return localVarResponse.Data;
 
         }
@@ -277,7 +277,7 @@ namespace Com.RelationalAI.Api
         /// <param name="transaction">Optional description in *Markdown*</param>
         /// <param name="cancellationToken">Cancellation Token to cancel request (optional) </param>
         /// <returns>Task of ApiResponse (TransactionResult)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<TransactionResult>> TransactionPostAsyncWithHttpInfo (Transaction transaction, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<ApiResponse<TransactionResult>> TransactionPostWithHttpInfoAsync (Transaction transaction, CancellationToken cancellationToken = default(CancellationToken))
         {
             // verify the required parameter 'transaction' is set
             if (transaction == null)
