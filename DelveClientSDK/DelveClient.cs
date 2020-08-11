@@ -5,13 +5,21 @@ using System.Threading.Tasks;
 
 namespace Com.RelationalAI
 {
+    public partial class GeneratedDelveClient
+    {
+        partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, string url)
+        {
+            //sign request here
+        }
+    }
+
     public class DelveClient : GeneratedDelveClient
     {
-        public DelveClient(HttpClient httpClient) : base(httpClient)
+        public DelveClient(InterceptedHttpClient httpClient) : base(httpClient)
         {
         }
 
-        public DelveClient() : this(new HttpClient())
+        public DelveClient() : this(new InterceptedHttpClient())
         {
         }
 
