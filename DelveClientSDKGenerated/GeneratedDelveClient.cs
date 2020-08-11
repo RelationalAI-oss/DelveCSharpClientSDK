@@ -13,6 +13,7 @@
 namespace Com.RelationalAI
 {
     using System = global::System;
+    using AnyValue = System.Object;
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.7.0.0 (NJsonSchema v10.1.24.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class GeneratedDelveClient 
@@ -231,20 +232,20 @@ namespace Com.RelationalAI
         }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class AnyValue 
-    {
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    //[System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    //public partial class AnyValue 
+    //{
+    //    private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties; }
-            set { _additionalProperties = value; }
-        }
+    //    [Newtonsoft.Json.JsonExtensionData]
+    //    public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+    //    {
+    //        get { return _additionalProperties; }
+    //        set { _additionalProperties = value; }
+    //    }
     
     
-    }
+    //}
     
     [Newtonsoft.Json.JsonConverter(typeof(JsonInheritanceConverter), "type")]
     [JsonInheritanceAttribute("CardinalityAction", typeof(CardinalityAction))]
