@@ -7,7 +7,7 @@ namespace Com.RelationalAI
 {
     public partial class GeneratedDelveClient
     {
-        partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, string url)
+        partial void PrepareRequest(HttpClient client, HttpRequestMessage request, string url)
         {
             //sign request here
         }
@@ -31,7 +31,6 @@ namespace Com.RelationalAI
 
             LabeledAction labeledAction = new LabeledAction();
             labeledAction.Name = name;
-            Console.WriteLine("xact.Actions = " + xact.Actions);
             labeledAction.Action = action;
             xact.Actions = new List<LabeledAction>();
             xact.Actions.Add(labeledAction);
@@ -74,7 +73,6 @@ namespace Com.RelationalAI
 
             InstallAction action = new InstallAction();
             action.Sources = new List<Source>();
-            Console.WriteLine("action.Sources = " + (action.Sources == null));
             action.Sources.Add(src);
 
             return (InstallActionResult)run_action(conn, "single", action);
