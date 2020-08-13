@@ -7,24 +7,28 @@ namespace Com.RelationalAI
 {
     public partial class GeneratedDelveClient
     {
+        public Connection conn {get; set;}
+
         partial void PrepareRequest(HttpClient client, HttpRequestMessage request, string url)
         {
             //sign request here
+            var raiRequest = new RAIRequest(request, conn);
+            raiRequest.sign();
         }
     }
 
     public class DelveClient : GeneratedDelveClient
     {
-        public DelveClient(InterceptedHttpClient httpClient) : base(httpClient)
-        {
-        }
+        private static HttpClient httpClient = new HttpClient();
 
-        public DelveClient() : this(new InterceptedHttpClient())
+        public DelveClient() : base(httpClient)
         {
         }
 
         public ActionResult run_action(Connection conn, String name, Action action)
         {
+            this.conn = conn;
+
             Transaction xact = new Transaction();
             xact.Mode = TransactionMode.OPEN;
             xact.Dbname = conn.dbname;
@@ -55,6 +59,8 @@ namespace Com.RelationalAI
 
         public bool create_database(Connection conn, bool overwrite)
         {
+            this.conn = conn;
+
             Transaction xact = new Transaction();
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
             xact.Dbname = conn.dbname;
