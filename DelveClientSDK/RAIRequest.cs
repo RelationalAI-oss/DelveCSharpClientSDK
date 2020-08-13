@@ -79,10 +79,12 @@ namespace Com.RelationalAI
             // HTTP headers
             inner_req.Headers.Authorization = null;
 
+            var all_headers = inner_req.Headers.Union(inner_req.Content.Headers);
+
             // Sort and lowercase() Headers to produce canonical form
             string canonical_headers = string.Join(
                 "\n",
-                from header in inner_req.Headers.Union(inner_req.Content.Headers)
+                from header in all_headers
                 orderby header.Key.ToLower()
                 select string.Format(
                     "{0}:{1}",
@@ -92,7 +94,7 @@ namespace Com.RelationalAI
             );
             string signed_headers = string.Join(
                 ";",
-                from header in inner_req.Headers.Union(inner_req.Content.Headers)
+                from header in all_headers
                 orderby header.Key.ToLower()
                 select header.Key.ToLower()
             );
