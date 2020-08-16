@@ -8,16 +8,15 @@ using NUnit.Framework;
 
 namespace Com.RelationalAI
 {
-    public class Tests
+    public class UnitTests
     {
-        private DelveClient api;
         string dbname;
         Connection conn;
+        private DelveClient api;
 
         [SetUp]
         public void Setup()
         {
-            api = new DelveClient();
 
             dbname = "testcsharpclient";
             conn = new Connection(
@@ -27,13 +26,12 @@ namespace Com.RelationalAI
                     "484aiIGKitw91qppUTR0m8ge4grU+hUp65/MZ4bO0MY="
                 )
             );
+            api = new DelveClient(conn);
         }
 
         [Test]
         public void Test1()
         {
-            //TransactionResult res = client.TransactionAsync(new Transaction()).Result;
-            //Console.WriteLine(res);
             Assert.IsTrue(api.create_database(conn, true));
             Assert.IsFalse(api.create_database(conn, false));
 
