@@ -1,9 +1,9 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DelveClientSDK", "DelveClientSDK\DelveClientSDK.csproj", "{EDF10AD8-3B58-4A1D-844D-CA6FCF883E6B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DelveClientSDKTests", "DelveClientSDKTests\DelveClientSDKTests.csproj", "{A822E187-C8F3-41C3-8461-D236D12126BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DelveClientSDK", "DelveClientSDK\DelveClientSDK.csproj", "{C7ED6857-CAA7-4EAD-B5AD-D8423AB07F22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,13 +11,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EDF10AD8-3B58-4A1D-844D-CA6FCF883E6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDF10AD8-3B58-4A1D-844D-CA6FCF883E6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EDF10AD8-3B58-4A1D-844D-CA6FCF883E6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EDF10AD8-3B58-4A1D-844D-CA6FCF883E6B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A822E187-C8F3-41C3-8461-D236D12126BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A822E187-C8F3-41C3-8461-D236D12126BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A822E187-C8F3-41C3-8461-D236D12126BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A822E187-C8F3-41C3-8461-D236D12126BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7ED6857-CAA7-4EAD-B5AD-D8423AB07F22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7ED6857-CAA7-4EAD-B5AD-D8423AB07F22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7ED6857-CAA7-4EAD-B5AD-D8423AB07F22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7ED6857-CAA7-4EAD-B5AD-D8423AB07F22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
