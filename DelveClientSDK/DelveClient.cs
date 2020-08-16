@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Security;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Com.RelationalAI
@@ -11,7 +15,12 @@ namespace Com.RelationalAI
 
         partial void PrepareRequest(HttpClient client, HttpRequestMessage request, string url)
         {
-            //sign request here
+            // populate headers
+            request.Headers.Accept.Clear();
+            request.Headers.Host = request.RequestUri.Host;
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            // sign request here
             var raiRequest = new RAIRequest(request, conn);
             raiRequest.sign();
         }
@@ -19,9 +28,55 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
-        private static HttpClient httpClient = new HttpClient();
+        private static HttpClient create_http_client(bool verify_ssl) {
+            if( verify_ssl ) {
+                return new HttpClient();
+            } else {
+                var handler = new HttpClientHandler()
+                {
+                    SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
+                    ServerCertificateCustomValidationCallback = ValidateServerCertificate
+                };
+                return new HttpClient(handler);
+            }
+        }
+        public static bool ValidateServerCertificate(object sender,X509Certificate certificate,X509Chain chain,SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors == SslPolicyErrors.None)
+                return true;
+            else
+            {
+                Console.WriteLine("The server certificate is not valid.");
+                return true;
+            }
+        }
+        private static HttpClient httpClient = create_http_client(httpClientVerifySSL);
+        private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
 
-        public DelveClient() : base(httpClient)
+        private static HttpClient get_http_client(Uri url, bool verify_ssl)
+        {
+            if( url.Scheme == "https" && httpClientVerifySSL != verify_ssl) {
+                httpClient.Dispose();
+                httpClient = create_http_client(verify_ssl);
+                httpClientVerifySSL = verify_ssl;
+            }
+            return httpClient;
+        }
+
+        public DelveClient(
+            string scheme="http", string host="127.0.0.1", int port=8010, bool verify_ssl = true
+        ) : this(new UriBuilder(scheme, host, port).Uri, verify_ssl)
+        {
+
+        }
+        public DelveClient(string url, bool verify_ssl = true) : this(new Uri(url), verify_ssl)
+        {
+        }
+        public DelveClient(Uri url, bool verify_ssl = true) : base(get_http_client(url, verify_ssl))
+        {
+            this.BaseUrl = url.ToString();
+        }
+        public DelveClient(Connection conn) : this(conn.baseUrl, conn.verifySSL)
         {
         }
 
