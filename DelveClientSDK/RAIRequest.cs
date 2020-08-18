@@ -29,15 +29,12 @@ namespace Com.RelationalAI
         public HttpRequestMessage innerReq { get; }
         public RAIRegion region { get; }
         public string service { get; }
-        public bool return_stream { get; }
-        public BufferedStream response_stream { get; }
 
         public RAIRequest(
             HttpRequestMessage innerReq,
             Connection conn,
-            string service = DEFAULT_SERVICE,
-            bool return_stream = true
-        ): this(innerReq, conn.creds, conn.region, service, return_stream)
+            string service = DEFAULT_SERVICE
+        ): this(innerReq, conn.creds, conn.region, service)
         {
         }
 
@@ -45,16 +42,13 @@ namespace Com.RelationalAI
             HttpRequestMessage innerReq,
             RAICredentials creds = null,
             RAIRegion region = Connection.DEFAULT_REGION,
-            string service = DEFAULT_SERVICE,
-            bool return_stream = true
+            string service = DEFAULT_SERVICE
         )
         {
             this.creds = creds;
             this.innerReq = innerReq;
             this.region = region;
             this.service = service;
-            this.return_stream = return_stream;
-            this.response_stream = null;
         }
 
         public void sign(int debugLevel=1) {
@@ -81,12 +75,12 @@ namespace Com.RelationalAI
             // HTTP headers
             innerReq.Headers.Authorization = null;
 
-            var all_headers = innerReq.Headers.Union(innerReq.Content.Headers);
+            var allHeaders = innerReq.Headers.Union(innerReq.Content.Headers);
 
             // Sort and lowercase() Headers to produce canonical form
-            string canonical_headers = string.Join(
+            string canonicalHeaders = string.Join(
                 "\n",
-                from header in all_headers
+                from header in allHeaders
                 orderby header.Key.ToLower()
                 select string.Format(
                     "{0}:{1}",
@@ -94,9 +88,9 @@ namespace Com.RelationalAI
                     string.Join(",", header.Value).Trim()
                 )
             );
-            string signed_headers = string.Join(
+            string signedHeaders = string.Join(
                 ";",
-                from header in all_headers
+                from header in allHeaders
                 orderby header.Key.ToLower()
                 select header.Key.ToLower()
             );
@@ -117,31 +111,31 @@ namespace Com.RelationalAI
             );
 
             // Create hash of canonical request
-            string canonical_form = string.Format(
+            string canonicalForm = string.Format(
                 "{0}\n{1}\n{2}\n{3}\n\n{4}\n{5}",
                 innerReq.Method,
                 HttpUtility.UrlPathEncode(innerReq.RequestUri.AbsolutePath),
                 query,
-                canonical_headers,
-                signed_headers,
+                canonicalHeaders,
+                signedHeaders,
                 contentHash
             );
 
             if(debugLevel > 2) {
                 Console.WriteLine("canonical_form:");
-                Console.WriteLine(canonical_form);
+                Console.WriteLine(canonicalForm);
                 Console.WriteLine();
             }
 
-            sha256Hash = shaw256HashAlgo.Hash(Encoding.UTF8.GetBytes(canonical_form));
+            sha256Hash = shaw256HashAlgo.Hash(Encoding.UTF8.GetBytes(canonicalForm));
             string canonicalHash = sha256Hash.ToHex();
 
             // Create and sign "String to Sign"
-            string string_to_sign = string.Format(
+            string stringToSign = string.Format(
                 "RAI01-ED25519-SHA256\n{0}\n{1}", scope, canonicalHash
             );
 
-            byte[] seed = Convert.FromBase64String(creds.private_key);
+            byte[] seed = Convert.FromBase64String(creds.privateKey);
 
             // select the Ed25519 signature algorithm
             var algorithm = SignatureAlgorithm.Ed25519;
@@ -151,13 +145,13 @@ namespace Com.RelationalAI
             // using var key = Key.Create(algorithm);
 
             // sign the data using the private key
-            byte[] signature = algorithm.Sign(key, Encoding.UTF8.GetBytes(string_to_sign));
+            byte[] signature = algorithm.Sign(key, Encoding.UTF8.GetBytes(stringToSign));
 
             string sig = signature.ToHex();
 
             if(debugLevel > 2) {
                 Console.WriteLine("string_to_sign:");
-                Console.WriteLine(string_to_sign);
+                Console.WriteLine(stringToSign);
                 Console.WriteLine();
                 Console.WriteLine("signature:");
                 Console.WriteLine(sig);
@@ -166,9 +160,9 @@ namespace Com.RelationalAI
 
             var authHeader = string.Format(
                 "RAI01-ED25519-SHA256 Credential={0}/{1}, SignedHeaders={2}, Signature={3}",
-                creds.access_key,
+                creds.accessKey,
                 scope,
-                signed_headers,
+                signedHeaders,
                 sig
             );
 

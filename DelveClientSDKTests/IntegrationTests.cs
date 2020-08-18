@@ -43,15 +43,15 @@ namespace Com.RelationalAI
         [Test]
         public void Test1()
         {
-            Assert.IsTrue(api.create_database(conn, true));
-            Assert.IsFalse(api.create_database(conn, false));
+            Assert.IsTrue(api.createDatabase(conn, true));
+            Assert.IsFalse(api.createDatabase(conn, false));
 
 
-            InstallActionResult source_install = api.install_source(conn, "name", "name", "def foo = 1");
-            Assert.IsNotNull(source_install);
+            InstallActionResult sourceInstall = api.installSource(conn, "name", "name", "def foo = 1");
+            Assert.IsNotNull(sourceInstall);
 
-            QueryActionResult query_res = api.query(conn, "name", "name", "def bar = 2", "bar");
-            Assert.IsNotNull(query_res);
+            QueryActionResult queryRes = api.query(conn, "name", "name", "def bar = 2", "bar");
+            Assert.IsNotNull(queryRes);
         }
     }
 }

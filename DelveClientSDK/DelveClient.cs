@@ -49,8 +49,8 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
-        private static HttpClient create_http_client(bool verify_ssl) {
-            if( verify_ssl ) {
+        private static HttpClient createHttpClient(bool verifySSL) {
+            if( verifySSL ) {
                 return new HttpClient();
             } else {
                 var handler = new HttpClientHandler()
@@ -76,29 +76,31 @@ namespace Com.RelationalAI
                 return true;
             }
         }
-        private static HttpClient httpClient = create_http_client(httpClientVerifySSL);
+        private static HttpClient httpClient = createHttpClient(httpClientVerifySSL);
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
 
-        private static HttpClient get_http_client(Uri url, bool verify_ssl)
+        private static HttpClient getHttpClient(Uri url, bool verifySSL)
         {
-            if( url.Scheme == "https" && httpClientVerifySSL != verify_ssl) {
+            if( url.Scheme == "https" && httpClientVerifySSL != verifySSL) {
                 httpClient.Dispose();
-                httpClient = create_http_client(verify_ssl);
-                httpClientVerifySSL = verify_ssl;
+                httpClient = createHttpClient(verifySSL);
+                httpClientVerifySSL = verifySSL;
             }
             return httpClient;
         }
 
         public DelveClient(
-            string scheme="http", string host="127.0.0.1", int port=8010, bool verify_ssl = true
-        ) : this(new UriBuilder(scheme, host, port).Uri, verify_ssl)
+            string scheme = Connection.DEFAULT_SCHEME,
+            string host = Connection.DEFAULT_HOST,
+            int port = Connection.DEFAULT_PORT,
+            bool verifySSL = Connection.DEFAULT_VERIFY_SSL
+        ) : this(new UriBuilder(scheme, host, port).Uri, verifySSL)
         {
-
         }
-        public DelveClient(string url, bool verify_ssl = true) : this(new Uri(url), verify_ssl)
+        public DelveClient(string url, bool verifySSL = true) : this(new Uri(url), verifySSL)
         {
         }
-        public DelveClient(Uri url, bool verify_ssl = true) : base(get_http_client(url, verify_ssl))
+        public DelveClient(Uri url, bool verifySSL = true) : base(getHttpClient(url, verifySSL))
         {
             this.BaseUrl = url.ToString();
         }
@@ -107,7 +109,7 @@ namespace Com.RelationalAI
             this.conn = conn;
         }
 
-        public ActionResult run_action(Connection conn, String name, Action action)
+        public ActionResult runAction(Connection conn, String name, Action action)
         {
             this.conn = conn;
 
@@ -139,7 +141,7 @@ namespace Com.RelationalAI
             return null;
         }
 
-        public bool create_database(Connection conn, bool overwrite)
+        public bool createDatabase(Connection conn, bool overwrite)
         {
             this.conn = conn;
 
@@ -160,33 +162,33 @@ namespace Com.RelationalAI
             return !response.Aborted && response.Problems.Count == 0;
         }
 
-        public InstallActionResult install_source(Connection conn, String name, String path, String src_str)
+        public InstallActionResult installSource(Connection conn, String name, String path, String srcStr)
         {
             Source src = new Source();
             src.Name = name;
             src.Path = path;
-            src.Value = src_str;
+            src.Value = srcStr;
 
             InstallAction action = new InstallAction();
             action.Sources = new List<Source>();
             action.Sources.Add(src);
 
-            return (InstallActionResult)run_action(conn, "single", action);
+            return (InstallActionResult)runAction(conn, "single", action);
         }
 
-        public QueryActionResult query(Connection conn, String name, String path, String src_str, string output)
+        public QueryActionResult query(Connection conn, String name, String path, String srcStr, string output)
         {
             Source src = new Source();
             src.Name = name;
             src.Path = path;
-            src.Value = src_str;
+            src.Value = srcStr;
 
             QueryAction action = new QueryAction();
             action.Source = src;
             action.Outputs = new List<string>();
             action.Outputs.Add(output);
 
-            return (QueryActionResult)run_action(conn, "single", action);
+            return (QueryActionResult)runAction(conn, "single", action);
         }
     }
 }
