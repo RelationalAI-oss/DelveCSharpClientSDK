@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -6,15 +7,32 @@ using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Com.RelationalAI
 {
     public partial class GeneratedDelveClient
     {
         public Connection conn {get; set;}
+        public int debugLevel = 0;
 
-        partial void PrepareRequest(HttpClient client, HttpRequestMessage request, string url)
+        partial void PrepareRequest(Transaction body, HttpClient client, HttpRequestMessage request, string url)
         {
+            var uriBuilder = new UriBuilder(request.RequestUri);
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["dbname"] = conn.dbname;
+            query["open_mode"] = body.Mode.ToString();
+            query["readonly"] = boolStr(body.Readonly);
+            query["empty"] = boolStr(body.Actions == null || body.Actions.Count == 0);
+            if(conn is CloudConnection) {
+                query["region"] = EnumString.GetDescription(conn.region);
+                if(conn.computeName != null) {
+                    query["compute_name"] = conn.computeName;
+                }
+            }
+            uriBuilder.Query = query.ToString();
+            request.RequestUri = uriBuilder.Uri;
+
             // populate headers
             request.Headers.Accept.Clear();
             request.Headers.Host = request.RequestUri.Host;
@@ -22,7 +40,11 @@ namespace Com.RelationalAI
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
-            raiRequest.sign();
+            raiRequest.sign(debugLevel: debugLevel);
+        }
+
+        private string boolStr(bool val) {
+            return val ? "true" : "false";
         }
     }
 
@@ -40,7 +62,12 @@ namespace Com.RelationalAI
                 return new HttpClient(handler);
             }
         }
-        public static bool ValidateServerCertificate(object sender,X509Certificate certificate,X509Chain chain,SslPolicyErrors sslPolicyErrors)
+        public static bool ValidateServerCertificate(
+            object sender,
+            X509Certificate certificate,
+            X509Chain chain,
+            SslPolicyErrors sslPolicyErrors
+        )
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
                 return true;
@@ -78,6 +105,7 @@ namespace Com.RelationalAI
         }
         public DelveClient(Connection conn) : this(conn.baseUrl, conn.verifySSL)
         {
+            this.conn = conn;
         }
 
         public ActionResult run_action(Connection conn, String name, Action action)
@@ -119,8 +147,15 @@ namespace Com.RelationalAI
             Transaction xact = new Transaction();
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
             xact.Dbname = conn.dbname;
+            if(this.debugLevel > 0) {
+                Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
+            }
             Task<TransactionResult> responseTask = this.TransactionAsync(xact);
             TransactionResult response = responseTask.Result;
+
+            if(this.debugLevel > 0) {
+                Console.WriteLine("TransactionOutput: " + JObject.FromObject(response).ToString());
+            }
 
             return !response.Aborted && response.Problems.Count == 0;
         }
