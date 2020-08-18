@@ -22,8 +22,8 @@ namespace Com.RelationalAI
             var envHome = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "HOMEPATH" : "HOME";
             var home = Environment.GetEnvironmentVariable(envHome);
 
-            dbname = "testcsharpclient";
-            conn = new Connection(
+            dbname = "testdb1";
+            conn = new CloudConnection(
                 dbname,
                 creds: new RAICredentials(
                     "e3536f8d-cbc6-4ed8-9de6-74cf4cb724a1",
@@ -32,9 +32,12 @@ namespace Com.RelationalAI
                 scheme: "https",
                 host: "127.0.0.1",
                 port: 8443
+                verifySSL: false,
+                computeName: "access-control-compute-5a746f7d-5482-43f2-95e0-23d0fd098262"
             );
 
             api = new DelveClient(conn);
+            api.debugLevel = 1;
         }
 
         [Test]

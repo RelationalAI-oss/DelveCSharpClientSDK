@@ -11,35 +11,43 @@ namespace Com.RelationalAI
     public class UnitTests
     {
         string dbname;
-        Connection conn;
-        private DelveClient api;
+        Connection localConn;
+        private DelveClient localApi;
+        CloudConnection cloudConn;
+        private DelveClient cloudApi;
 
         [SetUp]
         public void Setup()
         {
 
             dbname = "testcsharpclient";
-            conn = new Connection(
-                dbname,
+            localConn = new Connection(dbname);
+            localApi = new DelveClient(localConn);
+            localApi.debugLevel = 1;
+
+            cloudConn = new CloudConnection(
+                localConn,
                 creds: new RAICredentials(
                     "e3536f8d-cbc6-4ed8-9de6-74cf4cb724a1",
                     "484aiIGKitw91qppUTR0m8ge4grU+hUp65/MZ4bO0MY="
-                )
+                ),
+                verifySSL: false
             );
-            api = new DelveClient(conn);
+            cloudApi = new DelveClient(cloudConn);
+            cloudApi.debugLevel = 1;
         }
 
         [Test]
         public void Test1()
         {
-            Assert.IsTrue(api.create_database(conn, true));
-            Assert.IsFalse(api.create_database(conn, false));
+            Assert.IsTrue(localApi.create_database(localConn, true));
+            Assert.IsFalse(localApi.create_database(localConn, false));
 
 
-            InstallActionResult source_install = api.install_source(conn, "name", "name", "def foo = 1");
+            InstallActionResult source_install = localApi.install_source(localConn, "name", "name", "def foo = 1");
             Assert.IsNotNull(source_install);
 
-            QueryActionResult query_res = api.query(conn, "name", "name", "def bar = 2", "bar");
+            QueryActionResult query_res = localApi.query(localConn, "name", "name", "def bar = 2", "bar");
             Assert.IsNotNull(query_res);
         }
 
@@ -53,13 +61,13 @@ namespace Com.RelationalAI
             httpReq.Content = new StringContent("{}");
             httpReq.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             httpReq.Headers.Host = "127.0.0.1";
-            RAIRequest req = new RAIRequest(httpReq, conn, service: "database+list");
+            RAIRequest req = new RAIRequest(httpReq, cloudConn, service: "database+list");
 
-            req.sign(DateTime.Parse("2020-05-04T10:36:00"));
+            req.sign(DateTime.Parse("2020-05-04T10:36:00"), debugLevel: cloudApi.debugLevel);
 
             string output = string.Join(
                 "\n",
-                from header in req.inner_req.Headers.Union(req.inner_req.Content.Headers)
+                from header in req.innerReq.Headers.Union(req.innerReq.Content.Headers)
                 orderby header.Key.ToLower()
                 select string.Format(
                     "{0}: {1}",

@@ -26,23 +26,23 @@ namespace Com.RelationalAI
 
         public RAICredentials creds { get; }
         // verb, url, headers, content
-        public HttpRequestMessage inner_req { get; }
+        public HttpRequestMessage innerReq { get; }
         public RAIRegion region { get; }
         public string service { get; }
         public bool return_stream { get; }
         public BufferedStream response_stream { get; }
 
         public RAIRequest(
-            HttpRequestMessage inner_req,
+            HttpRequestMessage innerReq,
             Connection conn,
             string service = DEFAULT_SERVICE,
             bool return_stream = true
-        ): this(inner_req, conn.creds, conn.region, service, return_stream)
+        ): this(innerReq, conn.creds, conn.region, service, return_stream)
         {
         }
 
         public RAIRequest(
-            HttpRequestMessage inner_req,
+            HttpRequestMessage innerReq,
             RAICredentials creds = null,
             RAIRegion region = Connection.DEFAULT_REGION,
             string service = DEFAULT_SERVICE,
@@ -50,18 +50,20 @@ namespace Com.RelationalAI
         )
         {
             this.creds = creds;
-            this.inner_req = inner_req;
+            this.innerReq = innerReq;
             this.region = region;
             this.service = service;
             this.return_stream = return_stream;
             this.response_stream = null;
         }
 
-        public void sign(int debug_level=1) {
-            sign(DateTime.UtcNow, debug_level);
+        public void sign(int debugLevel=1) {
+            sign(DateTime.UtcNow, debugLevel);
         }
 
-        public void sign(DateTime t, int debug_level=1) {
+        public void sign(DateTime t, int debugLevel=1) {
+            if(this.creds == null) return;
+
             // ISO8601 date/time strings for time of request
             string date = String.Format("{0:yyyyMMdd}", t);
 
@@ -72,14 +74,14 @@ namespace Com.RelationalAI
 
             // SHA256 hash of content
             Sha256 shaw256HashAlgo = new Sha256();
-            byte[] reqContent = inner_req.Content.ReadAsByteArrayAsync().Result;
+            byte[] reqContent = innerReq.Content.ReadAsByteArrayAsync().Result;
             byte[] sha256Hash = shaw256HashAlgo.Hash(reqContent);
             string contentHash = sha256Hash.ToHex();
 
             // HTTP headers
-            inner_req.Headers.Authorization = null;
+            innerReq.Headers.Authorization = null;
 
-            var all_headers = inner_req.Headers.Union(inner_req.Content.Headers);
+            var all_headers = innerReq.Headers.Union(innerReq.Content.Headers);
 
             // Sort and lowercase() Headers to produce canonical form
             string canonical_headers = string.Join(
@@ -100,7 +102,7 @@ namespace Com.RelationalAI
             );
 
             // Sort Query String
-            var parsedQuery = HttpUtility.ParseQueryString(inner_req.RequestUri.Query);
+            var parsedQuery = HttpUtility.ParseQueryString(innerReq.RequestUri.Query);
             var parsedQueryDict = parsedQuery.AllKeys.SelectMany(
                 parsedQuery.GetValues, (k, v) => new {key = k, value = v}
             );
@@ -117,15 +119,15 @@ namespace Com.RelationalAI
             // Create hash of canonical request
             string canonical_form = string.Format(
                 "{0}\n{1}\n{2}\n{3}\n\n{4}\n{5}",
-                inner_req.Method,
-                HttpUtility.UrlPathEncode(inner_req.RequestUri.AbsolutePath),
-                HttpUtility.UrlEncode(query),
+                innerReq.Method,
+                HttpUtility.UrlPathEncode(innerReq.RequestUri.AbsolutePath),
+                query,
                 canonical_headers,
                 signed_headers,
                 contentHash
             );
 
-            if(debug_level > 2) {
+            if(debugLevel > 2) {
                 Console.WriteLine("canonical_form:");
                 Console.WriteLine(canonical_form);
                 Console.WriteLine();
@@ -153,7 +155,7 @@ namespace Com.RelationalAI
 
             string sig = signature.ToHex();
 
-            if(debug_level > 2) {
+            if(debugLevel > 2) {
                 Console.WriteLine("string_to_sign:");
                 Console.WriteLine(string_to_sign);
                 Console.WriteLine();
@@ -170,7 +172,7 @@ namespace Com.RelationalAI
                 sig
             );
 
-            inner_req.Headers.TryAddWithoutValidation("Authorization", authHeader);
+            innerReq.Headers.TryAddWithoutValidation("Authorization", authHeader);
         }
     }
 }
