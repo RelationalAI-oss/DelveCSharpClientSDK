@@ -23,18 +23,17 @@ namespace Com.RelationalAI
             query["dbname"] = conn.dbname;
             query["open_mode"] = body.Mode.ToString();
             query["readonly"] = boolStr(body.Readonly);
+            query["region"] = EnumString.GetDescription(conn.region);
             query["empty"] = boolStr(body.Actions == null || body.Actions.Count == 0);
-            if(conn is CloudConnection) {
-                query["region"] = EnumString.GetDescription(conn.region);
-                if(conn.computeName != null) {
-                    query["compute_name"] = conn.computeName;
-                }
+            if(conn.computeName != null) {
+                query["compute_name"] = conn.computeName;
             }
             uriBuilder.Query = query.ToString();
             request.RequestUri = uriBuilder.Uri;
 
             // populate headers
-            request.Headers.Accept.Clear();
+            request.Headers.Clear();
+            request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
@@ -147,6 +146,7 @@ namespace Com.RelationalAI
             Transaction xact = new Transaction();
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
             xact.Dbname = conn.dbname;
+            xact.Actions = new LinkedList<LabeledAction>();
             if(this.debugLevel > 0) {
                 Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
             }
