@@ -109,6 +109,12 @@ namespace Com.RelationalAI
                             return objectResponse_.Object;
                         }
                         else
+                        if (status_ == 403)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("Unauthorized", status_, responseText_, headers_, null);
+                        }
+                        else
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<TransactionResult>(response_, headers_).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
