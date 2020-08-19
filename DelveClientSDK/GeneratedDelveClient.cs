@@ -1570,6 +1570,9 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonProperty("readonly", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Readonly { get; set; } = false;
     
+        [Newtonsoft.Json.JsonProperty("source_dbname", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Source_dbname { get; set; } = "";
+    
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
@@ -1740,6 +1743,9 @@ namespace Com.RelationalAI
     
         [System.Runtime.Serialization.EnumMember(Value = @"OPEN_OR_CREATE")]
         OPEN_OR_CREATE = 3,
+    
+        [System.Runtime.Serialization.EnumMember(Value = @"BRANCH")]
+        BRANCH = 4,
     
     }
     
