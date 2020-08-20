@@ -162,6 +162,10 @@ namespace Com.RelationalAI
             return !response.Aborted && response.Problems.Count == 0;
         }
 
+        public InstallActionResult installSource(Connection conn, String name, String srcStr)
+        {
+            return installSource(conn, name, name, srcStr);
+        }
         public InstallActionResult installSource(Connection conn, String name, String path, String srcStr)
         {
             Source src = new Source();
