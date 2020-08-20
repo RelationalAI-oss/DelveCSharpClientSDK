@@ -114,6 +114,11 @@ namespace Com.RelationalAI
                             string responseText_ = ( response_.Content == null ) ? string.Empty : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
                             throw new ApiException("Unauthorized", status_, responseText_, headers_, null);
                         }
+                        if (status_ >= 400 && status_ < 600)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("Front-end server error:", status_, responseText_, headers_, null);
+                        }
                         else
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<TransactionResult>(response_, headers_).ConfigureAwait(false);
@@ -1565,6 +1570,9 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonProperty("readonly", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Readonly { get; set; } = false;
     
+        [Newtonsoft.Json.JsonProperty("source_dbname", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Source_dbname { get; set; } = "";
+    
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
@@ -1735,6 +1743,9 @@ namespace Com.RelationalAI
     
         [System.Runtime.Serialization.EnumMember(Value = @"OPEN_OR_CREATE")]
         OPEN_OR_CREATE = 3,
+    
+        [System.Runtime.Serialization.EnumMember(Value = @"BRANCH")]
+        BRANCH = 4,
     
     }
     

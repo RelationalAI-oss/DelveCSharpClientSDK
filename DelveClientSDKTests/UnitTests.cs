@@ -43,7 +43,6 @@ namespace Com.RelationalAI
             Assert.IsTrue(localApi.createDatabase(localConn, true));
             Assert.IsFalse(localApi.createDatabase(localConn, false));
 
-
             InstallActionResult sourceInstall = localApi.installSource(localConn, "name", "name", "def foo = 1");
             Assert.IsNotNull(sourceInstall);
 

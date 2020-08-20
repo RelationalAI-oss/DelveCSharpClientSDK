@@ -10,18 +10,18 @@ namespace Com.RelationalAI
     {
         private static FileIniDataParser parser = new FileIniDataParser();
         /*
-            dot_rai_config_path() -> String
+            dotRaiConfigPath() -> String
 
         Returns the path of the config file.
 
         # Returns
         - `String`
         */
-        public static string dot_rai_config_path()
+        public static string dotRaiConfigPath()
         {
-            return Path.Combine(dot_rai_dir(), "config");
+            return Path.Combine(dotRaiDir(), "config");
         }
-        public static string dot_rai_dir()
+        public static string dotRaiDir()
         {
             var envHome = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "HOMEPATH" : "HOME";
             var home = Environment.GetEnvironmentVariable(envHome);
@@ -30,7 +30,7 @@ namespace Com.RelationalAI
 
 
         /*
-            load_dot_rai_config(path::AbstractString=dot_rai_config_path()) -> Inifile
+            loadDotRaiConfig(path::AbstractString=dotRaiConfigPath()) -> IniData
 
         Returns the contents of the rAI .ini config file. Currently, this file is assumed to be
         stored at `~/.rai/config`. If no file is found, a `SystemError` is thrown.
@@ -42,57 +42,57 @@ namespace Com.RelationalAI
         host = azure-dev.relationalai.com
         port = 443
         infra = AZURE
-        access_key = [...]
-        private_key_filename = default_privatekey.json # pragma: allowlist secret
+        accessKey = [...]
+        privateKeyFilename = default_privatekey.json # pragma: allowlist secret
 
         [aws]
         region = us-east
         host = 127.0.0.1
         port = 8443
         infra = AWS
-        access_key = [...]
-        private_key_filename = aws_privatekey.json # pragma: allowlist secret
+        accessKey = [...]
+        privateKeyFilename = aws_privatekey.json # pragma: allowlist secret
         ```
 
         # Arguments
-        - `path::AbstractString=dot_rai_config_path()`: Path to the rAI config file
+        - `path=dotRaiConfigPath()`: Path to the rAI config file
             (`~/.rai/config` by default)
 
         # Returns
-        - `Inifile`: Contents of the config file (.ini format)
+        - `IniData`: Contents of the config file (.ini format)
 
         # Throws
         - `SystemError`: If the `path` doesn't exist
         */
-        public static IniData load_dot_rai_config()
+        public static IniData loadDotRaiConfig()
         {
-            return load_dot_rai_config(dot_rai_config_path());
+            return loadDotRaiConfig(dotRaiConfigPath());
         }
-        public static IniData load_dot_rai_config(string path=null)
+        public static IniData loadDotRaiConfig(string path=null)
         {
-            if( path == null ) path = dot_rai_config_path();
+            if( path == null ) path = dotRaiConfigPath();
             return parser.ReadFile(path);
         }
 
-        public static void store_dot_rai_config(IniData ini, string path=null)
+        public static void storeDotRaiConfig(IniData ini, string path=null)
         {
-            if( path == null ) path = dot_rai_config_path();
+            if( path == null ) path = dotRaiConfigPath();
             parser.WriteFile(path, ini);
         }
 
-        private static string _get_ini_value(
+        public static string getIniValue(
             IniData ini,
             string profile,
             string key,
-            string default_value="notfound"
+            string defaultValue="notfound"
         )
         {
             var KeyData = ini[profile].GetKeyData(key);
-            return KeyData == null ? default_value : KeyData.Value;
+            return KeyData == null ? defaultValue : KeyData.Value;
         }
 
         /*
-            rai_get_infra(IniData ini, string profile="default") -> Symbol
+            raiGetInfra(IniData ini, string profile="default") -> string
 
         Returns the cloud provider used by the rAI service from the config file, associated with
         the `[profile]`.
@@ -102,19 +102,19 @@ namespace Com.RelationalAI
         - `string profile="default"`: The [profile] to look for
 
         # Returns
-        - `Symbol`
+        - `string`
 
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static string rai_get_infra(IniData ini, string profile="default")
+        public static string raiGetInfra(IniData ini, string profile="default")
         {
-            return _get_ini_value(ini, profile, "infra", default_value:"AWS");
+            return getIniValue(ini, profile, "infra", defaultValue:"AWS");
         }
 
 
         /*
-        rai_get_region(IniData ini, string profile="default") -> Symbol
+        raiGetRegion(IniData ini, string profile="default") -> string
 
         Returns the region of the rAI service from the config file, associated with the
         `[profile]`.
@@ -124,19 +124,19 @@ namespace Com.RelationalAI
         - `string profile="default"`: The [profile] to look for
 
         # Returns
-        - `Symbol`
+        - `string`
 
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static string  rai_get_region(IniData ini, string profile="default")
+        public static string  raiGetRegion(IniData ini, string profile="default")
         {
-            return _get_ini_value(ini, profile, "region", default_value:"us-east");
+            return getIniValue(ini, profile, "region", defaultValue:"us-east");
         }
 
 
         /*
-            rai_get_host(IniData ini, string profile="default") -> String
+            raiGetHost(IniData ini, string profile="default") -> String
 
         Returns the hostname of the rAI service from the config file, associated with the
         `[profile]`.
@@ -151,16 +151,16 @@ namespace Com.RelationalAI
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static string rai_get_host(IniData ini, string profile="default")
+        public static string raiGetHost(IniData ini, string profile="default")
         {
-            string host = _get_ini_value(ini, profile, "host", default_value:"aws.relationalai.com");
+            string host = getIniValue(ini, profile, "host", defaultValue:"aws.relationalai.com");
 
             return host;
         }
 
 
         /*
-            rai_get_port(IniData ini, string profile="default") -> Int
+            raiGetPort(IniData ini, string profile="default") -> int
 
         Returns the port of the rAI service from the config file, associated with the `[profile]`.
 
@@ -169,24 +169,24 @@ namespace Com.RelationalAI
         - `string profile="default"`: The [profile] to look for
 
         # Returns
-        - `Int`
+        - `int`
 
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static int rai_get_port(IniData ini, string profile="default")
+        public static int raiGetPort(IniData ini, string profile="default")
         {
-            int port = int.Parse(_get_ini_value(ini, profile, "port", default_value:"443"));
+            int port = int.Parse(getIniValue(ini, profile, "port", defaultValue:"443"));
 
             return port;
         }
 
         /*
-            rai_set_infra(
+            raiSetInfra(
                 IniData ini,
                 string infra,
                 string profile="default"
-            ) -> Nothing
+            ) -> void
 
         Sets the cloud provider used by the rAI service to `infra`, for the specific `[profile]`.
 
@@ -196,9 +196,9 @@ namespace Com.RelationalAI
         - `string profile="default"`: The [profile] to look for
 
         # Returns
-        - `Nothing`
+        - `void`
         */
-        public static void rai_set_infra(
+        public static void raiSetInfra(
             IniData ini,
             string infra,
             string profile="default"
@@ -208,11 +208,11 @@ namespace Com.RelationalAI
         }
 
         /*
-        rai_set_region(
+        raiSetRegion(
                 IniData ini,
                 string region,
                 string profile="default"
-            ) -> Nothing
+            ) -> void
 
         Sets the region key to `region`, for the specific `[profile]`.
 
@@ -222,9 +222,9 @@ namespace Com.RelationalAI
         - `string profile="default"`: The [profile] to look for
 
         # Returns
-        - `Nothing`
+        - `void`
         */
-        public static void rai_set_region(
+        public static void raiSetRegion(
             IniData ini,
             string region,
             string profile="default"
@@ -236,55 +236,55 @@ namespace Com.RelationalAI
         }
 
         /*
-            rai_set_access_key(
+            raiSetAccessKey(
                 IniData ini,
-                access_string key,
+                string accessKey,
                 string profile="default"
-            ) -> Nothing
+            ) -> void
 
         Sets the access-key key to `access_key`, for the specific `[profile]`.
 
         # Arguments
         - `IniData ini`: The contents of the config file (.ini format)
-        - `access_string key`: The access-key value to set
+        - `string accessKey`: The access-key value to set
         - `string profile="default"`: The [profile] to look for
 
         # Returns
-        - `Nothing`
+        - `void`
         */
-        public static void rai_set_access_key(
+        public static void raiSetAccessKey(
             IniData ini,
-            string access_key,
+            string accessKey,
             string profile="default"
         )
         {
-            ini[profile]["access_key"] = access_key;
+            ini[profile]["access_key"] = accessKey;
         }
 
         /*
-            rai_set_private_key_filename(
+            raiSetPrivateKeyFilename(
                 IniData ini,
-                string private_key_filename,
+                string privateKeyFilename,
                 string profile="default"
-            ) -> Nothing
+            ) -> void
 
-        Sets the private-key's filename to `private_key_filename`, for the specific `[profile]`.
+        Sets the private-key's filename to `privateKeyFilename`, for the specific `[profile]`.
 
         # Arguments
         - `IniData ini`: The contents of the config file (.ini format)
-        - `string private_key_filename`: The private-key filename value to set
+        - `string privateKeyFilename`: The private-key filename value to set
         - `string profile="default"`: The [profile] to look for
 
         # Returns
-        - `Nothing`
+        - `void`
         */
-        public static void rai_set_private_key_filename(
+        public static void raiSetPrivateKeyFilename(
             IniData ini,
-            string private_key_filename,
+            string privateKeyFilename,
             string profile="default"
         )
         {
-            ini[profile]["private_key_filename"] = private_key_filename;
+            ini[profile]["privateKeyFilename"] = privateKeyFilename;
 
             return;
         }
