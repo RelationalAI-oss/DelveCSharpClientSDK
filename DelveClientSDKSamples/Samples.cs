@@ -1,4 +1,6 @@
 using System;
+using Com.RelationalAI;
+using IniParser.Model;
 
 namespace DelveClientSDKSamples
 {
@@ -6,8 +8,8 @@ namespace DelveClientSDKSamples
     {
         static void Main(string[] args)
         {
-            LocalWorkflow workflow = new LocalWorkflow();
-            workflow.runLocalWorkflow();
+            //LocalWorkflow workflow = new LocalWorkflow();
+            //workflow.runLocalWorkflow();
 
             CloudWorkflow cloudWorkflow = new CloudWorkflow();
             cloudWorkflow.runCloudWorkflow();
