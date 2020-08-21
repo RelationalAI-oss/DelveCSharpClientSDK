@@ -1,12 +1,4 @@
-using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Linq;
-using NSec.Cryptography;
 using NUnit.Framework;
-using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Com.RelationalAI
 {
@@ -45,7 +37,7 @@ namespace Com.RelationalAI
             InstallActionResult sourceInstall = api.installSource(conn, "name", "name", "def foo = 1");
             Assert.IsNotNull(sourceInstall);
 
-            QueryActionResult queryRes = api.query(conn, "name", "name", "def bar = 2", "bar");
+            QueryActionResult queryRes = api.query(conn, "def bar = 2", output: "bar");
             Assert.IsNotNull(queryRes);
         }
     }

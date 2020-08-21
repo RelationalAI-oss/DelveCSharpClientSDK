@@ -1,9 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Linq;
-using NSec.Cryptography;
 using NUnit.Framework;
 
 namespace Com.RelationalAI
@@ -46,7 +44,7 @@ namespace Com.RelationalAI
             InstallActionResult sourceInstall = localApi.installSource(localConn, "name", "name", "def foo = 1");
             Assert.IsNotNull(sourceInstall);
 
-            QueryActionResult queryRes = localApi.query(localConn, "name", "name", "def bar = 2", "bar");
+            QueryActionResult queryRes = localApi.query(localConn, "def bar = 2", output: "bar");
             Assert.IsNotNull(queryRes);
         }
 
