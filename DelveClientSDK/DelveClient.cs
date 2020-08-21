@@ -184,7 +184,13 @@ namespace Com.RelationalAI
             xact.Dbname = conn.dbname;
             xact.Actions = new LinkedList<LabeledAction>();
 
-            TransactionResult response = runTransaction(xact);
+            TransactionResult response = null;
+            try {
+                response = runTransaction(xact);
+            } catch (Exception e) {
+                Console.WriteLine("Error while creating the database (" + conn.dbname + "):" + e);
+                return false;
+            }
 
             return !response.Aborted && response.Problems.Count == 0;
         }
