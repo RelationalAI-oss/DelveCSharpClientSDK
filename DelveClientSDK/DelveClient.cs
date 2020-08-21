@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
@@ -11,8 +12,12 @@ using System.Web;
 
 namespace Com.RelationalAI
 {
+    using AnyValue = System.Object;
     public partial class GeneratedDelveClient
     {
+        public const string JSON_CONTENT_TYPE = "application/json";
+        public const string CSV_CONTENT_TYPE = "text/csv";
+
         public Connection conn {get; set;}
         public int debugLevel = 0;
 
@@ -35,7 +40,7 @@ namespace Com.RelationalAI
             request.Headers.Clear();
             request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(JSON_CONTENT_TYPE);
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
@@ -109,22 +114,39 @@ namespace Com.RelationalAI
             this.conn = conn;
         }
 
+        public TransactionResult runTransaction(Transaction xact)
+        {
+            if(this.debugLevel > 0) {
+                Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
+            }
+            Task<TransactionResult> responseTask = this.TransactionAsync(xact);
+            TransactionResult response = responseTask.Result;
+
+            if(this.debugLevel > 0) {
+                Console.WriteLine("TransactionOutput: " + JObject.FromObject(response).ToString());
+            }
+            return response;
+        }
+
+        public ActionResult runAction(Connection conn, Action action)
+        {
+            return runAction(conn, action);
+        }
         public ActionResult runAction(Connection conn, String name, Action action)
         {
             this.conn = conn;
 
-            Transaction xact = new Transaction();
+            var xact = new Transaction();
             xact.Mode = TransactionMode.OPEN;
             xact.Dbname = conn.dbname;
 
-            LabeledAction labeledAction = new LabeledAction();
+            var labeledAction = new LabeledAction();
             labeledAction.Name = name;
             labeledAction.Action = action;
             xact.Actions = new List<LabeledAction>();
             xact.Actions.Add(labeledAction);
 
-            Task<TransactionResult> responseTask = this.TransactionAsync(xact);
-            TransactionResult response = responseTask.Result;
+            TransactionResult response = runTransaction(xact);
 
 
             if (!response.Aborted && response.Problems.Count == 0)
@@ -141,23 +163,28 @@ namespace Com.RelationalAI
             return null;
         }
 
+        public bool branchdatabase(Connection conn, string sourceDbname)
+        {
+            var xact = new Transaction();
+            xact.Mode = TransactionMode.BRANCH;
+            xact.Dbname = conn.dbname;
+            xact.Actions = new LinkedList<LabeledAction>();
+            xact.Source_dbname = sourceDbname;
+            TransactionResult response = runTransaction(xact);
+
+            return !response.Aborted && response.Problems.Count == 0;
+        }
+
         public bool createDatabase(Connection conn, bool overwrite)
         {
             this.conn = conn;
 
-            Transaction xact = new Transaction();
+            var xact = new Transaction();
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
             xact.Dbname = conn.dbname;
             xact.Actions = new LinkedList<LabeledAction>();
-            if(this.debugLevel > 0) {
-                Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
-            }
-            Task<TransactionResult> responseTask = this.TransactionAsync(xact);
-            TransactionResult response = responseTask.Result;
 
-            if(this.debugLevel > 0) {
-                Console.WriteLine("TransactionOutput: " + JObject.FromObject(response).ToString());
-            }
+            TransactionResult response = runTransaction(xact);
 
             return !response.Aborted && response.Problems.Count == 0;
         }
@@ -173,26 +200,326 @@ namespace Com.RelationalAI
             src.Path = path;
             src.Value = srcStr;
 
-            InstallAction action = new InstallAction();
-            action.Sources = new List<Source>();
-            action.Sources.Add(src);
-
-            return (InstallActionResult)runAction(conn, "single", action);
+            return installSource(conn, src);
+        }
+        public InstallActionResult installSource(Connection conn, Source src)
+        {
+            return installSource(conn, new List<Source>() { src });
         }
 
-        public QueryActionResult query(Connection conn, String name, String path, String srcStr, string output)
+        public InstallActionResult installSource(Connection conn, ICollection<Source> srcList)
         {
-            Source src = new Source();
+            var action = new InstallAction();
+            action.Sources = srcList;
+
+            return (InstallActionResult)runAction(conn, action);
+        }
+
+        public ModifyWorkspaceActionResult deleteSource(Connection conn, ICollection<string> srcNameList)
+        {
+            var action = new ModifyWorkspaceAction();
+            action.Delete_source = srcNameList;
+
+            return (ModifyWorkspaceActionResult)runAction(conn, action);
+        }
+
+        public ModifyWorkspaceActionResult deleteSource(Connection conn, string srcName)
+        {
+            return deleteSource(conn, new List<string>() { srcName });
+        }
+
+        // TODO: list_source
+
+        public QueryActionResult query(
+            Connection conn,
+            string srcStr = "",
+            ICollection<Relation> inputs = null,
+            string output = null,
+            ICollection<string> persist = null,
+            bool? is_readonly = null,
+            TransactionMode? mode = null
+        )
+        {
+            return query(conn, srcStr, inputs, new List<String>() { output }, persist, is_readonly, mode);
+        }
+        public QueryActionResult query(
+            Connection conn,
+            string srcStr = "",
+            ICollection<Relation> inputs = null,
+            ICollection<string> outputs = null,
+            ICollection<string> persist = null,
+            bool? is_readonly = null,
+            TransactionMode? mode = null
+        )
+        {
+            var srcName = "query";
+            var srcPath = srcName;
+
+            return query(conn, srcName, srcPath, srcStr, inputs, outputs, persist, is_readonly, mode);
+        }
+        public QueryActionResult query(
+            Connection conn,
+            string name = "",
+            string path = "",
+            string srcStr = "",
+            ICollection<Relation> inputs = null,
+            ICollection<string> outputs = null,
+            ICollection<string> persist = null,
+            bool? is_readonly = null,
+            TransactionMode? mode = null
+        )
+        {
+            var src = new Source();
             src.Name = name;
             src.Path = path;
             src.Value = srcStr;
 
-            QueryAction action = new QueryAction();
-            action.Source = src;
-            action.Outputs = new List<string>();
-            action.Outputs.Add(output);
-
-            return (QueryActionResult)runAction(conn, "single", action);
+            return query(conn, src, inputs, outputs, persist, is_readonly, mode);
         }
+
+        public QueryActionResult query(
+            Connection conn,
+            Source src = null,
+            ICollection<Relation> inputs = null,
+            ICollection<string> outputs = null,
+            ICollection<string> persist = null,
+            bool? is_readonly = null,
+            TransactionMode? mode = null
+        )
+        {
+            if(src == null) {
+                src = new Source();
+                src.Name = "";
+                src.Path = "";
+                src.Value = "";
+            }
+            if(inputs == null) inputs = new List<Relation>();
+            if(outputs == null) outputs = new List<string>();
+            if(persist == null) persist = new List<string>();
+            if(is_readonly == null) is_readonly = persist.Count == 0;
+            if(mode == null) mode = conn.defaultOpenMode;
+
+
+            var action = new QueryAction();
+            action.Source = src;
+            action.Outputs = outputs;
+
+            return (QueryActionResult)runAction(conn, action);
+        }
+
+        public UpdateActionResult updateEDB(
+            Connection conn,
+            RelKey rel,
+            ICollection<Pair_AnyValue_AnyValue_> updates = null,
+            ICollection<Pair_AnyValue_AnyValue_> delta = null
+        )
+        {
+            if(updates == null) updates = new List<Pair_AnyValue_AnyValue_>();
+            if(delta == null) delta = new List<Pair_AnyValue_AnyValue_>();
+
+            var action = new UpdateAction();
+            action.Rel = rel;
+            action.Updates = updates;
+            action.Delta = delta;
+
+            return (UpdateActionResult)runAction(conn, action);
+        }
+
+        private void _handleNullFieldsForLoadData(LoadData loadData)
+        {
+            if(!isEmpty(loadData.Path) && !isEmpty(loadData.Data)) {
+                var message = string.Format(
+                    "Either `Path` or `Data` should be specified for `LoadData`." +
+                    "You have provided both: `Path`={0} and `Data`={1}",
+                    loadData.Path,
+                    loadData.Data
+                );
+                throw new ArgumentException(message);
+            }
+
+            if(isEmpty(loadData.Path) && isEmpty(loadData.Data)) {
+                var message = "Either `Path` or `Data` is required.";
+                throw new ArgumentException(message);
+            }
+
+            if(isEmpty(loadData.Content_type)) {
+                throw new ArgumentException("`ContentType` is required.");
+            }
+
+            if(!loadData.Content_type.Equals(JSON_CONTENT_TYPE) && !loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
+                throw new ArgumentException(string.Format("`ContentType`={0} is not supported.", loadData.Content_type));
+            }
+
+            // if(loadData.Key == null) loadData.Key = new List<string>();
+
+            // if(loadData.File_syntax == null) {
+            //     if(loadData.Content_type.Equals(JSON_CONTENT_TYPE)) {
+            //         loadData.File_syntax = new JSONFileSyntax();
+            //     } else if(loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
+            //         loadData.File_syntax = new CSVFileSyntax();
+            //     } else {
+            //         throw new InvalidOperationException();
+            //     }
+            // }
+
+            // if(loadData.File_schema == null) {
+            //     if(loadData.Content_type.Equals(JSON_CONTENT_TYPE)) {
+            //         loadData.File_schema = new JSONFileSchema();
+            //     } else if(loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
+            //         loadData.File_schema = new CSVFileSchema();
+            //     } else {
+            //         throw new InvalidOperationException();
+            //     }
+            // }
+        }
+        private bool isEmpty(string str)
+        {
+            return str == null || str.Length == 0;
+        }
+        private void _readFileFromPath(LoadData loadData)
+        {
+            if(!isEmpty(loadData.Path) && isEmpty(loadData.Data)) {
+                if(!File.Exists(loadData.Path)) {
+                    throw new FileLoadException(string.Format("Could not load file from {0}", loadData.Path));
+                }
+                loadData.Data = File.ReadAllText(loadData.Path);
+                loadData.Path = null;
+            }
+        }
+
+        public LoadData jsonString(
+            string data,
+            AnyValue key = null,
+            FileSyntax fileSyntax = null,
+            FileSchema fileSchema = null
+        )
+        {
+            var loadData = new LoadData();
+            loadData.Data = data;
+            loadData.Content_type = JSON_CONTENT_TYPE;
+            loadData.Key = key;
+            loadData.File_syntax = fileSyntax;
+            loadData.File_schema = fileSchema;
+
+            return loadData;
+        }
+
+        public LoadData jsonFile(
+            string filePath,
+            AnyValue key = null,
+            FileSyntax fileSyntax = null,
+            FileSchema fileSchema = null
+        )
+        {
+            var loadData = new LoadData();
+            loadData.Path = filePath;
+            loadData.Content_type = JSON_CONTENT_TYPE;
+            loadData.Key = key;
+            loadData.File_syntax = fileSyntax;
+            loadData.File_schema = fileSchema;
+
+            return loadData;
+        }
+
+        public LoadData csvString(
+            string data,
+            AnyValue key = null,
+            FileSyntax fileSyntax = null,
+            FileSchema fileSchema = null
+        )
+        {
+            var loadData = new LoadData();
+            loadData.Data = data;
+            loadData.Content_type = CSV_CONTENT_TYPE;
+            loadData.Key = key;
+            loadData.File_syntax = fileSyntax;
+            loadData.File_schema = fileSchema;
+
+            return loadData;
+        }
+
+        public LoadData csvFile(
+            string filePath,
+            AnyValue key = null,
+            FileSyntax fileSyntax = null,
+            FileSchema fileSchema = null
+        )
+        {
+            var loadData = new LoadData();
+            loadData.Path = filePath;
+            loadData.Content_type = CSV_CONTENT_TYPE;
+            loadData.Key = key;
+            loadData.File_syntax = fileSyntax;
+            loadData.File_schema = fileSchema;
+
+            return loadData;
+        }
+
+        public LoadDataActionResult loadEDB(
+            Connection conn,
+            string rel,
+            string contentType,
+            string data = null,
+            string path = null,
+            AnyValue key = null,
+            FileSyntax fileSyntax = null,
+            FileSchema fileSchema = null
+        )
+        {
+            var loadData = new LoadData();
+            loadData.Content_type = contentType;
+            loadData.Data = data;
+            loadData.Path = path;
+            loadData.Key = key;
+            loadData.File_syntax = fileSyntax;
+            loadData.File_schema = fileSchema;
+
+            return loadEDB(conn, rel, loadData);
+        }
+        public LoadDataActionResult loadEDB(
+            Connection conn,
+            string rel,
+            LoadData value
+        )
+        {
+            _readFileFromPath(value);
+            _handleNullFieldsForLoadData(value);
+            var action = new LoadDataAction();
+            action.Rel = rel;
+            action.Value = value;
+
+            return (LoadDataActionResult)runAction(conn, action);
+        }
+
+        public LoadDataActionResult loadCSV(
+            Connection conn,
+            string rel,
+            string data = null,
+            string path = null,
+            AnyValue key = null,
+            FileSyntax fileSyntax = null,
+            FileSchema fileSchema = null
+        )
+        {
+            return loadEDB(conn, rel, CSV_CONTENT_TYPE, data, path, key, fileSyntax, fileSchema);
+        }
+
+        public LoadDataActionResult loadJSON(
+            Connection conn,
+            string rel,
+            string data = null,
+            string path = null,
+            AnyValue key = null
+        )
+        {
+            return loadEDB(conn, rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
+        }
+
+        // TODO: list_edb
+        // TODO: delete_edb
+        // TODO: enable_library
+        // TODO: cardinality
+        // TODO: collect_problems
+        // TODO: configure
     }
 }
