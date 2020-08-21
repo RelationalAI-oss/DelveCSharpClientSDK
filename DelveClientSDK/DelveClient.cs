@@ -130,7 +130,7 @@ namespace Com.RelationalAI
 
         public ActionResult runAction(Connection conn, Action action)
         {
-            return runAction(conn, action);
+            return runAction(conn, "single", action);
         }
         public ActionResult runAction(Connection conn, String name, Action action)
         {
@@ -232,35 +232,23 @@ namespace Com.RelationalAI
 
         public QueryActionResult query(
             Connection conn,
+            string output,
+            string name = "query",
+            string path = null,
             string srcStr = "",
             ICollection<Relation> inputs = null,
-            string output = null,
             ICollection<string> persist = null,
             bool? is_readonly = null,
             TransactionMode? mode = null
         )
         {
-            return query(conn, srcStr, inputs, new List<String>() { output }, persist, is_readonly, mode);
+            return query(conn, name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
         }
-        public QueryActionResult query(
-            Connection conn,
-            string srcStr = "",
-            ICollection<Relation> inputs = null,
-            ICollection<string> outputs = null,
-            ICollection<string> persist = null,
-            bool? is_readonly = null,
-            TransactionMode? mode = null
-        )
-        {
-            var srcName = "query";
-            var srcPath = srcName;
 
-            return query(conn, srcName, srcPath, srcStr, inputs, outputs, persist, is_readonly, mode);
-        }
         public QueryActionResult query(
             Connection conn,
-            string name = "",
-            string path = "",
+            string name = "query",
+            string path = null,
             string srcStr = "",
             ICollection<Relation> inputs = null,
             ICollection<string> outputs = null,
@@ -269,6 +257,8 @@ namespace Com.RelationalAI
             TransactionMode? mode = null
         )
         {
+            if(path == null) path = name;
+
             var src = new Source();
             src.Name = name;
             src.Path = path;
