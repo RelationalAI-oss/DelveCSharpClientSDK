@@ -41,10 +41,14 @@ namespace Com.RelationalAI
             Assert.IsTrue(localApi.createDatabase(localConn, true));
             Assert.IsFalse(localApi.createDatabase(localConn, false));
 
-            InstallActionResult sourceInstall = localApi.installSource(localConn, "name", "name", "def foo = 1");
+            InstallActionResult sourceInstall = localApi.installSource(localConn, "name", "def foo = 1");
             Assert.IsNotNull(sourceInstall);
 
-            QueryActionResult queryRes = localApi.query(localConn, "def bar = 2", output: "bar");
+            QueryActionResult queryRes = localApi.query(
+                localConn,
+                srcStr: "def bar = 2",
+                output: "bar"
+            );
             Assert.IsNotNull(queryRes);
         }
 

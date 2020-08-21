@@ -11,14 +11,14 @@ namespace Com.RelationalAI
         [SetUp]
         public void Setup()
         {
-            string profile = "azure-ssh";
-            dbname = "testdb5";
+            string profile = "default";
+            dbname = "testclientdb";
             string computeName = dbname;
             conn = new CloudConnection(
                 dbname,
                 creds: RAICredentials.fromFile(profile: profile),
                 scheme: "https",
-                host: string.Format("{0}.relationalai.com", profile),
+                host: string.Format("azure-ssh.relationalai.com", profile),
                 port: 443,
                 verifySSL: false,
                 computeName: computeName
@@ -37,7 +37,11 @@ namespace Com.RelationalAI
             InstallActionResult sourceInstall = api.installSource(conn, "name", "name", "def foo = 1");
             Assert.IsNotNull(sourceInstall);
 
-            QueryActionResult queryRes = api.query(conn, "def bar = 2", output: "bar");
+            QueryActionResult queryRes = api.query(
+                conn,
+                srcStr: "def bar = 2",
+                output: "bar"
+            );
             Assert.IsNotNull(queryRes);
         }
     }
