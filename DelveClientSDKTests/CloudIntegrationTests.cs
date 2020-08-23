@@ -20,7 +20,7 @@ namespace Com.RelationalAI
                 scheme: "https",
                 host: string.Format("azure-ssh.relationalai.com", profile),
                 port: 443,
-                verifySSL: true,
+                verifySSL: false,
                 computeName: computeName
             );
 

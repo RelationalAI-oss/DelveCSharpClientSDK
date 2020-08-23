@@ -81,8 +81,8 @@ namespace Com.RelationalAI
                 return true;
             }
         }
-        private static HttpClient httpClient = createHttpClient(httpClientVerifySSL);
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
+        private static HttpClient httpClient = createHttpClient(httpClientVerifySSL);
 
         private static HttpClient getHttpClient(Uri url, bool verifySSL)
         {
