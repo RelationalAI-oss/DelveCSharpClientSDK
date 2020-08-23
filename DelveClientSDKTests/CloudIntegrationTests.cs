@@ -31,18 +31,7 @@ namespace Com.RelationalAI
         [Test]
         public void Test1()
         {
-            Assert.IsTrue(api.createDatabase(conn, true));
-            Assert.IsFalse(api.createDatabase(conn, false));
-
-            InstallActionResult sourceInstall = api.installSource(conn, "name", "name", "def foo = 1");
-            Assert.IsNotNull(sourceInstall);
-
-            QueryActionResult queryRes = api.query(
-                conn,
-                srcStr: "def bar = 2",
-                output: "bar"
-            );
-            Assert.IsNotNull(queryRes);
+            IntegrationTestsCommons.Test1(api, conn);
         }
     }
 }
