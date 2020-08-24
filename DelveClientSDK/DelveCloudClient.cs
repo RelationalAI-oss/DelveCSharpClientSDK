@@ -26,22 +26,32 @@ namespace Com.RelationalAI
 
     public class DelveCloudClient : GeneratedDelveCloudClient
     {
-        public DelveCloudClient(Connection conn) : base(new HttpClient())
+        public DelveCloudClient(CloudConnection conn) : base(DelveClient.createHttpClient(conn.verifySSL))
         {
             this.conn = conn;
-            this.BaseUrl = "https://" + this.conn.host;
+            this.BaseUrl = conn.baseUrl.ToString();
         }
 
         public ListComputesResponseProtocol listComputes() {return this.ComputeGetAsync().Result;}
 
-        public CreateComputeResponseProtocol createCompute(string displayName, string size, bool dryRun)
+        public CreateComputeResponseProtocol createCompute(CloudConnection conn, string size, bool dryRun)
+        {
+            return this.createCompute(conn.computeName, size, EnumString.GetDescription(conn.region), dryRun);
+        }
+
+        public CreateComputeResponseProtocol createCompute(string displayName, string size, string region, bool dryRun)
         {
             CreateComputeRequestProtocol request = new CreateComputeRequestProtocol();
-            request.Region = EnumString.GetDescription(conn.region);
+            request.Region = region;
             request.Display_name = displayName;
             request.Size = size;
             request.Dryrun = dryRun;
             return this.ComputePutAsync(request).Result;
+        }
+
+        public DeleteComputeResponseProtocol deleteCompute(CloudConnection conn, bool dryRun)
+        {
+            return this.deleteCompute(conn.computeName, dryRun);
         }
 
         public DeleteComputeResponseProtocol deleteCompute(string computeName, bool dryRun)
@@ -53,6 +63,11 @@ namespace Com.RelationalAI
         }
 
         public ListDatabasesResponseProtocol listDatabases() {return this.DatabaseGetAsync().Result;}
+
+        public void removeDefaultCompute(CloudConnection conn)
+        {
+            this.updateDatabase(conn.dbname, null, removeDefaultCompute: true, dryRun: false);
+        }
 
         public void updateDatabase(string displayName, string defaultComputeName, bool removeDefaultCompute, bool dryRun)
         {

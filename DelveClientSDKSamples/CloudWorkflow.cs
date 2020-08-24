@@ -9,31 +9,30 @@ namespace DelveClientSDKSamples
 {
     class CloudWorkflow
     {
-        string dbname;
-        IniData ini;
         CloudConnection cloudConn;
 
-        public CloudWorkflow(string dbname = "testcsharpclient")
+        public CloudWorkflow(string dbname = "csharpdbtest6", string computeName = "csharpcompute6", string profile = "default")
         {
-            this.dbname = dbname;
-            ini = Config.loadDotRaiConfig();
+            IniData ini = Config.loadDotRaiConfig();
 
-            cloudConn = new CloudConnection(
-                dbname: dbname,
-                creds: RAICredentials.fromFile(),
-                host: Config.raiGetHost(ini)
+            this.cloudConn = new CloudConnection(
+                dbname,
+                creds: RAICredentials.fromFile(profile: profile),
+                scheme: "https",
+                host: Config.raiGetHost(ini, profile),
+                port: 443,
+                verifySSL: true,
+                computeName: computeName
             );
         }
         public void runCloudWorkflow()
         {
-            DelveCloudClient cloudClient = new DelveCloudClient(this.cloudConn);
-            var databases = cloudClient.listDatabases();
-            var computes = cloudClient.listComputes();
-            var users = cloudClient.listUsers();
-
-            Console.WriteLine("Databases: " + JObject.FromObject(databases).ToString());
-            Console.WriteLine("Computes: " + JObject.FromObject(computes).ToString());
-            Console.WriteLine("Users: " + JObject.FromObject(users).ToString());
+            DelveCloudClient mngtClient = new DelveCloudClient(conn: this.cloudConn);
+            DelveClient client = new DelveClient(conn: this.cloudConn);
+            mngtClient.createCompute(conn: cloudConn, size: "XS", dryRun: false);
+            client.createDatabase(conn: this.cloudConn, overwrite: true);
+            mngtClient.removeDefaultCompute(conn: this.cloudConn);
+            mngtClient.deleteCompute(conn: this.cloudConn, dryRun: true);
         }
     }
 }

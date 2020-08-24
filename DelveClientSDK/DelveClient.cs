@@ -54,7 +54,7 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
-        private static HttpClient createHttpClient(bool verifySSL) {
+        public static HttpClient createHttpClient(bool verifySSL) {
             if( verifySSL ) {
                 return new HttpClient();
             } else {
