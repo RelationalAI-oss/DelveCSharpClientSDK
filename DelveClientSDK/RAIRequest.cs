@@ -122,6 +122,8 @@ namespace Com.RelationalAI
             );
 
             if(debugLevel > 2) {
+                Console.WriteLine("reqContent:");
+                Console.WriteLine(System.Text.Encoding.Default.GetString(reqContent));
                 Console.WriteLine("canonical_form:");
                 Console.WriteLine(canonicalForm);
                 Console.WriteLine();

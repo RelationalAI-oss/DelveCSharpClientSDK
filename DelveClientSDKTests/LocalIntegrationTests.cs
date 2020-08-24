@@ -1,9 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Linq;
-using NSec.Cryptography;
 using NUnit.Framework;
 
 namespace Com.RelationalAI
@@ -40,14 +38,7 @@ namespace Com.RelationalAI
         [Test]
         public void Test1()
         {
-            Assert.IsTrue(localApi.createDatabase(localConn, true));
-            Assert.IsFalse(localApi.createDatabase(localConn, false));
-
-            InstallActionResult sourceInstall = localApi.installSource(localConn, "name", "name", "def foo = 1");
-            Assert.IsNotNull(sourceInstall);
-
-            QueryActionResult queryRes = localApi.query(localConn, "name", "name", "def bar = 2", "bar");
-            Assert.IsNotNull(queryRes);
+            IntegrationTestsCommons.Test1(cloudApi, cloudConn);
         }
 
         [Test]
