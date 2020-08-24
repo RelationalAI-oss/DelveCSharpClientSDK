@@ -15,7 +15,7 @@ namespace Com.RelationalAI
     using AnyValue = System.Object;
     public partial class GeneratedDelveClient
     {
-        public const string JSON_CONTENT_TYPE = "application/json";
+        public const string JSON_CONTENT_TYPE = "application/json; charset=utf-8";
         public const string CSV_CONTENT_TYPE = "text/csv";
 
         public Connection conn {get; set;}
