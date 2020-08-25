@@ -578,7 +578,7 @@ namespace Com.RelationalAI
     public partial class CSVFileSyntax : FileSyntax
     {
         [Newtonsoft.Json.JsonProperty("datarow", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object Datarow { get; set; }
+        public int Datarow { get; set; } = 0;
     
         [Newtonsoft.Json.JsonProperty("delim", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Delim { get; set; } = "";
@@ -590,7 +590,7 @@ namespace Com.RelationalAI
         public System.Collections.Generic.ICollection<string> Header { get; set; }
     
         [Newtonsoft.Json.JsonProperty("header_row", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object Header_row { get; set; }
+        public int Header_row { get; set; } = 0;
     
         [Newtonsoft.Json.JsonProperty("ignorerepeated", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Ignorerepeated { get; set; } = false;
@@ -1104,10 +1104,10 @@ namespace Com.RelationalAI
     public partial class Point 
     {
         [Newtonsoft.Json.JsonProperty("column", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object Column { get; set; }
+        public int Column { get; set; } = 0;
     
         [Newtonsoft.Json.JsonProperty("row", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object Row { get; set; }
+        public int Row { get; set; } = 0;
     
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -1162,13 +1162,13 @@ namespace Com.RelationalAI
         public Area Area { get; set; } = new Area();
     
         [Newtonsoft.Json.JsonProperty("end_byte", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object End_byte { get; set; }
+        public int End_byte { get; set; } = 0;
     
         [Newtonsoft.Json.JsonProperty("input", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AnyValue Input { get; set; }
     
         [Newtonsoft.Json.JsonProperty("start_byte", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object Start_byte { get; set; }
+        public int Start_byte { get; set; } = 0;
     
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
