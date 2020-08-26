@@ -11,7 +11,7 @@ namespace DelveClientSDKSamples
     {
         CloudConnection cloudConn;
 
-        public CloudWorkflow(string dbname = "csharpdbtest6", string computeName = "csharpcompute6", string profile = "default")
+        public CloudWorkflow(string dbname = "csharpdbtest", string computeName = "csharpcompute", string profile = "default")
         {
             IniData ini = Config.loadDotRaiConfig();
 
@@ -29,10 +29,24 @@ namespace DelveClientSDKSamples
         {
             DelveCloudClient mngtClient = new DelveCloudClient(conn: this.cloudConn);
             DelveClient client = new DelveClient(conn: this.cloudConn);
-            mngtClient.createCompute(conn: cloudConn, size: "XS", dryRun: false);
+
+            var computes = mngtClient.listComputes();
+            var databases = mngtClient.listDatabases();
+            var users = mngtClient.listUsers();
+
+            Console.WriteLine(JObject.FromObject(computes).ToString());
+            Console.WriteLine(JObject.FromObject(databases).ToString());
+            Console.WriteLine(JObject.FromObject(users).ToString());
+
+            var createComputeResponse = mngtClient.createCompute(conn: cloudConn, size: "XS");
+
             client.createDatabase(conn: this.cloudConn, overwrite: true);
+
             mngtClient.removeDefaultCompute(conn: this.cloudConn);
-            mngtClient.deleteCompute(conn: this.cloudConn, dryRun: true);
+            var deleteComputeResponse = mngtClient.deleteCompute(conn: this.cloudConn);
+
+            Console.WriteLine(JObject.FromObject(createComputeResponse).ToString());
+            Console.WriteLine(JObject.FromObject(deleteComputeResponse).ToString());
         }
     }
 }

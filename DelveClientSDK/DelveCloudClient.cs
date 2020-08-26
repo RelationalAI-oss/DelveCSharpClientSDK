@@ -34,12 +34,12 @@ namespace Com.RelationalAI
 
         public ListComputesResponseProtocol listComputes() {return this.ComputeGetAsync().Result;}
 
-        public CreateComputeResponseProtocol createCompute(CloudConnection conn, string size, bool dryRun)
+        public CreateComputeResponseProtocol createCompute(CloudConnection conn, string size, bool dryRun = false)
         {
             return this.createCompute(conn.computeName, size, EnumString.GetDescription(conn.region), dryRun);
         }
 
-        public CreateComputeResponseProtocol createCompute(string displayName, string size, string region, bool dryRun)
+        public CreateComputeResponseProtocol createCompute(string displayName, string size, string region, bool dryRun = false)
         {
             CreateComputeRequestProtocol request = new CreateComputeRequestProtocol();
             request.Region = region;
@@ -49,12 +49,12 @@ namespace Com.RelationalAI
             return this.ComputePutAsync(request).Result;
         }
 
-        public DeleteComputeResponseProtocol deleteCompute(CloudConnection conn, bool dryRun)
+        public DeleteComputeResponseProtocol deleteCompute(CloudConnection conn, bool dryRun = false)
         {
             return this.deleteCompute(conn.computeName, dryRun);
         }
 
-        public DeleteComputeResponseProtocol deleteCompute(string computeName, bool dryRun)
+        public DeleteComputeResponseProtocol deleteCompute(string computeName, bool dryRun = false)
         {
             DeleteComputeRequestProtocol request = new DeleteComputeRequestProtocol();
             request.Compute_name = computeName;
@@ -69,7 +69,7 @@ namespace Com.RelationalAI
             this.updateDatabase(conn.dbname, null, removeDefaultCompute: true, dryRun: false);
         }
 
-        public void updateDatabase(string displayName, string defaultComputeName, bool removeDefaultCompute, bool dryRun)
+        public void updateDatabase(string displayName, string defaultComputeName, bool removeDefaultCompute, bool dryRun = false)
         {
             UpdateDatabaseRequestProtocol request = new UpdateDatabaseRequestProtocol();
             request.Display_name = displayName;
@@ -80,7 +80,7 @@ namespace Com.RelationalAI
         }
         public ListUsersResponseProtocol listUsers() {return this.UserGetAsync().Result;}
 
-        public CreateUserResponseProtocol createUser(string username, string firstName, string lastName, string email, bool dryRun)
+        public CreateUserResponseProtocol createUser(string username, string firstName, string lastName, string email, bool dryRun = false)
         {
             CreateUserRequestProtocol request = new CreateUserRequestProtocol();
             request.Username = username;

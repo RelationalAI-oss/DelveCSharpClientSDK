@@ -28,7 +28,7 @@ namespace DelveClientSDKSamples
             /**
              * QueryActionResult query(Connection conn, String name, String path, String srcStr, string output)
              */
-            QueryActionResult queryRes = client.query(conn, "name", "name", "def bar = 2", "bar");
+            QueryActionResult queryRes = client.query(conn, srcStr: "def bar = 2", output: "bar");
             Console.WriteLine("QueryActionResult: " + JObject.FromObject(queryRes).ToString());
         }
     }
