@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Text;
 
 namespace Com.RelationalAI
 {
@@ -85,6 +86,23 @@ namespace Com.RelationalAI
                 b[y] = (byte)((c1 << 4) + c2);
             }
             return b;
+        }
+    }
+
+    public static class ExceptionUtils {
+        public static string flattenException(Exception exception)
+        {
+            var stringBuilder = new StringBuilder();
+
+            while (exception != null)
+            {
+                stringBuilder.AppendLine(exception.Message);
+                stringBuilder.AppendLine(exception.StackTrace);
+
+                exception = exception.InnerException;
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }
