@@ -128,16 +128,16 @@ namespace Com.RelationalAI
             return response;
         }
 
-        public ActionResult runAction(Connection conn, Action action)
+        public ActionResult runAction(Connection conn, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
-            return runAction(conn, "single", action);
+            return runAction(conn, "single", action, isReadOnly, mode);
         }
-        public ActionResult runAction(Connection conn, String name, Action action)
+        public ActionResult runAction(Connection conn, String name, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
             this.conn = conn;
 
             var xact = new Transaction();
-            xact.Mode = TransactionMode.OPEN;
+            xact.Mode = mode;
             xact.Dbname = conn.dbname;
 
             var labeledAction = new LabeledAction();
@@ -145,11 +145,12 @@ namespace Com.RelationalAI
             labeledAction.Action = action;
             xact.Actions = new List<LabeledAction>();
             xact.Actions.Add(labeledAction);
+            xact.Readonly = isReadOnly;
 
             TransactionResult response = runTransaction(xact);
 
 
-            if (!response.Aborted && response.Problems.Count == 0)
+            if (is_success(response))
             {
                 foreach (LabeledActionResult act in response.Actions)
                 {
@@ -162,6 +163,9 @@ namespace Com.RelationalAI
             }
             return null;
         }
+        private bool is_success(TransactionResult response) {
+            return !response.Aborted && response.Problems.Count == 0;
+        }
 
         public bool branchdatabase(Connection conn, string sourceDbname)
         {
@@ -170,9 +174,10 @@ namespace Com.RelationalAI
             xact.Dbname = conn.dbname;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Source_dbname = sourceDbname;
+            xact.Readonly = false;
             TransactionResult response = runTransaction(xact);
 
-            return !response.Aborted && response.Problems.Count == 0;
+            return is_success(response);
         }
 
         public bool createDatabase(Connection conn, bool overwrite)
@@ -183,16 +188,18 @@ namespace Com.RelationalAI
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
             xact.Dbname = conn.dbname;
             xact.Actions = new LinkedList<LabeledAction>();
+            xact.Readonly = false;
 
             TransactionResult response = null;
             try {
                 response = runTransaction(xact);
             } catch (Exception e) {
-                Console.WriteLine("Error while creating the database (" + conn.dbname + "):" + e);
+                string fullError = ExceptionUtils.flattenException(e);
+                Console.WriteLine("Error while creating the database (" + conn.dbname + "): " + fullError);
                 return false;
             }
 
-            return !response.Aborted && response.Problems.Count == 0;
+            return is_success(response);
         }
 
         public InstallActionResult installSource(Connection conn, String name, String srcStr)
@@ -234,7 +241,18 @@ namespace Com.RelationalAI
             return deleteSource(conn, new List<string>() { srcName });
         }
 
-        // TODO: list_source
+        public IDictionary<string, Source> list_source(Connection conn)
+        {
+            var action = new ListSourceAction();
+            var actionRes = (ListSourceActionResult)runAction(conn, action, isReadOnly: true);
+
+            var resultDict = new Dictionary<string, Source>();
+            foreach(Source src in actionRes.Sources) {
+                resultDict[src.Name] = src;
+            }
+
+            return resultDict;
+        }
 
         public QueryActionResult query(
             Connection conn,
@@ -279,7 +297,7 @@ namespace Com.RelationalAI
             ICollection<Relation> inputs = null,
             ICollection<string> outputs = null,
             ICollection<string> persist = null,
-            bool? is_readonly = null,
+            bool? isReadOnly = null,
             TransactionMode? mode = null
         )
         {
@@ -292,15 +310,20 @@ namespace Com.RelationalAI
             if(inputs == null) inputs = new List<Relation>();
             if(outputs == null) outputs = new List<string>();
             if(persist == null) persist = new List<string>();
-            if(is_readonly == null) is_readonly = persist.Count == 0;
-            if(mode == null) mode = conn.defaultOpenMode;
 
 
             var action = new QueryAction();
+            action.Inputs = inputs;
             action.Source = src;
             action.Outputs = outputs;
+            action.Persist = persist;
 
-            return (QueryActionResult)runAction(conn, action);
+            return (QueryActionResult)runAction(
+                conn,
+                action,
+                isReadOnly.GetValueOrDefault(persist.Count == 0),
+                mode.GetValueOrDefault(conn.defaultOpenMode)
+            );
         }
 
         public UpdateActionResult updateEDB(
@@ -318,7 +341,7 @@ namespace Com.RelationalAI
             action.Updates = updates;
             action.Delta = delta;
 
-            return (UpdateActionResult)runAction(conn, action);
+            return (UpdateActionResult)runAction(conn, action, isReadOnly: true);
         }
 
         private void _handleNullFieldsForLoadData(LoadData loadData)
@@ -484,7 +507,7 @@ namespace Com.RelationalAI
             action.Rel = rel;
             action.Value = value;
 
-            return (LoadDataActionResult)runAction(conn, action);
+            return (LoadDataActionResult)runAction(conn, action, isReadOnly: true);
         }
 
         public LoadDataActionResult loadCSV(
@@ -511,11 +534,72 @@ namespace Com.RelationalAI
             return loadEDB(conn, rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
         }
 
-        // TODO: list_edb
-        // TODO: delete_edb
-        // TODO: enable_library
-        // TODO: cardinality
-        // TODO: collect_problems
-        // TODO: configure
+        public ICollection<RelKey> listEdb(Connection conn)
+        {
+            var action = new ListEdbAction();
+            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            return actionRes.Rels;
+        }
+
+        public ICollection<RelKey> listEdb(Connection conn, string relName)
+        {
+            var action = new ListEdbAction();
+            action.Relname = relName;
+            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            return actionRes.Rels;
+        }
+
+        public ICollection<RelKey> deleteEdb(Connection conn, string relName)
+        {
+            var action = new ModifyWorkspaceAction();
+            action.Delete_edb = relName;
+            var actionRes = (ModifyWorkspaceActionResult)runAction(conn, action);
+            return actionRes.Delete_edb_result;
+        }
+
+        public ModifyWorkspaceActionResult enableLibrary(Connection conn, string srcName)
+        {
+            var action = new ModifyWorkspaceAction();
+            action.Enable_library = srcName;
+            return (ModifyWorkspaceActionResult)runAction(conn, action);
+        }
+
+        public CardinalityActionResult cardinality(Connection conn)
+        {
+            var action = new CardinalityAction();
+            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+        }
+
+        public CardinalityActionResult cardinality(Connection conn, string relName)
+        {
+            var action = new CardinalityAction();
+            action.Relname = relName;
+            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+        }
+
+        public ICollection<AbstractProblem> collectProblems(Connection conn)
+        {
+            var action = new CollectProblemsAction();
+            var actionRes = (CollectProblemsActionResult)runAction(conn, action, isReadOnly: true);
+            return actionRes.Problems;
+        }
+
+        public SetOptionsActionResult configure(
+            Connection conn,
+            bool? debug,
+            bool? debugTrace,
+            bool? broken,
+            bool? silent,
+            bool? abortOnError
+        )
+        {
+            var action = new SetOptionsAction();
+            action.Debug = debug;
+            action.Debug_trace = debugTrace;
+            action.Broken = broken;
+            action.Silent = silent;
+            action.Abort_on_error = abortOnError;
+            return (SetOptionsActionResult)runAction(conn, action, isReadOnly: true);
+        }
     }
 }
