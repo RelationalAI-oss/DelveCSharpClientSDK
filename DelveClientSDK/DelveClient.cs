@@ -150,15 +150,12 @@ namespace Com.RelationalAI
             TransactionResult response = runTransaction(xact);
 
 
-            if (is_success(response))
+            foreach (LabeledActionResult act in response.Actions)
             {
-                foreach (LabeledActionResult act in response.Actions)
+                if (name.Equals(act.Name))
                 {
-                    if (name.Equals(act.Name))
-                    {
-                        ActionResult res = (ActionResult)act.Result;
-                        return res;
-                    }
+                    ActionResult res = (ActionResult)act.Result;
+                    return res;
                 }
             }
             return null;
