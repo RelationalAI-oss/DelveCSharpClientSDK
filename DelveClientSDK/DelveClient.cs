@@ -241,7 +241,18 @@ namespace Com.RelationalAI
             return deleteSource(conn, new List<string>() { srcName });
         }
 
-        // TODO: list_source
+        public IDictionary<string, Source> list_source(Connection conn)
+        {
+            var action = new ListSourceAction();
+            var actionRes = (ListSourceActionResult)runAction(conn, action, isReadOnly: true);
+
+            var resultDict = new Dictionary<string, Source>();
+            foreach(Source src in actionRes.Sources) {
+                resultDict[src.Name] = src;
+            }
+
+            return resultDict;
+        }
 
         public QueryActionResult query(
             Connection conn,
@@ -523,11 +534,72 @@ namespace Com.RelationalAI
             return loadEDB(conn, rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
         }
 
-        // TODO: list_edb
-        // TODO: delete_edb
-        // TODO: enable_library
-        // TODO: cardinality
-        // TODO: collect_problems
-        // TODO: configure
+        public ICollection<RelKey> listEdb(Connection conn)
+        {
+            var action = new ListEdbAction();
+            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            return actionRes.Rels;
+        }
+
+        public ICollection<RelKey> listEdb(Connection conn, string relName)
+        {
+            var action = new ListEdbAction();
+            action.Relname = relName;
+            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            return actionRes.Rels;
+        }
+
+        public ICollection<RelKey> deleteEdb(Connection conn, string relName)
+        {
+            var action = new ModifyWorkspaceAction();
+            action.Delete_edb = relName;
+            var actionRes = (ModifyWorkspaceActionResult)runAction(conn, action);
+            return actionRes.Delete_edb_result;
+        }
+
+        public ModifyWorkspaceActionResult enableLibrary(Connection conn, string srcName)
+        {
+            var action = new ModifyWorkspaceAction();
+            action.Enable_library = srcName;
+            return (ModifyWorkspaceActionResult)runAction(conn, action);
+        }
+
+        public CardinalityActionResult cardinality(Connection conn)
+        {
+            var action = new CardinalityAction();
+            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+        }
+
+        public CardinalityActionResult cardinality(Connection conn, string relName)
+        {
+            var action = new CardinalityAction();
+            action.Relname = relName;
+            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+        }
+
+        public ICollection<AbstractProblem> collectProblems(Connection conn)
+        {
+            var action = new CollectProblemsAction();
+            var actionRes = (CollectProblemsActionResult)runAction(conn, action, isReadOnly: true);
+            return actionRes.Problems;
+        }
+
+        public SetOptionsActionResult configure(
+            Connection conn,
+            bool? debug,
+            bool? debugTrace,
+            bool? broken,
+            bool? silent,
+            bool? abortOnError
+        )
+        {
+            var action = new SetOptionsAction();
+            action.Debug = debug;
+            action.Debug_trace = debugTrace;
+            action.Broken = broken;
+            action.Silent = silent;
+            action.Abort_on_error = abortOnError;
+            return (SetOptionsActionResult)runAction(conn, action, isReadOnly: true);
+        }
     }
 }
