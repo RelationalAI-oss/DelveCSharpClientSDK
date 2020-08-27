@@ -220,9 +220,27 @@ namespace Com.RelationalAI
         public InstallActionResult installSource(Connection conn, ICollection<Source> srcList)
         {
             var action = new InstallAction();
+            foreach(Source src in srcList) {
+                _readFileFromPath(src);
+            }
             action.Sources = srcList;
 
             return (InstallActionResult)runAction(conn, action);
+        }
+
+        private void _readFileFromPath(Source src)
+        {
+            if(!isEmpty(src.Path)) {
+                if(isEmpty(src.Value)) {
+                    if(!File.Exists(src.Path)) {
+                        throw new FileLoadException(string.Format("Could not load source file from {0}", src.Path));
+                    }
+                    src.Value = File.ReadAllText(src.Path);
+                }
+                if(isEmpty(src.Name)) {
+                    src.Name = Path.GetFileNameWithoutExtension(src.Path);
+                }
+            }
         }
 
         public ModifyWorkspaceActionResult deleteSource(Connection conn, ICollection<string> srcNameList)
