@@ -128,11 +128,11 @@ namespace Com.RelationalAI
             return response;
         }
 
-        public ActionResult runAction(Connection conn, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
+        public ActionResult runAction(Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
-            return runAction(conn, "single", action, isReadOnly, mode);
+            return runAction("single", action, isReadOnly, mode);
         }
-        public ActionResult runAction(Connection conn, String name, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
+        public ActionResult runAction(String name, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
             this.conn = conn;
 
@@ -164,7 +164,7 @@ namespace Com.RelationalAI
             return !response.Aborted && response.Problems.Count == 0;
         }
 
-        public bool branchdatabase(Connection conn, string sourceDbname)
+        public bool branchdatabase(string sourceDbname)
         {
             var xact = new Transaction();
             xact.Mode = TransactionMode.BRANCH;
@@ -177,7 +177,7 @@ namespace Com.RelationalAI
             return is_success(response);
         }
 
-        public bool createDatabase(Connection conn, bool overwrite)
+        public bool createDatabase(bool overwrite = false)
         {
             this.conn = conn;
 
@@ -199,25 +199,25 @@ namespace Com.RelationalAI
             return is_success(response);
         }
 
-        public InstallActionResult installSource(Connection conn, String name, String srcStr)
+        public InstallActionResult installSource(String name, String srcStr)
         {
-            return installSource(conn, name, name, srcStr);
+            return installSource(name, name, srcStr);
         }
-        public InstallActionResult installSource(Connection conn, String name, String path, String srcStr)
+        public InstallActionResult installSource(String name, String path, String srcStr)
         {
             Source src = new Source();
             src.Name = name;
             src.Path = path;
             src.Value = srcStr;
 
-            return installSource(conn, src);
+            return installSource(src);
         }
-        public InstallActionResult installSource(Connection conn, Source src)
+        public InstallActionResult installSource(Source src)
         {
-            return installSource(conn, new List<Source>() { src });
+            return installSource(new List<Source>() { src });
         }
 
-        public InstallActionResult installSource(Connection conn, ICollection<Source> srcList)
+        public InstallActionResult installSource(ICollection<Source> srcList)
         {
             var action = new InstallAction();
             foreach(Source src in srcList) {
@@ -225,7 +225,7 @@ namespace Com.RelationalAI
             }
             action.Sources = srcList;
 
-            return (InstallActionResult)runAction(conn, action);
+            return (InstallActionResult)runAction(action);
         }
 
         private void _readFileFromPath(Source src)
@@ -233,9 +233,8 @@ namespace Com.RelationalAI
             if(!isEmpty(src.Path)) {
                 if(isEmpty(src.Value)) {
                     if(!File.Exists(src.Path)) {
-                        throw new FileLoadException(string.Format("Could not load source file from {0}", src.Path));
+                        src.Value = File.ReadAllText(src.Path);
                     }
-                    src.Value = File.ReadAllText(src.Path);
                 }
                 if(isEmpty(src.Name)) {
                     src.Name = Path.GetFileNameWithoutExtension(src.Path);
@@ -243,23 +242,23 @@ namespace Com.RelationalAI
             }
         }
 
-        public ModifyWorkspaceActionResult deleteSource(Connection conn, ICollection<string> srcNameList)
+        public ModifyWorkspaceActionResult deleteSource(ICollection<string> srcNameList)
         {
             var action = new ModifyWorkspaceAction();
             action.Delete_source = srcNameList;
 
-            return (ModifyWorkspaceActionResult)runAction(conn, action);
+            return (ModifyWorkspaceActionResult)runAction(action);
         }
 
-        public ModifyWorkspaceActionResult deleteSource(Connection conn, string srcName)
+        public ModifyWorkspaceActionResult deleteSource(string srcName)
         {
-            return deleteSource(conn, new List<string>() { srcName });
+            return deleteSource(new List<string>() { srcName });
         }
 
-        public IDictionary<string, Source> list_source(Connection conn)
+        public IDictionary<string, Source> list_source()
         {
             var action = new ListSourceAction();
-            var actionRes = (ListSourceActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (ListSourceActionResult)runAction(action, isReadOnly: true);
 
             var resultDict = new Dictionary<string, Source>();
             foreach(Source src in actionRes.Sources) {
@@ -270,7 +269,6 @@ namespace Com.RelationalAI
         }
 
         public QueryActionResult query(
-            Connection conn,
             string output,
             string name = "query",
             string path = null,
@@ -281,11 +279,10 @@ namespace Com.RelationalAI
             TransactionMode? mode = null
         )
         {
-            return query(conn, name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
+            return query(name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
         }
 
         public QueryActionResult query(
-            Connection conn,
             string name = "query",
             string path = null,
             string srcStr = "",
@@ -303,11 +300,10 @@ namespace Com.RelationalAI
             src.Path = path;
             src.Value = srcStr;
 
-            return query(conn, src, inputs, outputs, persist, is_readonly, mode);
+            return query(src, inputs, outputs, persist, is_readonly, mode);
         }
 
         public QueryActionResult query(
-            Connection conn,
             Source src = null,
             ICollection<Relation> inputs = null,
             ICollection<string> outputs = null,
@@ -334,7 +330,6 @@ namespace Com.RelationalAI
             action.Persist = persist;
 
             return (QueryActionResult)runAction(
-                conn,
                 action,
                 isReadOnly.GetValueOrDefault(persist.Count == 0),
                 mode.GetValueOrDefault(conn.defaultOpenMode)
@@ -342,7 +337,6 @@ namespace Com.RelationalAI
         }
 
         public UpdateActionResult updateEDB(
-            Connection conn,
             RelKey rel,
             ICollection<Pair_AnyValue_AnyValue_> updates = null,
             ICollection<Pair_AnyValue_AnyValue_> delta = null
@@ -356,7 +350,7 @@ namespace Com.RelationalAI
             action.Updates = updates;
             action.Delta = delta;
 
-            return (UpdateActionResult)runAction(conn, action, isReadOnly: true);
+            return (UpdateActionResult)runAction(action, isReadOnly: true);
         }
 
         private void _handleNullFieldsForLoadData(LoadData loadData)
@@ -413,11 +407,9 @@ namespace Com.RelationalAI
         private void _readFileFromPath(LoadData loadData)
         {
             if(!isEmpty(loadData.Path) && isEmpty(loadData.Data)) {
-                if(!File.Exists(loadData.Path)) {
-                    throw new FileLoadException(string.Format("Could not load file from {0}", loadData.Path));
+                if(File.Exists(loadData.Path)) {
+                    loadData.Data = File.ReadAllText(loadData.Path);
                 }
-                loadData.Data = File.ReadAllText(loadData.Path);
-                loadData.Path = null;
             }
         }
 
@@ -490,7 +482,6 @@ namespace Com.RelationalAI
         }
 
         public LoadDataActionResult loadEDB(
-            Connection conn,
             string rel,
             string contentType,
             string data = null,
@@ -508,10 +499,9 @@ namespace Com.RelationalAI
             loadData.File_syntax = fileSyntax;
             loadData.File_schema = fileSchema;
 
-            return loadEDB(conn, rel, loadData);
+            return loadEDB(rel, loadData);
         }
         public LoadDataActionResult loadEDB(
-            Connection conn,
             string rel,
             LoadData value
         )
@@ -522,11 +512,10 @@ namespace Com.RelationalAI
             action.Rel = rel;
             action.Value = value;
 
-            return (LoadDataActionResult)runAction(conn, action, isReadOnly: true);
+            return (LoadDataActionResult)runAction(action, isReadOnly: true);
         }
 
         public LoadDataActionResult loadCSV(
-            Connection conn,
             string rel,
             string data = null,
             string path = null,
@@ -535,72 +524,70 @@ namespace Com.RelationalAI
             FileSchema fileSchema = null
         )
         {
-            return loadEDB(conn, rel, CSV_CONTENT_TYPE, data, path, key, fileSyntax, fileSchema);
+            return loadEDB(rel, CSV_CONTENT_TYPE, data, path, key, fileSyntax, fileSchema);
         }
 
         public LoadDataActionResult loadJSON(
-            Connection conn,
             string rel,
             string data = null,
             string path = null,
             AnyValue key = null
         )
         {
-            return loadEDB(conn, rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
+            return loadEDB(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
         }
 
-        public ICollection<RelKey> listEdb(Connection conn)
+        public ICollection<RelKey> listEdb()
         {
             var action = new ListEdbAction();
-            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (ListEdbActionResult)runAction(action, isReadOnly: true);
             return actionRes.Rels;
         }
 
-        public ICollection<RelKey> listEdb(Connection conn, string relName)
+        public ICollection<RelKey> listEdb(string relName)
         {
             var action = new ListEdbAction();
             action.Relname = relName;
-            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (ListEdbActionResult)runAction(action, isReadOnly: true);
             return actionRes.Rels;
         }
 
-        public ICollection<RelKey> deleteEdb(Connection conn, string relName)
+        public ICollection<RelKey> deleteEdb(string relName)
         {
             var action = new ModifyWorkspaceAction();
             action.Delete_edb = relName;
-            var actionRes = (ModifyWorkspaceActionResult)runAction(conn, action);
+            var actionRes = (ModifyWorkspaceActionResult)runAction(action);
             return actionRes.Delete_edb_result;
         }
 
-        public ModifyWorkspaceActionResult enableLibrary(Connection conn, string srcName)
+        public ModifyWorkspaceActionResult enableLibrary(string srcName)
         {
             var action = new ModifyWorkspaceAction();
             action.Enable_library = srcName;
-            return (ModifyWorkspaceActionResult)runAction(conn, action);
+            return (ModifyWorkspaceActionResult)runAction(action);
         }
 
-        public CardinalityActionResult cardinality(Connection conn)
+        public CardinalityActionResult cardinality()
         {
             var action = new CardinalityAction();
-            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+            return (CardinalityActionResult)runAction(action, isReadOnly: true);
         }
 
-        public CardinalityActionResult cardinality(Connection conn, string relName)
+        public CardinalityActionResult cardinality(string relName)
         {
             var action = new CardinalityAction();
             action.Relname = relName;
-            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+            return (CardinalityActionResult)runAction(action, isReadOnly: true);
         }
 
-        public ICollection<AbstractProblem> collectProblems(Connection conn)
+        public ICollection<AbstractProblem> collectProblems()
         {
             var action = new CollectProblemsAction();
-            var actionRes = (CollectProblemsActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (CollectProblemsActionResult)runAction(action, isReadOnly: true);
             return actionRes.Problems;
         }
 
         public SetOptionsActionResult configure(
-            Connection conn,
             bool? debug,
             bool? debugTrace,
             bool? broken,
@@ -614,7 +601,7 @@ namespace Com.RelationalAI
             action.Broken = broken;
             action.Silent = silent;
             action.Abort_on_error = abortOnError;
-            return (SetOptionsActionResult)runAction(conn, action, isReadOnly: true);
+            return (SetOptionsActionResult)runAction(action, isReadOnly: true);
         }
     }
 }
