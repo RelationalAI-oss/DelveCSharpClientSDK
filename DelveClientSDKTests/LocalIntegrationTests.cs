@@ -8,37 +8,37 @@ namespace Com.RelationalAI
 {
     public class UnitTests
     {
-        string dbname;
-        Connection localConn;
-        private DelveClient localApi;
-        CloudConnection cloudConn;
         private DelveClient cloudApi;
 
         [SetUp]
         public void Setup()
         {
+            createCloudConnection("testcsharpclient", out cloudApi);
+        }
 
-            dbname = "testcsharpclient";
-            localConn = new Connection(dbname);
-            localApi = new DelveClient(localConn);
-            localApi.debugLevel = 1;
+        public static void createCloudConnection(out DelveClient api) {
+            string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
 
-            cloudConn = new CloudConnection(
-                localConn,
+            createCloudConnection(dbname, out api);
+        }
+
+        public static void createCloudConnection(string dbname, out DelveClient api) {
+            var conn = new CloudConnection(
+                new Connection(dbname),
                 creds: new RAICredentials(
                     "e3536f8d-cbc6-4ed8-9de6-74cf4cb724a1",
                     "484aiIGKitw91qppUTR0m8ge4grU+hUp65/MZ4bO0MY="
                 ),
                 verifySSL: false
             );
-            cloudApi = new DelveClient(cloudConn);
-            cloudApi.debugLevel = 1;
+            api = new DelveClient(conn);
+            api.debugLevel = 1;
         }
 
         [Test]
         public void Test1()
         {
-            IntegrationTestsCommons.Test1(cloudApi, cloudConn);
+            IntegrationTestsCommons.Test1(createCloudConnection);
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace Com.RelationalAI
             httpReq.Content = new StringContent("{}");
             httpReq.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             httpReq.Headers.Host = "127.0.0.1";
-            RAIRequest req = new RAIRequest(httpReq, cloudConn, service: "database+list");
+            RAIRequest req = new RAIRequest(httpReq, cloudApi.conn, service: "database+list");
 
             req.sign(DateTime.Parse("2020-05-04T10:36:00"), debugLevel: cloudApi.debugLevel);
 
