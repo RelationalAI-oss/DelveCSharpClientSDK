@@ -384,8 +384,8 @@ namespace Com.RelationalAI
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class Relation 
     {
-        [Newtonsoft.Json.JsonProperty("columns", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public AnyValue Columns { get; set; }
+        [Newtonsoft.Json.JsonProperty("columns", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<System.Collections.Generic.ICollection<AnyValue>> Columns { get; set; }
     
         [Newtonsoft.Json.JsonProperty("rel_key", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
