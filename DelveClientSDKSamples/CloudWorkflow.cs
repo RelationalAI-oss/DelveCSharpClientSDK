@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using Com.RelationalAI;
 using IniParser.Model;
 using Newtonsoft.Json.Linq;
@@ -10,10 +11,17 @@ namespace DelveClientSDKSamples
     class CloudWorkflow
     {
         CloudConnection cloudConn;
+        DelveClient delveClient;
+        DelveCloudClient mngtClient;
 
-        public CloudWorkflow(string computeName = "csharpcompute", string profile = "default")
+        int maxAttempts;
+        int sleepTime;
+
+        public CloudWorkflow(string computeName = "csharpcompute", string profile = "default", int maxAttempts = 10, int sleepTime = 3000)
         {
             IniData ini = Config.loadDotRaiConfig();
+            this.maxAttempts = maxAttempts;
+            this.sleepTime = sleepTime;
 
             this.cloudConn = new CloudConnection(
                 dbname: computeName,
@@ -24,45 +32,86 @@ namespace DelveClientSDKSamples
                 verifySSL: false,
                 computeName: computeName
             );
+
+            this.delveClient = new DelveClient(conn: this.cloudConn);
+            this.mngtClient = new DelveCloudClient(conn: this.cloudConn);
         }
         public void runCloudWorkflow()
         {
-            DelveCloudClient mngtClient = new DelveCloudClient(conn: this.cloudConn);
-            DelveClient client = new DelveClient(conn: this.cloudConn);
-
             // list computes
-            var computes = mngtClient.listComputes();
-            Console.WriteLine(JObject.FromObject(computes).ToString());
+            var computes = this.mngtClient.listComputes();
+            Console.WriteLine("=> Computes: " + JObject.FromObject(computes));
 
             // list databases
-            var databases = mngtClient.listDatabases();
-            Console.WriteLine(JObject.FromObject(databases).ToString());
+            var databases = this.mngtClient.listDatabases();
+            Console.WriteLine("=> Databases: " + JObject.FromObject(databases).ToString());
 
             // list users
-            var users = mngtClient.listUsers();
-            Console.WriteLine(JObject.FromObject(users).ToString());
+            var users = this.mngtClient.listUsers();
+            Console.WriteLine("=> Users: " + JObject.FromObject(users).ToString());
 
             // create compute
-            var createComputeResponse = mngtClient.createCompute(conn: cloudConn, size: "XS");
-            Console.WriteLine(JObject.FromObject(createComputeResponse).ToString());
+            var createComputeResponse = this.mngtClient.createCompute(conn: cloudConn, size: "XS");
+            Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
+
+            // wait for compute to be provisioned
+            if(!waitForCompute(this.cloudConn.computeName))
+                return;
 
             // create database
-            client.createDatabase(conn: this.cloudConn, overwrite: true);
+            this.delveClient.createDatabase(conn: this.cloudConn, overwrite: true);
 
             // install source
-            InstallActionResult sourceInstall = client.installSource(conn: this.cloudConn, "name", "name", "def foo = 1");
-            Console.WriteLine("InstallActionResult: " + JObject.FromObject(sourceInstall).ToString());
+            InstallActionResult sourceInstall = this.delveClient.installSource(conn: this.cloudConn, "name", "name", "def foo = 1");
+            Console.WriteLine("=> InstallActionResult: " + JObject.FromObject(sourceInstall).ToString());
 
             // query
-            QueryActionResult queryRes = client.query(conn: this.cloudConn, srcStr: "def bar = 2 + foo", output: "bar");
-            Console.WriteLine("QueryActionResult: " + JObject.FromObject(queryRes).ToString());
+            QueryActionResult queryRes = this.delveClient.query(conn: this.cloudConn, srcStr: "def bar = 2 + foo", output: "bar");
+            Console.WriteLine("=> QueryActionResult: " + JObject.FromObject(queryRes).ToString());
 
             // remove default compute
-            mngtClient.removeDefaultCompute(conn: this.cloudConn);
+            this.mngtClient.removeDefaultCompute(conn: this.cloudConn);
 
             // delete compute
-            var deleteComputeResponse = mngtClient.deleteCompute(conn: this.cloudConn);
-            Console.WriteLine(JObject.FromObject(deleteComputeResponse).ToString());
+            var deleteComputeResponse = this.mngtClient.deleteCompute(conn: this.cloudConn);
+            Console.WriteLine("=> DeleteComputeResponse: " + JObject.FromObject(deleteComputeResponse).ToString());
+        }
+
+        private bool waitForCompute(string computeName)
+        {
+            var compute = getByComputeName(computeName);
+            for (int i=0; i<this.maxAttempts; i++)
+            {
+                string computeState = (string)compute["computeState"];
+                if ("PROVISIONED".Equals(computeState))
+                    return true;
+                Console.WriteLine(String.Format("Current state: {0}. Waiting for {1} to be provisioned. (Attempt {2}).", computeState ,computeName, i+1));
+                Thread.Sleep(this.sleepTime);
+            }
+            return false;
+        }
+
+        private JToken getByComputeId(string computeId)
+        {
+            return getByField("computeId", computeId);
+        }
+
+        private JToken getByComputeName(string computeName)
+        {
+            return getByField("computeName", computeName);
+        }
+
+        private JToken getByField(string field, string value)
+        {
+            var computes = this.mngtClient.listComputes();
+
+            foreach (var compute in JObject.FromObject(computes)["compute_requests_list"])
+            {
+                string currentComputeField = (string)compute[field];
+                if (value.Equals(currentComputeField))
+                    return compute;
+            }
+            return null;
         }
     }
 }
