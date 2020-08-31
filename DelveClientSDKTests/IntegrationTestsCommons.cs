@@ -1,13 +1,35 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Com.RelationalAI
 {
+    using AnyValue = Object;
     public class IntegrationTestsCommons
     {
+        public static string DictionaryToString<K,V>(IDictionary < K, V > dictionary) {
+            string dictionaryString = "{";
+            foreach(KeyValuePair < K, V > keyValues in dictionary) {
+                dictionaryString += keyValues.Key + " : " + keyValues.Value + ", ";
+            }
+            return dictionaryString.TrimEnd(',', ' ') + "}";
+        }
+
         public static Random rnd = new Random();
         public static string genDbname(string prefix="") {
             return string.Format("{0}-{1}", prefix, Math.Abs(rnd.Next()));
+        }
+
+        private static AnyValue[][] toRelData(params AnyValue[] vals) {
+            return new AnyValue[][] { vals };
+        }
+
+        private static void queryResEquals(IDictionary<RelKey, Relation> queryRes, object[][] expectedRes)
+        {
+            Assert.IsNotNull(queryRes);
+            Assert.AreEqual(queryRes.Count, 1);
+            Assert.AreEqual(queryRes.First().Value, expectedRes);
         }
 
         public delegate void ConnFunc(out DelveClient api);
@@ -67,18 +89,43 @@ namespace Com.RelationalAI
 
             // delete_source
             // =============================================================================
-            // connFunc(out api);
-            // api.createDatabase();
-            // ModifyWorkspaceActionResult deleteSrcRes = api.deleteSource("stdlib");
+            connFunc(out api);
+            api.createDatabase();
+            Assert.True(api.deleteSource("stdlib"));
+
+            // list_source
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            Console.WriteLine("api.list_source().Keys: " + DictionaryToString(api.list_source()));
+            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(api.list_source().Keys));
 
             // query
             // =============================================================================
-            QueryActionResult queryRes = api.query(
+            connFunc(out api);
+            api.createDatabase();
+
+            queryResEquals(api.query(
                 srcStr: "def bar = 2",
                 output: "bar"
-            );
-            Assert.IsNotNull(queryRes);
+            ), toRelData( 2L ));
 
-        }
-    }
-}
+            queryResEquals(api.query(
+                srcStr: "def p = {(1,); (2,); (3,)}",
+                output: "p"
+            ), toRelData( 1L, 2L, 3L ));
+
+            queryResEquals(api.query(
+                srcStr: "def p = {(1.1,); (2.2,); (3.4,)}",
+                output: "p"
+            ), toRelData( 1.1D, 2.2D, 3.4D ));
+
+            queryResEquals(api.query(
+                srcStr: "def p = {(parse_decimal[64, 2, \"1.1\"],); (parse_decimal[64, 2, \"2.2\"],); (parse_decimal[64, 2, \"3.4\"],)}",
+                output: "p"
+            ), toRelData( 1.1D, 2.2D, 3.4D ));
+
+            queryResEquals(api.query(
+                srcStr: "def p = {(1, 5); (2, 7); (3, 9)}",
+                output: "p"
+            ), new AnyValue[][] { new AnyValue[] { 1L, 2L, 3L }, new AnyValue[] { 5L, 7L, 9L } });
