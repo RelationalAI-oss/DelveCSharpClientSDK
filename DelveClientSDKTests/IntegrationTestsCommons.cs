@@ -33,7 +33,7 @@ namespace Com.RelationalAI
         }
 
         public delegate void ConnFunc(out DelveClient api);
-        public static void Test1(ConnFunc connFunc)
+        public static void RunAllTests(ConnFunc connFunc)
         {
             DelveClient api;
             connFunc(out api);

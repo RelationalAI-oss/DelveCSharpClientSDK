@@ -36,7 +36,7 @@ namespace Com.RelationalAI
         [Test]
         public void Test1()
         {
-            IntegrationTestsCommons.Test1(createCloudConnection);
+            IntegrationTestsCommons.RunAllTests(createCloudConnection);
         }
     }
 }
