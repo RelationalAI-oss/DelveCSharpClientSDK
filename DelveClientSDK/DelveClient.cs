@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
@@ -49,6 +50,58 @@ namespace Com.RelationalAI
 
         private string boolStr(bool val) {
             return val ? "true" : "false";
+        }
+    }
+
+    partial class RelKey {
+        public override bool Equals(object obj)
+        {
+            return obj is RelKey key &&
+                   Name == key.Name &&
+                   EqualityComparer<ICollection<string>>.Default.Equals(Keys, key.Keys) &&
+                   EqualityComparer<ICollection<string>>.Default.Equals(Values, key.Values);
+        }
+
+        public override int GetHashCode()
+        {
+            return System.HashCode.Combine(Name, Keys, Values);
+        }
+    }
+
+    partial class Relation
+    {
+        public HashSet<HashSet<AnyValue>> columnsToHashSet(ICollection<ICollection<AnyValue>> columns)
+        {
+            return columns.Select(col => col.ToHashSet()).ToHashSet();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+
+            if ( obj is Relation relation ) {
+                return EqualityComparer<RelKey>.Default.Equals(Rel_key, relation.Rel_key) &&
+                       columnsToHashSet(Columns).SetEquals(columnsToHashSet(relation.Columns));
+            } else if ( obj.GetType().IsArray ) {
+                object[] arr = (object[]) obj;
+                if( arr.Length == 0 ) {
+                    return Columns.Count == 0 || Columns.First().Count == 0;
+                } else if ( arr[0].GetType().IsArray ) {
+                    return equalsToArr((dynamic) arr);
+                }
+            }
+            return false;
+        }
+
+        private bool equalsToArr(AnyValue[][] arr) {
+            var x1 = columnsToHashSet(Columns);
+            var x2 = arr.Select(col => col.Cast<object>().ToHashSet()).ToHashSet();
+            return x1.All(elem1 => x2.Any(elem2 => elem1.SetEquals(elem2))) && x2.All(elem2 => x1.Any(elem1 => elem2.SetEquals(elem1)));
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Rel_key, columnsToHashSet(Columns));
         }
     }
 
@@ -128,11 +181,16 @@ namespace Com.RelationalAI
             return response;
         }
 
+        public ActionResult runAction(Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN) {
+            return runAction("single", action, out success, isReadOnly, mode);
+        }
+
         public ActionResult runAction(Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
-            return runAction("single", action, isReadOnly, mode);
+            bool success;
+            return runAction("single", action, out success, isReadOnly, mode);
         }
-        public ActionResult runAction(String name, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
+        public ActionResult runAction(String name, Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
             this.conn = conn;
 
@@ -149,7 +207,7 @@ namespace Com.RelationalAI
 
             TransactionResult response = runTransaction(xact);
 
-
+            success = is_success(response);
             foreach (LabeledActionResult act in response.Actions)
             {
                 if (name.Equals(act.Name))
@@ -242,15 +300,17 @@ namespace Com.RelationalAI
             }
         }
 
-        public ModifyWorkspaceActionResult deleteSource(ICollection<string> srcNameList)
+        public bool deleteSource(ICollection<string> srcNameList)
         {
             var action = new ModifyWorkspaceAction();
             action.Delete_source = srcNameList;
 
-            return (ModifyWorkspaceActionResult)runAction(action);
+            bool success;
+            var actionRes = (ModifyWorkspaceActionResult)runAction(action, out success);
+            return success && actionRes != null;
         }
 
-        public ModifyWorkspaceActionResult deleteSource(string srcName)
+        public bool deleteSource(string srcName)
         {
             return deleteSource(new List<string>() { srcName });
         }
@@ -268,7 +328,7 @@ namespace Com.RelationalAI
             return resultDict;
         }
 
-        public QueryActionResult query(
+        public IDictionary<RelKey, Relation> query(
             string output,
             string name = "query",
             string path = null,
@@ -282,7 +342,7 @@ namespace Com.RelationalAI
             return query(name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
         }
 
-        public QueryActionResult query(
+        public IDictionary<RelKey, Relation> query(
             string name = "query",
             string path = null,
             string srcStr = "",
@@ -300,10 +360,17 @@ namespace Com.RelationalAI
             src.Path = path;
             src.Value = srcStr;
 
-            return query(src, inputs, outputs, persist, is_readonly, mode);
+            return filterDictionary(query(src, inputs, outputs, persist, is_readonly, mode), outputs);
         }
 
-        public QueryActionResult query(
+        private IDictionary<RelKey, Relation> filterDictionary(IDictionary<RelKey, Relation> dict, ICollection<string> outputs)
+        {
+            if(dict.All(kvp => outputs.Contains(kvp.Key.Name))) return dict;
+            return dict.Where(kvp => outputs.Contains(kvp.Key.Name))
+                       .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
+        public IDictionary<RelKey, Relation> query(
             Source src = null,
             ICollection<Relation> inputs = null,
             ICollection<string> outputs = null,
@@ -329,11 +396,24 @@ namespace Com.RelationalAI
             action.Outputs = outputs;
             action.Persist = persist;
 
-            return (QueryActionResult)runAction(
+            var actionRes = (QueryActionResult)runAction(
                 action,
                 isReadOnly.GetValueOrDefault(persist.Count == 0),
                 mode.GetValueOrDefault(conn.defaultOpenMode)
             );
+
+            return actionRes == null ? null : convertToDictionary(actionRes.Output);
+        }
+
+        private IDictionary<RelKey, Relation> convertToDictionary(ICollection<Relation> output)
+        {
+            var outDict = new Dictionary<RelKey, Relation>();
+            if(output != null) {
+                foreach(Relation rel in output) {
+                    outDict[rel.Rel_key] = rel;
+                }
+            }
+            return outDict;
         }
 
         public UpdateActionResult updateEDB(
