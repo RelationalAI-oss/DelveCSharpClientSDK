@@ -17,7 +17,7 @@ namespace DelveClientSDKSamples
         int maxAttempts;
         int sleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute", string profile = "default", int maxAttempts = 10, int sleepTime = 3000)
+        public CloudWorkflow(string computeName = "csharpcompute8", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
         {
             IniData ini = Config.loadDotRaiConfig();
             this.maxAttempts = maxAttempts;
@@ -79,9 +79,9 @@ namespace DelveClientSDKSamples
 
         private bool waitForCompute(string computeName)
         {
-            var compute = getByComputeName(computeName);
             for (int i=0; i<this.maxAttempts; i++)
             {
+                var compute = getByComputeName(computeName);
                 string computeState = (string)compute["computeState"];
                 if ("PROVISIONED".Equals(computeState))
                     return true;
