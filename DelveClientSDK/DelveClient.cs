@@ -118,15 +118,19 @@ namespace Com.RelationalAI
             if( verifySSL ) {
                 return new HttpClient();
             } else {
+                // If we don't want to verify SSL certificate (from the Server), we need to
+                // specifically attach a `HttpClientHandler` to `HttpClient` for accepting
+                // any certificate from the server. This is useful for testing purposes, but
+                // should not be used in production.
                 var handler = new HttpClientHandler()
                 {
                     SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
-                    ServerCertificateCustomValidationCallback = ValidateServerCertificate
+                    ServerCertificateCustomValidationCallback = AcceptAllServerCertificate
                 };
                 return new HttpClient(handler);
             }
         }
-        public static bool ValidateServerCertificate(
+        public static bool AcceptAllServerCertificate(
             object sender,
             X509Certificate certificate,
             X509Chain chain,
