@@ -153,6 +153,12 @@ namespace Com.RelationalAI
         private static HttpClient getHttpClient(Uri url, bool verifySSL)
         {
             if( url.Scheme == "https" && httpClientVerifySSL != verifySSL) {
+                // we keep a single static HttpClient instance and keep reusing it instead
+                // of creating an instance for each request. This is a proven best practice.
+                // However, if we are going to handle a `https` request and suddenly
+                // decide a value for `verifySSL` other than its default value (or the value
+                // used in the previous requests), then this section disposes the existing
+                // HttpClient instance and creates a new one.
                 httpClient.Dispose();
                 httpClient = createHttpClient(verifySSL);
                 httpClientVerifySSL = verifySSL;
