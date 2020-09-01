@@ -476,28 +476,6 @@ namespace Com.RelationalAI
             if(!loadData.Content_type.Equals(JSON_CONTENT_TYPE) && !loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
                 throw new ArgumentException(string.Format("`ContentType`={0} is not supported.", loadData.Content_type));
             }
-
-            // if(loadData.Key == null) loadData.Key = new List<string>();
-
-            // if(loadData.File_syntax == null) {
-            //     if(loadData.Content_type.Equals(JSON_CONTENT_TYPE)) {
-            //         loadData.File_syntax = new JSONFileSyntax();
-            //     } else if(loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
-            //         loadData.File_syntax = new CSVFileSyntax();
-            //     } else {
-            //         throw new InvalidOperationException();
-            //     }
-            // }
-
-            // if(loadData.File_schema == null) {
-            //     if(loadData.Content_type.Equals(JSON_CONTENT_TYPE)) {
-            //         loadData.File_schema = new JSONFileSchema();
-            //     } else if(loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
-            //         loadData.File_schema = new CSVFileSchema();
-            //     } else {
-            //         throw new InvalidOperationException();
-            //     }
-            // }
         }
         private bool isEmpty(string str)
         {

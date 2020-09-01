@@ -144,7 +144,6 @@ namespace Com.RelationalAI
 
             // create a new key pair
             using var key = Key.Import(algorithm, seed, KeyBlobFormat.RawPrivateKey);
-            // using var key = Key.Create(algorithm);
 
             // sign the data using the private key
             byte[] signature = algorithm.Sign(key, Encoding.UTF8.GetBytes(stringToSign));

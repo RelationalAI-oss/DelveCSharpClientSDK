@@ -59,34 +59,6 @@ namespace Com.RelationalAI
             }
             return new string(c, 0, c.Length);
         }
-        public static byte[] FromHex(this string str)
-        {
-            return FromHex(str, 0, 0, 0);
-        }
-        public static byte[] FromHex(this string str, int offset, int step)
-        {
-            return FromHex(str, offset, step, 0);
-        }
-        public static byte[] FromHex(this string str, int offset, int step, int tail)
-        {
-            byte[] b = new byte[(str.Length - offset - tail + step) / (2 + step)];
-            byte c1, c2;
-            int l = str.Length - tail;
-            int s = step + 1;
-            for (int y = 0, x = offset; x < l; ++y, x += s)
-            {
-                c1 = (byte)str[x];
-                if (c1 > 0x60) c1 -= 0x57;
-                else if (c1 > 0x40) c1 -= 0x37;
-                else c1 -= 0x30;
-                c2 = (byte)str[++x];
-                if (c2 > 0x60) c2 -= 0x57;
-                else if (c2 > 0x40) c2 -= 0x37;
-                else c2 -= 0x30;
-                b[y] = (byte)((c1 << 4) + c2);
-            }
-            return b;
-        }
     }
 
     public static class ExceptionUtils {
