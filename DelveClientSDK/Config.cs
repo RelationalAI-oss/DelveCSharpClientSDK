@@ -153,9 +153,7 @@ namespace Com.RelationalAI
         */
         public static string raiGetHost(IniData ini, string profile="default")
         {
-            string host = getIniValue(ini, profile, "host", defaultValue:"aws.relationalai.com");
-
-            return host;
+            return getIniValue(ini, profile, "host", defaultValue:"aws.relationalai.com");
         }
 
 
@@ -176,9 +174,7 @@ namespace Com.RelationalAI
         */
         public static int raiGetPort(IniData ini, string profile="default")
         {
-            int port = int.Parse(getIniValue(ini, profile, "port", defaultValue:"443"));
-
-            return port;
+            return int.Parse(getIniValue(ini, profile, "port", defaultValue:"443"));
         }
 
         /*
@@ -205,6 +201,7 @@ namespace Com.RelationalAI
         )
         {
             ini[profile]["infra"] = infra;
+            return;
         }
 
         /*
@@ -231,7 +228,6 @@ namespace Com.RelationalAI
         )
         {
             ini[profile]["region"] = region;
-
             return;
         }
 
@@ -259,6 +255,7 @@ namespace Com.RelationalAI
         )
         {
             ini[profile]["access_key"] = accessKey;
+            return;
         }
 
         /*
