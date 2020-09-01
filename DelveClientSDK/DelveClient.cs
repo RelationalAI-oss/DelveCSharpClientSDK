@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -53,7 +54,8 @@ namespace Com.RelationalAI
         }
     }
 
-    partial class RelKey {
+    partial class RelKey
+    {
         public override bool Equals(object obj)
         {
             return obj is RelKey key &&
@@ -93,9 +95,14 @@ namespace Com.RelationalAI
             return false;
         }
 
+        public static ICollection<ICollection<object>> toCollection(AnyValue[][] arr)
+        {
+            return arr.Select(col => (ICollection<object>)(col.Cast<object>().ToHashSet())).ToHashSet();
+        }
+
         private bool equalsToArr(AnyValue[][] arr) {
             var x1 = columnsToHashSet(Columns);
-            var x2 = arr.Select(col => col.Cast<object>().ToHashSet()).ToHashSet();
+            var x2 = columnsToHashSet(toCollection(arr));
             return x1.All(elem1 => x2.Any(elem2 => elem1.SetEquals(elem2))) && x2.All(elem2 => x1.Any(elem1 => elem2.SetEquals(elem1)));
         }
 
@@ -136,6 +143,8 @@ namespace Com.RelationalAI
         }
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
         private static HttpClient httpClient = createHttpClient(httpClientVerifySSL);
+
+        public string dbname { get { return conn.dbname; } }
 
         private static HttpClient getHttpClient(Uri url, bool verifySSL)
         {
@@ -430,7 +439,7 @@ namespace Com.RelationalAI
             action.Updates = updates;
             action.Delta = delta;
 
-            return (UpdateActionResult)runAction(action, isReadOnly: true);
+            return (UpdateActionResult)runAction(action, isReadOnly: false);
         }
 
         private void _handleNullFieldsForLoadData(LoadData loadData)
@@ -592,7 +601,65 @@ namespace Com.RelationalAI
             action.Rel = rel;
             action.Value = value;
 
-            return (LoadDataActionResult)runAction(action, isReadOnly: true);
+            return (LoadDataActionResult)runAction(action, isReadOnly: false);
+        }
+
+        private static string typeToString(Type tp)
+        {
+            var str = tp.ToString();
+            return tp.Name;
+        }
+
+        public ImportActionResult loadEDB(
+            string relName, AnyValue[][] columns
+        )
+        {
+            return loadEDB(relName, Relation.toCollection(columns));
+        }
+
+        public ImportActionResult loadEDB(
+            string relName, ICollection<ICollection<AnyValue>> columns
+        )
+        {
+            var rel = new Relation();
+            rel.Rel_key = new RelKey();
+            rel.Rel_key.Name = relName;
+            rel.Rel_key.Keys = new List<string>();
+            rel.Rel_key.Values = new List<string>();
+            if( columns != null && columns.Count > 0 && columns.First().Count > 0) {
+                Debug.Assert(columns.All(col => col.Count == columns.First().Count));
+                foreach(var col in columns) {
+                    rel.Rel_key.Keys.Add(typeToString(col.First().GetType()));
+                }
+            }
+
+            rel.Columns = columns;
+            return loadEDB(rel);
+        }
+
+        public ImportActionResult loadEDB(
+            RelKey relKey, ICollection<ICollection<AnyValue>> columns
+        )
+        {
+            var rel = new Relation();
+            rel.Rel_key = relKey;
+            rel.Columns = columns;
+            return loadEDB(rel);
+        }
+        public ImportActionResult loadEDB(
+            Relation value
+        )
+        {
+            return loadEDB( new List<Relation>() { value } );
+        }
+        public ImportActionResult loadEDB(
+            ICollection<Relation> value
+        )
+        {
+            var action = new ImportAction();
+            action.Inputs = value;
+
+            return (ImportActionResult)runAction(action, isReadOnly: false);
         }
 
         public LoadDataActionResult loadCSV(
@@ -681,7 +748,7 @@ namespace Com.RelationalAI
             action.Broken = broken;
             action.Silent = silent;
             action.Abort_on_error = abortOnError;
-            return (SetOptionsActionResult)runAction(action, isReadOnly: true);
+            return (SetOptionsActionResult)runAction(action, isReadOnly: false);
         }
     }
 }
