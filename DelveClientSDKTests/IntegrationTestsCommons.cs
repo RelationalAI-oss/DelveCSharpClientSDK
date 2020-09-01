@@ -163,9 +163,23 @@ namespace Com.RelationalAI
             connFunc(out api);
             api.createDatabase();
             api.loadEDB("p", toRelData( 1L, 2L, 3L ));
-            queryResEquals(api.query(
-                output: "p"
-            ), toRelData( 1L, 2L, 3L ));
+            var pQuery = api.query(output: "p");
+            queryResEquals(pQuery, toRelData( 1L, 2L, 3L ));
+
+            var pRelKey = pQuery.First().Key;
+
+            api.updateEDB(pRelKey, updates: new List<Tuple<AnyValue, AnyValue>>() {
+                new Tuple<AnyValue, AnyValue>(new int[] { 1 } , +1),
+                new Tuple<AnyValue, AnyValue>(new int[] { 3 } , -1),
+                new Tuple<AnyValue, AnyValue>(new int[] { 8 } , -1),
+                new Tuple<AnyValue, AnyValue>(new int[] { 4 } , +1),
+                new Tuple<AnyValue, AnyValue>(new int[] { 4 } , -1),
+                new Tuple<AnyValue, AnyValue>(new int[] { 0 } , -1),
+                new Tuple<AnyValue, AnyValue>(new int[] { 5 } , +1),
+            });
+
+            queryResEquals(api.query(output: "p"), toRelData( 1L, 2L, 5L ));
+
         }
     }
 }

@@ -435,21 +435,30 @@ namespace Com.RelationalAI
             return outDict;
         }
 
-        public UpdateActionResult updateEDB(
+        private static ICollection<Pair_AnyValue_AnyValue_> convertCollection(ICollection<Tuple<AnyValue, AnyValue>> data)
+        {
+            var res = new List<Pair_AnyValue_AnyValue_>();
+            foreach(var tpl in data) {
+                var pair = new Pair_AnyValue_AnyValue_();
+                pair.First = tpl.Item1;
+                pair.Second = tpl.Item2;
+                res.Add(pair);
+            }
+            return res;
+        }
+
+        public void updateEDB(
             RelKey rel,
-            ICollection<Pair_AnyValue_AnyValue_> updates = null,
-            ICollection<Pair_AnyValue_AnyValue_> delta = null
+            ICollection<Tuple<AnyValue, AnyValue>> updates = null,
+            ICollection<Tuple<AnyValue, AnyValue>> delta = null
         )
         {
-            if(updates == null) updates = new List<Pair_AnyValue_AnyValue_>();
-            if(delta == null) delta = new List<Pair_AnyValue_AnyValue_>();
-
             var action = new UpdateAction();
             action.Rel = rel;
-            action.Updates = updates;
-            action.Delta = delta;
+            if(updates != null) action.Updates = convertCollection(updates);
+            if(delta != null)action.Delta = convertCollection(delta);
 
-            return (UpdateActionResult)runAction(action, isReadOnly: false);
+            runAction(action, isReadOnly: false);
         }
 
         private void _handleNullFieldsForLoadData(LoadData loadData)
