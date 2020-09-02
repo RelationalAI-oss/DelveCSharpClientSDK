@@ -334,7 +334,7 @@ namespace Com.RelationalAI
             return deleteSource(new List<string>() { srcName });
         }
 
-        public IDictionary<string, Source> list_source()
+        public IDictionary<string, Source> listSource()
         {
             var action = new ListSourceAction();
             var actionRes = (ListSourceActionResult)runAction(action, isReadOnly: true);
@@ -577,6 +577,8 @@ namespace Com.RelationalAI
             FileSchema fileSchema = null
         )
         {
+            if(key == null) key = new int[] {};
+
             var loadData = new LoadData();
             loadData.Content_type = contentType;
             loadData.Data = data;

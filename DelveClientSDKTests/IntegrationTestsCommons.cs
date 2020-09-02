@@ -36,7 +36,7 @@ namespace Com.RelationalAI
         {
             Assert.IsNotNull(installSourceRes);
             Assert.IsEmpty(api.collectProblems());
-            Assert.True(api.list_source().ContainsKey(name));
+            Assert.True(api.listSource().ContainsKey(name));
         }
         private static void testInstallSource(DelveClient api, String name, String srcStr)
         {
@@ -102,8 +102,8 @@ namespace Com.RelationalAI
             // =============================================================================
             connFunc(out api);
             api.createDatabase();
-            Console.WriteLine("api.list_source().Keys: " + DictionaryToString(api.list_source()));
-            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(api.list_source().Keys));
+            Console.WriteLine("api.listSource().Keys: " + DictionaryToString(api.listSource()));
+            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(api.listSource().Keys));
 
             // query
             // =============================================================================
@@ -180,6 +180,17 @@ namespace Com.RelationalAI
 
             queryResEquals(api.query(output: "p"), toRelData( 1L, 2L, 5L ));
 
+            // load_csv
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            var fileSchema = new CSVFileSchema();
+            fileSchema.Types = new List<string>() { "Int64", "Int64", "Int64" };
+            api.loadCSV("csv", fileSchema: fileSchema, data: @"
+              A,B,C
+              1,2,3
+              4,5,6
+            ");
         }
     }
 }
