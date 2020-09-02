@@ -39,9 +39,9 @@ namespace Com.RelationalAI
             }
         }
 
-        public static void testInstallSource(DelveClient api, string name, InstallActionResult installSourceRes)
+        public static void testInstallSource(DelveClient api, string name, bool installSourceRes)
         {
-            Assert.IsNotNull(installSourceRes);
+            Assert.True(installSourceRes);
             Assert.IsEmpty(api.collectProblems());
             Assert.True(api.listSource().ContainsKey(name));
         }
@@ -74,11 +74,8 @@ namespace Com.RelationalAI
             testInstallSource(api, "name", "def foo = 1");
 
 
-            var src3 = new Source();
-            src3.Name = "name";
-            src3.Value = "def foo = ";
-            InstallActionResult sourceInstall3 = api.installSource(src3);
-            Assert.IsNotNull(sourceInstall3);
+            var src3 = new Source("name", "def foo = ");
+            Assert.True(api.installSource(src3));
             Assert.AreEqual(api.collectProblems().Count, 2);
 
             testInstallSource(api, "name", "def foo = 1");
@@ -86,13 +83,11 @@ namespace Com.RelationalAI
             try {
                 System.IO.File.WriteAllText(@"test.delve", "def foo = 1");
 
-                var src4 = new Source();
-                src4.Path = @"test.delve";
+                var src4 = new Source(@"test.delve");
                 testInstallSource(api, src4, "test");
 
 
-                var src5 = new Source();
-                src5.Path = src4.Path;
+                var src5 = new Source(src4.Path);
                 src5.Name = "not_" + src4.Name;
                 testInstallSource(api, src5);
             } finally {
@@ -274,6 +269,24 @@ namespace Com.RelationalAI
                     toRelData( 3L )
                 )
             );
+            var deleteRes = api.deleteEdb("p");
+            Assert.AreEqual(deleteRes.Count, 1);
+            Assert.AreEqual(deleteRes.ElementAt(0), new RelKey("p", new List<string>() { "Int64" }));
+
+            // Collect problems
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            Assert.AreEqual(api.collectProblems().Count, 0);
+            api.installSource(new Source("name", "", "def foo = "));
+            Assert.AreEqual(api.collectProblems().Count, 2);
+
+            // Set options
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            Assert.True(api.configure(debug: true));
+            Assert.True(api.configure(debug: false));
         }
     }
 }
