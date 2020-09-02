@@ -17,7 +17,7 @@ namespace Com.RelationalAI
     using AnyValue = System.Object;
     public partial class GeneratedDelveClient
     {
-        public const string JSON_CONTENT_TYPE = "application/json; charset=utf-8";
+        public const string JSON_CONTENT_TYPE = "application/json";
         public const string CSV_CONTENT_TYPE = "text/csv";
 
         public Connection conn {get; set;}
@@ -42,7 +42,7 @@ namespace Com.RelationalAI
             request.Headers.Clear();
             request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(JSON_CONTENT_TYPE);
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
@@ -56,12 +56,25 @@ namespace Com.RelationalAI
 
     partial class RelKey
     {
+        private static MultiSetComparer<string> comp = new MultiSetComparer<string>();
+
+        public RelKey()
+        {
+        }
+
+        public RelKey(string name, List<string> keyTypes = null, List<string> valueTypes = null)
+        {
+            this.Name = name;
+            this.Keys = keyTypes == null ? new List<string>() : keyTypes;
+            this.Values = valueTypes == null ? new List<string>() : valueTypes;
+        }
+
         public override bool Equals(object obj)
         {
             return obj is RelKey key &&
-                   Name == key.Name &&
-                   EqualityComparer<ICollection<string>>.Default.Equals(Keys, key.Keys) &&
-                   EqualityComparer<ICollection<string>>.Default.Equals(Values, key.Values);
+                   Name.Equals(key.Name) &&
+                   comp.Equals(Keys, key.Keys) &&
+                   comp.Equals(Values, key.Values);
         }
 
         public override int GetHashCode()
@@ -72,6 +85,22 @@ namespace Com.RelationalAI
 
     partial class Relation
     {
+        public Relation()
+        {
+        }
+
+        public Relation(RelKey relKey, AnyValue[][] columns)
+        {
+            this.Rel_key = relKey;
+            this.Columns = toCollection(columns);
+        }
+
+        public Relation(RelKey relKey, ICollection<ICollection<AnyValue>> columns)
+        {
+            this.Rel_key = relKey;
+            this.Columns = columns;
+        }
+
         public HashSet<HashSet<AnyValue>> columnsToHashSet(ICollection<ICollection<AnyValue>> columns)
         {
             return columns.Select(col => col.ToHashSet()).ToHashSet();
@@ -83,9 +112,9 @@ namespace Com.RelationalAI
 
             if ( obj is Relation relation ) {
                 return EqualityComparer<RelKey>.Default.Equals(Rel_key, relation.Rel_key) &&
-                       columnsToHashSet(Columns).SetEquals(columnsToHashSet(relation.Columns));
+                       equalsToCollection(relation.Columns);
             } else if ( obj.GetType().IsArray ) {
-                object[] arr = (object[]) obj;
+                AnyValue[] arr = (AnyValue[]) obj;
                 if( arr.Length == 0 ) {
                     return Columns.Count == 0 || Columns.First().Count == 0;
                 } else if ( arr[0].GetType().IsArray ) {
@@ -95,20 +124,59 @@ namespace Com.RelationalAI
             return false;
         }
 
-        public static ICollection<ICollection<object>> toCollection(AnyValue[][] arr)
+        public static ICollection<ICollection<AnyValue>> toCollection(AnyValue[][] arr)
         {
-            return arr.Select(col => (ICollection<object>)(col.Cast<object>().ToHashSet())).ToHashSet();
+            return arr.Select(col => (ICollection<AnyValue>)(col.Cast<AnyValue>().ToHashSet())).ToHashSet();
         }
 
         private bool equalsToArr(AnyValue[][] arr) {
+            return equalsToCollection(toCollection(arr));
+        }
+
+        private bool equalsToCollection(ICollection<ICollection<AnyValue>> col) {
             var x1 = columnsToHashSet(Columns);
-            var x2 = columnsToHashSet(toCollection(arr));
+            var x2 = columnsToHashSet(col);
             return x1.All(elem1 => x2.Any(elem2 => elem1.SetEquals(elem2))) && x2.All(elem2 => x1.Any(elem1 => elem2.SetEquals(elem1)));
         }
 
         public override int GetHashCode()
         {
             return HashCode.Combine(Rel_key, columnsToHashSet(Columns));
+        }
+    }
+    public partial class CSVFileSchema : FileSchema
+    {
+        public CSVFileSchema(params string[] types)
+        {
+            this.Types = types.ToList();
+        }
+    }
+
+    public partial class CSVFileSyntax : FileSyntax
+    {
+        public CSVFileSyntax(
+            ICollection<string> header = null,
+            int headerRow = -1,
+            bool normalizeNames = false,
+            int dataRow = -1,
+            ICollection<string> missingStrings = null,
+            string delim = ",",
+            bool ignoreRepeated = false,
+            string quoteChar = "\"",
+            string escapeChar = "\\"
+        )
+        {
+            if( missingStrings == null ) missingStrings = new List<string>();
+
+            this.Header = header;
+            this.Header_row = headerRow;
+            this.Normalizenames = normalizeNames;
+            this.Datarow = dataRow;
+            this.Missingstrings = missingStrings;
+            this.Delim = delim;
+            this.Ignorerepeated = ignoreRepeated;
+            this.Quotechar = quoteChar;
+            this.Escapechar = escapeChar;
         }
     }
 
@@ -152,7 +220,7 @@ namespace Com.RelationalAI
 
         private static HttpClient getHttpClient(Uri url, bool verifySSL)
         {
-            if( url.Scheme == "https" && httpClientVerifySSL != verifySSL) {
+            if( "https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL) {
                 // we keep a single static HttpClient instance and keep reusing it instead
                 // of creating an instance for each request. This is a proven best practice.
                 // However, if we are going to handle a `https` request and suddenly
@@ -482,7 +550,7 @@ namespace Com.RelationalAI
                 throw new ArgumentException("`ContentType` is required.");
             }
 
-            if(!loadData.Content_type.Equals(JSON_CONTENT_TYPE) && !loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
+            if(!loadData.Content_type.StartsWith(JSON_CONTENT_TYPE) && !loadData.Content_type.StartsWith(CSV_CONTENT_TYPE)) {
                 throw new ArgumentException(string.Format("`ContentType`={0} is not supported.", loadData.Content_type));
             }
         }
@@ -502,16 +570,16 @@ namespace Com.RelationalAI
         public LoadData jsonString(
             string data,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Data = data;
             loadData.Content_type = JSON_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
@@ -519,16 +587,16 @@ namespace Com.RelationalAI
         public LoadData jsonFile(
             string filePath,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Path = filePath;
             loadData.Content_type = JSON_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
@@ -536,16 +604,16 @@ namespace Com.RelationalAI
         public LoadData csvString(
             string data,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Data = data;
             loadData.Content_type = CSV_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
@@ -553,28 +621,28 @@ namespace Com.RelationalAI
         public LoadData csvFile(
             string filePath,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Path = filePath;
             loadData.Content_type = CSV_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
 
-        public LoadDataActionResult loadEDB(
+        public bool loadEDB(
             string rel,
             string contentType,
             string data = null,
             string path = null,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             if(key == null) key = new int[] {};
@@ -584,12 +652,12 @@ namespace Com.RelationalAI
             loadData.Data = data;
             loadData.Path = path;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadEDB(rel, loadData);
         }
-        public LoadDataActionResult loadEDB(
+        public bool loadEDB(
             string rel,
             LoadData value
         )
@@ -600,7 +668,7 @@ namespace Com.RelationalAI
             action.Rel = rel;
             action.Value = value;
 
-            return (LoadDataActionResult)runAction(action, isReadOnly: false);
+            return runAction(action, isReadOnly: false) != null;
         }
 
         private static string typeToString(Type tp)
@@ -621,10 +689,7 @@ namespace Com.RelationalAI
         )
         {
             var rel = new Relation();
-            rel.Rel_key = new RelKey();
-            rel.Rel_key.Name = relName;
-            rel.Rel_key.Keys = new List<string>();
-            rel.Rel_key.Values = new List<string>();
+            rel.Rel_key = new RelKey(relName);
             if( columns != null && columns.Count > 0 && columns.First().Count > 0) {
                 Debug.Assert(columns.All(col => col.Count == columns.First().Count));
                 foreach(var col in columns) {
@@ -661,19 +726,19 @@ namespace Com.RelationalAI
             return (ImportActionResult)runAction(action, isReadOnly: false);
         }
 
-        public LoadDataActionResult loadCSV(
+        public bool loadCSV(
             string rel,
             string data = null,
             string path = null,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
-            return loadEDB(rel, CSV_CONTENT_TYPE, data, path, key, fileSyntax, fileSchema);
+            return loadEDB(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema);
         }
 
-        public LoadDataActionResult loadJSON(
+        public bool loadJSON(
             string rel,
             string data = null,
             string path = null,
@@ -706,11 +771,11 @@ namespace Com.RelationalAI
             return actionRes.Delete_edb_result;
         }
 
-        public ModifyWorkspaceActionResult enableLibrary(string srcName)
+        public bool enableLibrary(string srcName)
         {
             var action = new ModifyWorkspaceAction();
             action.Enable_library = srcName;
-            return (ModifyWorkspaceActionResult)runAction(action);
+            return runAction(action) != null;
         }
 
         public CardinalityActionResult cardinality()
@@ -719,11 +784,11 @@ namespace Com.RelationalAI
             return (CardinalityActionResult)runAction(action, isReadOnly: true);
         }
 
-        public CardinalityActionResult cardinality(string relName)
+        public ICollection<Relation> cardinality(string relName)
         {
             var action = new CardinalityAction();
             action.Relname = relName;
-            return (CardinalityActionResult)runAction(action, isReadOnly: true);
+            return ((CardinalityActionResult)runAction(action, isReadOnly: true)).Result;
         }
 
         public ICollection<AbstractProblem> collectProblems()
