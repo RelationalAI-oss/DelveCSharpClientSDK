@@ -144,6 +144,26 @@ namespace Com.RelationalAI
             return HashCode.Combine(Rel_key, columnsToHashSet(Columns));
         }
     }
+
+    public partial class Source
+    {
+        public Source()
+        {
+        }
+        public Source(string path) : this("", path, "")
+        {
+        }
+        public Source(string name, string value) : this(name, name, value)
+        {
+        }
+        public Source(string name, string path, string value) : this()
+        {
+            Name = name;
+            Path = path;
+            Value = value;
+        }
+    }
+
     public partial class CSVFileSchema : FileSchema
     {
         public CSVFileSchema(params string[] types)
@@ -344,11 +364,11 @@ namespace Com.RelationalAI
             return is_success(response);
         }
 
-        public InstallActionResult installSource(String name, String srcStr)
+        public bool installSource(String name, String srcStr)
         {
             return installSource(name, name, srcStr);
         }
-        public InstallActionResult installSource(String name, String path, String srcStr)
+        public bool installSource(String name, String path, String srcStr)
         {
             Source src = new Source();
             src.Name = name;
@@ -357,12 +377,12 @@ namespace Com.RelationalAI
 
             return installSource(src);
         }
-        public InstallActionResult installSource(Source src)
+        public bool installSource(Source src)
         {
             return installSource(new List<Source>() { src });
         }
 
-        public InstallActionResult installSource(ICollection<Source> srcList)
+        public bool installSource(ICollection<Source> srcList)
         {
             var action = new InstallAction();
             foreach(Source src in srcList) {
@@ -370,7 +390,7 @@ namespace Com.RelationalAI
             }
             action.Sources = srcList;
 
-            return (InstallActionResult)runAction(action);
+            return runAction(action) != null;
         }
 
         private void _readFileFromPath(Source src)
@@ -677,14 +697,14 @@ namespace Com.RelationalAI
             return tp.Name;
         }
 
-        public ImportActionResult loadEDB(
+        public bool loadEDB(
             string relName, AnyValue[][] columns
         )
         {
             return loadEDB(relName, Relation.toCollection(columns));
         }
 
-        public ImportActionResult loadEDB(
+        public bool loadEDB(
             string relName, ICollection<ICollection<AnyValue>> columns
         )
         {
@@ -701,7 +721,7 @@ namespace Com.RelationalAI
             return loadEDB(rel);
         }
 
-        public ImportActionResult loadEDB(
+        public bool loadEDB(
             RelKey relKey, ICollection<ICollection<AnyValue>> columns
         )
         {
@@ -710,20 +730,20 @@ namespace Com.RelationalAI
             rel.Columns = columns;
             return loadEDB(rel);
         }
-        public ImportActionResult loadEDB(
+        public bool loadEDB(
             Relation value
         )
         {
             return loadEDB( new List<Relation>() { value } );
         }
-        public ImportActionResult loadEDB(
+        public bool loadEDB(
             ICollection<Relation> value
         )
         {
             var action = new ImportAction();
             action.Inputs = value;
 
-            return (ImportActionResult)runAction(action, isReadOnly: false);
+            return runAction(action, isReadOnly: false) != null;
         }
 
         public bool loadCSV(
@@ -778,10 +798,10 @@ namespace Com.RelationalAI
             return runAction(action) != null;
         }
 
-        public CardinalityActionResult cardinality()
+        public ICollection<Relation> cardinality()
         {
             var action = new CardinalityAction();
-            return (CardinalityActionResult)runAction(action, isReadOnly: true);
+            return ((CardinalityActionResult)runAction(action, isReadOnly: true)).Result;
         }
 
         public ICollection<Relation> cardinality(string relName)
@@ -798,12 +818,12 @@ namespace Com.RelationalAI
             return actionRes.Problems;
         }
 
-        public SetOptionsActionResult configure(
-            bool? debug,
-            bool? debugTrace,
-            bool? broken,
-            bool? silent,
-            bool? abortOnError
+        public bool configure(
+            bool? debug = null,
+            bool? debugTrace = null,
+            bool? broken = null,
+            bool? silent = null,
+            bool? abortOnError = null
         )
         {
             var action = new SetOptionsAction();
@@ -812,7 +832,7 @@ namespace Com.RelationalAI
             action.Broken = broken;
             action.Silent = silent;
             action.Abort_on_error = abortOnError;
-            return (SetOptionsActionResult)runAction(action, isReadOnly: false);
+            return runAction(action, isReadOnly: false) != null;
         }
     }
 }
