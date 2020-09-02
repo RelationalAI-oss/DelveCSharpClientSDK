@@ -89,13 +89,11 @@ namespace Com.RelationalAI
         {
         }
 
-        public Relation(RelKey relKey, AnyValue[][] columns)
+        public Relation(RelKey relKey, AnyValue[][] columns) : this(relKey, toCollection(columns))
         {
-            this.Rel_key = relKey;
-            this.Columns = toCollection(columns);
         }
 
-        public Relation(RelKey relKey, ICollection<ICollection<AnyValue>> columns)
+        public Relation(RelKey relKey, ICollection<ICollection<AnyValue>> columns) : this()
         {
             this.Rel_key = relKey;
             this.Columns = columns;
