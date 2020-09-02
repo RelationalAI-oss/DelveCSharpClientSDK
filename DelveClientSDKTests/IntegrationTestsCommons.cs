@@ -25,11 +25,18 @@ namespace Com.RelationalAI
             return new AnyValue[][] { vals };
         }
 
-        private static void queryResEquals(IDictionary<RelKey, Relation> queryRes, object[][] expectedRes)
+        private static void queryResEquals(IDictionary<RelKey, Relation> queryRes, AnyValue[][] expectedRes)
         {
             Assert.IsNotNull(queryRes);
-            Assert.AreEqual(queryRes.Count, 1);
-            Assert.AreEqual(queryRes.First().Value, expectedRes);
+            if ( expectedRes[0].Count() == 0 )
+            {
+                Assert.AreEqual(queryRes.Count, 0);
+            }
+            else
+            {
+                Assert.AreEqual(queryRes.Count, 1);
+                Assert.AreEqual(queryRes.First().Value, expectedRes);
+            }
         }
 
         public static void testInstallSource(DelveClient api, string name, InstallActionResult installSourceRes)
@@ -184,13 +191,89 @@ namespace Com.RelationalAI
             // =============================================================================
             connFunc(out api);
             api.createDatabase();
-            var fileSchema = new CSVFileSchema();
-            fileSchema.Types = new List<string>() { "Int64", "Int64", "Int64" };
-            api.loadCSV("csv", fileSchema: fileSchema, data: @"
-              A,B,C
-              1,2,3
-              4,5,6
-            ");
+            Assert.True(api.loadCSV("csv",
+                schema: new CSVFileSchema("Int64", "Int64", "Int64"),
+                data: @"
+                    A,B,C
+                    1,2,3
+                    4,5,6
+                "
+            ));
+            queryResEquals(api.query(
+                srcStr: "def result = count[pos: csv[pos, :A]]",
+                output: "result"
+            ), toRelData( 2L ));
+
+            Assert.True(api.loadCSV("bar",
+                syntax: new CSVFileSyntax(delim: "|"),
+                schema: new CSVFileSchema("Int64", "Int64", "Int64"),
+                data: @"
+                    D|E|F
+                    1|2|3
+                    1|2|3
+                    1|2|3
+                    1|2|3
+                "
+            ));
+            queryResEquals(api.query(
+                srcStr: "def result = count[pos: bar[pos, :D]]",
+                output: "result"
+            ), toRelData( 4L ));
+
+            // load_json
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            Assert.True(api.loadJSON("json",
+                data: @"
+                    { ""address"": { ""city"": ""Vancouver"", ""state"": ""BC"" } }
+                "
+            ));
+            Assert.AreEqual(api.listEdb().Count, 2);
+            queryResEquals(api.query(
+                srcStr: @"
+                    def cityRes(x) = exists(pos: json(:address, :city, x))
+                ",
+                output: "cityRes"
+            ), toRelData( "Vancouver" ));
+
+            Assert.True(api.loadJSON("json",
+                data: @"
+                    { ""name"": ""Martin"", ""height"": 185.5 }
+                "
+            ));
+            Assert.AreEqual(api.listEdb().Count, 4);
+
+            // list_edb
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            Assert.AreEqual(api.listEdb().Count, 0);// list_edb
+
+            // enable_library
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            Assert.True(api.enableLibrary("stdlib"));
+
+            // cardinality
+            // =============================================================================
+            connFunc(out api);
+            api.createDatabase();
+            queryResEquals(api.query(
+                srcStr: "def p = {(1,); (2,); (3,)}",
+                persist: new List<string>() { "p" }
+            ), toRelData());
+            var cardRels = api.cardinality("p");
+            Assert.AreEqual(cardRels.Count, 1);
+            var pCar = cardRels.ElementAt(0);
+            Assert.AreEqual(
+                pCar,
+                new Relation(
+                    new RelKey("p", new List<string>() { "Int64" }),
+                    toRelData( 3L )
+                )
+            );
         }
     }
 }
