@@ -26,20 +26,20 @@ namespace Com.RelationalAI
 
     public class DelveCloudClient : GeneratedDelveCloudClient
     {
-        public DelveCloudClient(CloudConnection conn) : base(DelveClient.createHttpClient(conn.verifySSL))
+        public DelveCloudClient(CloudConnection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
         {
             this.conn = conn;
-            this.BaseUrl = conn.baseUrl.ToString();
+            this.BaseUrl = conn.BaseUrl.ToString();
         }
 
-        public ListComputesResponseProtocol listComputes() {return this.ComputeGetAsync().Result;}
+        public ListComputesResponseProtocol ListComputes() {return this.ComputeGetAsync().Result;}
 
-        public CreateComputeResponseProtocol createCompute(CloudConnection conn, string size, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(CloudConnection conn, string size, bool dryRun = false)
         {
-            return this.createCompute(conn.computeName, size, EnumString.GetDescription(conn.region), dryRun);
+            return this.CreateCompute(conn.ComputeName, size, EnumString.GetDescription(conn.Region), dryRun);
         }
 
-        public CreateComputeResponseProtocol createCompute(string displayName, string size, string region, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string displayName, string size, string region, bool dryRun = false)
         {
             CreateComputeRequestProtocol request = new CreateComputeRequestProtocol();
             request.Region = region;
@@ -49,12 +49,12 @@ namespace Com.RelationalAI
             return this.ComputePutAsync(request).Result;
         }
 
-        public DeleteComputeResponseProtocol deleteCompute(CloudConnection conn, bool dryRun = false)
+        public DeleteComputeResponseProtocol DeleteCompute(CloudConnection conn, bool dryRun = false)
         {
-            return this.deleteCompute(conn.computeName, dryRun);
+            return this.DeleteCompute(conn.ComputeName, dryRun);
         }
 
-        public DeleteComputeResponseProtocol deleteCompute(string computeName, bool dryRun = false)
+        public DeleteComputeResponseProtocol DeleteCompute(string computeName, bool dryRun = false)
         {
             DeleteComputeRequestProtocol request = new DeleteComputeRequestProtocol();
             request.Compute_name = computeName;
@@ -62,14 +62,14 @@ namespace Com.RelationalAI
             return this.ComputeDeleteAsync(request).Result;
         }
 
-        public ListDatabasesResponseProtocol listDatabases() {return this.DatabaseGetAsync().Result;}
+        public ListDatabasesResponseProtocol ListDatabases() {return this.DatabaseGetAsync().Result;}
 
-        public void removeDefaultCompute(CloudConnection conn)
+        public void RemoveDefaultCompute(CloudConnection conn)
         {
-            this.updateDatabase(conn.dbname, null, removeDefaultCompute: true, dryRun: false);
+            this.UpdateDatabase(conn.DbName, null, removeDefaultCompute: true, dryRun: false);
         }
 
-        public void updateDatabase(string displayName, string defaultComputeName, bool removeDefaultCompute, bool dryRun = false)
+        public void UpdateDatabase(string displayName, string defaultComputeName, bool removeDefaultCompute, bool dryRun = false)
         {
             UpdateDatabaseRequestProtocol request = new UpdateDatabaseRequestProtocol();
             request.Display_name = displayName;
@@ -78,9 +78,9 @@ namespace Com.RelationalAI
             request.Dryrun = dryRun;
             this.DatabasePostAsync(request).Wait();
         }
-        public ListUsersResponseProtocol listUsers() {return this.UserGetAsync().Result;}
+        public ListUsersResponseProtocol ListUsers() {return this.UserGetAsync().Result;}
 
-        public CreateUserResponseProtocol createUser(string username, string firstName, string lastName, string email, bool dryRun = false)
+        public CreateUserResponseProtocol CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
         {
             CreateUserRequestProtocol request = new CreateUserRequestProtocol();
             request.Username = username;

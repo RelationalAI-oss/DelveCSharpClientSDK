@@ -200,7 +200,7 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
-        public static HttpClient createHttpClient(bool verifySSL) {
+        public static HttpClient CreateHttpClient(bool verifySSL) {
             if( verifySSL ) {
                 return new HttpClient();
             } else {
@@ -680,8 +680,8 @@ namespace Com.RelationalAI
             LoadData value
         )
         {
-            _readFileFromPath(value);
             _handleNullFieldsForLoadData(value);
+            _readFileFromPath(value);
             var action = new LoadDataAction();
             action.Rel = rel;
             action.Value = value;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -17,17 +18,17 @@ namespace DelveClientSDKSamples
         int maxAttempts;
         int sleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute8", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
+        public CloudWorkflow(string computeName = "csharpcompute9", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
         {
-            IniData ini = Config.loadDotRaiConfig();
+            IniData ini = Config.LoadDotRaiConfig();
             this.maxAttempts = maxAttempts;
             this.sleepTime = sleepTime;
 
             this.cloudConn = new CloudConnection(
                 dbname: computeName,
-                creds: RAICredentials.fromFile(profile: profile),
+                creds: RAICredentials.FromFile(profile: profile),
                 scheme: "https",
-                host: Config.raiGetHost(ini, profile),
+                host: Config.RaiGetHost(ini, profile),
                 port: 443,
                 verifySSL: false,
                 computeName: computeName
@@ -35,53 +36,83 @@ namespace DelveClientSDKSamples
 
             this.delveClient = new DelveClient(conn: this.cloudConn);
             this.mngtClient = new DelveCloudClient(conn: this.cloudConn);
+            this.delveClient.debugLevel = 1;
         }
         public void runCloudWorkflow()
         {
             // list computes
-            var computes = this.mngtClient.listComputes();
+            var computes = this.mngtClient.ListComputes();
             Console.WriteLine("=> Computes: " + JObject.FromObject(computes));
 
             // list databases
-            var databases = this.mngtClient.listDatabases();
+            var databases = this.mngtClient.ListDatabases();
             Console.WriteLine("=> Databases: " + JObject.FromObject(databases).ToString());
 
             // list users
-            var users = this.mngtClient.listUsers();
+            var users = this.mngtClient.ListUsers();
             Console.WriteLine("=> Users: " + JObject.FromObject(users).ToString());
 
             // create compute
-            var createComputeResponse = this.mngtClient.createCompute(conn: cloudConn, size: "XS");
+            var createComputeResponse = this.mngtClient.CreateCompute(conn: cloudConn, size: "XS");
             Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
 
             // wait for compute to be provisioned
-            if(!waitForCompute(this.cloudConn.computeName))
+            if(!WaitForCompute(this.cloudConn.ComputeName))
                 return;
 
             // create database
-            this.delveClient.createDatabase(conn: this.cloudConn, overwrite: true);
+            this.delveClient.CreateDatabase(overwrite: true);
 
-            // install source
-            InstallActionResult sourceInstall = this.delveClient.installSource(conn: this.cloudConn, "name", "name", "def foo = 1");
-            Console.WriteLine("=> InstallActionResult: " + JObject.FromObject(sourceInstall).ToString());
+            this.delveClient.LoadCSV(
+                rel: "edge_csv",
+                schema: new CSVFileSchema("Int64", "Int64"),
+                syntax: new CSVFileSyntax(header: new List<string>() { "src", "dest" }, delim: "|"),
+                data: @"
+                        30|31
+                        33|30
+                        32|31
+                        34|35
+                        35|32
+                    "
+            );
 
-            // query
-            QueryActionResult queryRes = this.delveClient.query(conn: this.cloudConn, srcStr: "def bar = 2 + foo", output: "bar");
-            Console.WriteLine("=> QueryActionResult: " + JObject.FromObject(queryRes).ToString());
+            this.delveClient.Query(
+                srcStr: @"
+                    def vertex(id) = exists(pos: edge_csv(pos, :src, id) or edge_csv(pos, :dest, id))
+                    def edge(a, b) = exists(pos: edge_csv(pos, :src, a) and edge_csv(pos, :dest, b))
+                ",
+                persist: new List<string>() { "vertex", "edge" },
+                output: "edge"
+            );
+
+            string queryString = @"
+                def uedge(a, b) = edge(a, b) or edge(b, a)
+                def tmp(a, b, x) = uedge(x,a) and uedge(x,b) and a > b
+                def jaccard_similarity(a,b,v) = (count[x : tmp(a,b,x)] / count[x: (uedge(a, x) or uedge(b, x)) and tmp(a,b,_)])(v)
+
+                def result = jaccard_similarity
+            ";
+
+            var queryResult = this.delveClient.Query(
+                srcStr: queryString,
+                output: "result"
+            );
+
+            Console.WriteLine("=> Jaccard Similarity query result: " + queryResult);
 
             // remove default compute
-            this.mngtClient.removeDefaultCompute(conn: this.cloudConn);
+            this.mngtClient.RemoveDefaultCompute(conn: this.cloudConn);
 
             // delete compute
-            var deleteComputeResponse = this.mngtClient.deleteCompute(conn: this.cloudConn);
+            var deleteComputeResponse = this.mngtClient.DeleteCompute(conn: this.cloudConn);
             Console.WriteLine("=> DeleteComputeResponse: " + JObject.FromObject(deleteComputeResponse).ToString());
         }
 
-        private bool waitForCompute(string computeName)
+        private bool WaitForCompute(string computeName)
         {
             for (int i=0; i<this.maxAttempts; i++)
             {
-                var compute = getByComputeName(computeName);
+                var compute = GetByComputeName(computeName);
                 string computeState = (string)compute["computeState"];
                 if ("PROVISIONED".Equals(computeState))
                     return true;
@@ -91,19 +122,19 @@ namespace DelveClientSDKSamples
             return false;
         }
 
-        private JToken getByComputeId(string computeId)
+        private JToken GetByComputeId(string computeId)
         {
-            return getByField("computeId", computeId);
+            return GetByField("computeId", computeId);
         }
 
-        private JToken getByComputeName(string computeName)
+        private JToken GetByComputeName(string computeName)
         {
-            return getByField("computeName", computeName);
+            return GetByField("computeName", computeName);
         }
 
-        private JToken getByField(string field, string value)
+        private JToken GetByField(string field, string value)
         {
-            var computes = this.mngtClient.listComputes();
+            var computes = this.mngtClient.ListComputes();
 
             foreach (var compute in JObject.FromObject(computes)["compute_requests_list"])
             {

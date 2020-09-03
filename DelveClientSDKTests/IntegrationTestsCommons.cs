@@ -285,8 +285,8 @@ namespace Com.RelationalAI
             // =============================================================================
             connFunc(out api);
             api.CreateDatabase();
-            Assert.True(api.configure(debug: true));
-            Assert.True(api.configure(debug: false));
+            Assert.True(api.Configure(debug: true));
+            Assert.True(api.Configure(debug: false));
         }
     }
 }
