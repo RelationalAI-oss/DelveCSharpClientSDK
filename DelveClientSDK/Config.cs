@@ -10,18 +10,18 @@ namespace Com.RelationalAI
     {
         private static FileIniDataParser parser = new FileIniDataParser();
         /*
-            dotRaiConfigPath() -> String
+            DotRaiConfigPath() -> String
 
         Returns the path of the config file.
 
         # Returns
         - `String`
         */
-        public static string dotRaiConfigPath()
+        public static string DotRaiConfigPath()
         {
-            return Path.Combine(dotRaiDir(), "config");
+            return Path.Combine(DotRaiDir(), "config");
         }
-        public static string dotRaiDir()
+        public static string DotRaiDir()
         {
             var envHome = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "HOMEPATH" : "HOME";
             var home = Environment.GetEnvironmentVariable(envHome);
@@ -30,7 +30,7 @@ namespace Com.RelationalAI
 
 
         /*
-            loadDotRaiConfig(path::AbstractString=dotRaiConfigPath()) -> IniData
+            LoadDotRaiConfig(path::AbstractString=dotRaiConfigPath()) -> IniData
 
         Returns the contents of the rAI .ini config file. Currently, this file is assumed to be
         stored at `~/.rai/config`. If no file is found, a `SystemError` is thrown.
@@ -64,23 +64,23 @@ namespace Com.RelationalAI
         # Throws
         - `SystemError`: If the `path` doesn't exist
         */
-        public static IniData loadDotRaiConfig()
+        public static IniData LoadDotRaiConfig()
         {
-            return loadDotRaiConfig(dotRaiConfigPath());
+            return LoadDotRaiConfig(DotRaiConfigPath());
         }
-        public static IniData loadDotRaiConfig(string path=null)
+        public static IniData LoadDotRaiConfig(string path=null)
         {
-            if( path == null ) path = dotRaiConfigPath();
+            if( path == null ) path = DotRaiConfigPath();
             return parser.ReadFile(path);
         }
 
-        public static void storeDotRaiConfig(IniData ini, string path=null)
+        public static void StoreDotRaiConfig(IniData ini, string path=null)
         {
-            if( path == null ) path = dotRaiConfigPath();
+            if( path == null ) path = DotRaiConfigPath();
             parser.WriteFile(path, ini);
         }
 
-        public static string getIniValue(
+        public static string GetIniValue(
             IniData ini,
             string profile,
             string key,
@@ -92,7 +92,7 @@ namespace Com.RelationalAI
         }
 
         /*
-            raiGetInfra(IniData ini, string profile="default") -> string
+            RaiGetInfra(IniData ini, string profile="default") -> string
 
         Returns the cloud provider used by the rAI service from the config file, associated with
         the `[profile]`.
@@ -107,14 +107,14 @@ namespace Com.RelationalAI
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static string raiGetInfra(IniData ini, string profile="default")
+        public static string RaiGetInfra(IniData ini, string profile="default")
         {
-            return getIniValue(ini, profile, "infra", defaultValue:"AWS");
+            return GetIniValue(ini, profile, "infra", defaultValue:"AWS");
         }
 
 
         /*
-        raiGetRegion(IniData ini, string profile="default") -> string
+        RaiGetRegion(IniData ini, string profile="default") -> string
 
         Returns the region of the rAI service from the config file, associated with the
         `[profile]`.
@@ -129,14 +129,14 @@ namespace Com.RelationalAI
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static string  raiGetRegion(IniData ini, string profile="default")
+        public static string  RaiGetRegion(IniData ini, string profile="default")
         {
-            return getIniValue(ini, profile, "region", defaultValue:"us-east");
+            return GetIniValue(ini, profile, "region", defaultValue:"us-east");
         }
 
 
         /*
-            raiGetHost(IniData ini, string profile="default") -> String
+            RaiGetHost(IniData ini, string profile="default") -> String
 
         Returns the hostname of the rAI service from the config file, associated with the
         `[profile]`.
@@ -151,16 +151,14 @@ namespace Com.RelationalAI
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static string raiGetHost(IniData ini, string profile="default")
+        public static string RaiGetHost(IniData ini, string profile="default")
         {
-            string host = getIniValue(ini, profile, "host", defaultValue:"aws.relationalai.com");
-
-            return host;
+            return GetIniValue(ini, profile, "host", defaultValue:"aws.relationalai.com");
         }
 
 
         /*
-            raiGetPort(IniData ini, string profile="default") -> int
+            RaiGetPort(IniData ini, string profile="default") -> int
 
         Returns the port of the rAI service from the config file, associated with the `[profile]`.
 
@@ -174,15 +172,13 @@ namespace Com.RelationalAI
         # Throws
         - `KeyError`: If the `profile` doesn't exist
         */
-        public static int raiGetPort(IniData ini, string profile="default")
+        public static int RaiGetPort(IniData ini, string profile="default")
         {
-            int port = int.Parse(getIniValue(ini, profile, "port", defaultValue:"443"));
-
-            return port;
+            return int.Parse(GetIniValue(ini, profile, "port", defaultValue:"443"));
         }
 
         /*
-            raiSetInfra(
+            RaiSetInfra(
                 IniData ini,
                 string infra,
                 string profile="default"
@@ -198,17 +194,18 @@ namespace Com.RelationalAI
         # Returns
         - `void`
         */
-        public static void raiSetInfra(
+        public static void RaiSetInfra(
             IniData ini,
             string infra,
             string profile="default"
         )
         {
             ini[profile]["infra"] = infra;
+            return;
         }
 
         /*
-        raiSetRegion(
+        RaiSetRegion(
                 IniData ini,
                 string region,
                 string profile="default"
@@ -224,19 +221,18 @@ namespace Com.RelationalAI
         # Returns
         - `void`
         */
-        public static void raiSetRegion(
+        public static void RaiSetRegion(
             IniData ini,
             string region,
             string profile="default"
         )
         {
             ini[profile]["region"] = region;
-
             return;
         }
 
         /*
-            raiSetAccessKey(
+            RaiSetAccessKey(
                 IniData ini,
                 string accessKey,
                 string profile="default"
@@ -252,17 +248,18 @@ namespace Com.RelationalAI
         # Returns
         - `void`
         */
-        public static void raiSetAccessKey(
+        public static void RaiSetAccessKey(
             IniData ini,
             string accessKey,
             string profile="default"
         )
         {
             ini[profile]["access_key"] = accessKey;
+            return;
         }
 
         /*
-            raiSetPrivateKeyFilename(
+            RaiSetPrivateKeyFilename(
                 IniData ini,
                 string privateKeyFilename,
                 string profile="default"
@@ -278,7 +275,7 @@ namespace Com.RelationalAI
         # Returns
         - `void`
         */
-        public static void raiSetPrivateKeyFilename(
+        public static void RaiSetPrivateKeyFilename(
             IniData ini,
             string privateKeyFilename,
             string profile="default"

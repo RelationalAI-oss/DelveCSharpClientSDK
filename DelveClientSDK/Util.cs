@@ -1,11 +1,104 @@
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
 namespace Com.RelationalAI
 {
+    public class MultiSetComparer<T> : IEqualityComparer<IEnumerable<T>>
+    {
+        private readonly IEqualityComparer<T> m_comparer;
+        public MultiSetComparer(IEqualityComparer<T> comparer = null)
+        {
+            m_comparer = comparer ?? EqualityComparer<T>.Default;
+        }
+
+        public bool Equals(IEnumerable<T> first, IEnumerable<T> second)
+        {
+            if (first == null)
+                return second == null;
+
+            if (second == null)
+                return false;
+
+            if (ReferenceEquals(first, second))
+                return true;
+
+            if (first is ICollection<T> firstCollection && second is ICollection<T> secondCollection)
+            {
+                if (firstCollection.Count != secondCollection.Count)
+                    return false;
+
+                if (firstCollection.Count == 0)
+                    return true;
+            }
+
+            return !HaveMismatchedElement(first, second);
+        }
+
+        private bool HaveMismatchedElement(IEnumerable<T> first, IEnumerable<T> second)
+        {
+            int firstNullCount;
+            int secondNullCount;
+
+            var firstElementCounts = GetElementCounts(first, out firstNullCount);
+            var secondElementCounts = GetElementCounts(second, out secondNullCount);
+
+            if (firstNullCount != secondNullCount || firstElementCounts.Count != secondElementCounts.Count)
+                return true;
+
+            foreach (var kvp in firstElementCounts)
+            {
+                var firstElementCount = kvp.Value;
+                int secondElementCount;
+                secondElementCounts.TryGetValue(kvp.Key, out secondElementCount);
+
+                if (firstElementCount != secondElementCount)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private Dictionary<T, int> GetElementCounts(IEnumerable<T> enumerable, out int nullCount)
+        {
+            var dictionary = new Dictionary<T, int>(m_comparer);
+            nullCount = 0;
+
+            foreach (T element in enumerable)
+            {
+                if (element == null)
+                {
+                    nullCount++;
+                }
+                else
+                {
+                    int num;
+                    dictionary.TryGetValue(element, out num);
+                    num++;
+                    dictionary[element] = num;
+                }
+            }
+
+            return dictionary;
+        }
+
+        public int GetHashCode(IEnumerable<T> enumerable)
+        {
+            if (enumerable == null) throw new ArgumentNullException(nameof(enumerable));
+
+            int hash = 17;
+
+            foreach (T val in enumerable.OrderBy(x => x))
+                hash = hash * 23 + (val?.GetHashCode() ?? 42);
+
+            return hash;
+        }
+    }
+
     public static class EnumString
     {
         public static string GetDescription<T>(this T enumerationValue)
@@ -59,38 +152,10 @@ namespace Com.RelationalAI
             }
             return new string(c, 0, c.Length);
         }
-        public static byte[] FromHex(this string str)
-        {
-            return FromHex(str, 0, 0, 0);
-        }
-        public static byte[] FromHex(this string str, int offset, int step)
-        {
-            return FromHex(str, offset, step, 0);
-        }
-        public static byte[] FromHex(this string str, int offset, int step, int tail)
-        {
-            byte[] b = new byte[(str.Length - offset - tail + step) / (2 + step)];
-            byte c1, c2;
-            int l = str.Length - tail;
-            int s = step + 1;
-            for (int y = 0, x = offset; x < l; ++y, x += s)
-            {
-                c1 = (byte)str[x];
-                if (c1 > 0x60) c1 -= 0x57;
-                else if (c1 > 0x40) c1 -= 0x37;
-                else c1 -= 0x30;
-                c2 = (byte)str[++x];
-                if (c2 > 0x60) c2 -= 0x57;
-                else if (c2 > 0x40) c2 -= 0x37;
-                else c2 -= 0x30;
-                b[y] = (byte)((c1 << 4) + c2);
-            }
-            return b;
-        }
     }
 
     public static class ExceptionUtils {
-        public static string flattenException(Exception exception)
+        public static string FlattenException(Exception exception)
         {
             var stringBuilder = new StringBuilder();
 

@@ -18,9 +18,9 @@ namespace Com.RelationalAI
             request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            
+
             RAIRequest raiReq = new RAIRequest(request, conn);
-            raiReq.sign();
+            raiReq.Sign();
         }
     }
 

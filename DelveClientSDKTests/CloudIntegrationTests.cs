@@ -4,19 +4,24 @@ namespace Com.RelationalAI
 {
     public class IntegrationTests
     {
-        string dbname;
-        Connection conn;
-        private DelveClient api;
 
         [SetUp]
         public void Setup()
         {
+        }
+
+        public static void createCloudConnection(out DelveClient api) {
+            string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
+
+            createCloudConnection(dbname, out api);
+        }
+
+        public static void createCloudConnection(string dbname, out DelveClient api) {
             string profile = "default";
-            dbname = "testclientdb";
             string computeName = dbname;
-            conn = new CloudConnection(
+            var conn = new CloudConnection(
                 dbname,
-                creds: RAICredentials.fromFile(profile: profile),
+                creds: RAICredentials.FromFile(profile: profile),
                 scheme: "https",
                 host: string.Format("azure-ssh.relationalai.com", profile),
                 port: 443,
@@ -31,7 +36,7 @@ namespace Com.RelationalAI
         [Test]
         public void Test1()
         {
-            IntegrationTestsCommons.Test1(api, conn);
+            IntegrationTestsCommons.RunAllTests(createCloudConnection);
         }
     }
 }

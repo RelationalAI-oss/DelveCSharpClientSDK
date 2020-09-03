@@ -19,36 +19,36 @@ namespace Com.RelationalAI
             string host = DEFAULT_HOST,
             int port = DEFAULT_PORT)
         {
-            this.dbname = dbname;
-            this.defaultOpenMode = defaultOpenMode;
-            this.scheme = scheme;
-            this.host = host;
-            this.port = port;
+            this.DbName = dbname;
+            this.DefaultOpenMode = defaultOpenMode;
+            this.Scheme = scheme;
+            this.Host = host;
+            this.Port = port;
         }
 
-        public string dbname { get; }
-        public TransactionMode defaultOpenMode { get; }
-        public string scheme { get; }
-        public string host { get; }
-        public int port { get; }
-        public virtual RAIInfra infra { get{ return DEFAULT_INFRA; } }
-        public virtual RAIRegion region { get{ return DEFAULT_REGION; } }
-        public virtual RAICredentials creds { get{ return null; } }
-        public virtual bool verifySSL { get{ return DEFAULT_VERIFY_SSL; } }
-        public virtual string computeName { get{ return null; } }
+        public string DbName { get; }
+        public TransactionMode DefaultOpenMode { get; }
+        public string Scheme { get; }
+        public string Host { get; }
+        public int Port { get; }
+        public virtual RAIInfra Infra { get{ return DEFAULT_INFRA; } }
+        public virtual RAIRegion Region { get{ return DEFAULT_REGION; } }
+        public virtual RAICredentials Creds { get{ return null; } }
+        public virtual bool VerifySSL { get{ return DEFAULT_VERIFY_SSL; } }
+        public virtual string ComputeName { get{ return null; } }
 
-        public Uri baseUrl {
-            get { return new UriBuilder(this.scheme, this.host, this.port).Uri; }
+        public Uri BaseUrl {
+            get { return new UriBuilder(this.Scheme, this.Host, this.Port).Uri; }
         }
     }
 
     public class CloudConnection : Connection
     {
-        public override RAIInfra infra { get; }
-        public override RAIRegion region { get; }
-        public override RAICredentials creds { get; }
-        public override bool verifySSL { get; }
-        public override string computeName { get; }
+        public override RAIInfra Infra { get; }
+        public override RAIRegion Region { get; }
+        public override RAICredentials Creds { get; }
+        public override bool VerifySSL { get; }
+        public override string ComputeName { get; }
 
         public CloudConnection(
             string dbname,
@@ -63,11 +63,11 @@ namespace Com.RelationalAI
             string computeName = null
         ) : base(dbname, defaultOpenMode, scheme, host, port)
         {
-            this.infra = infra;
-            this.region = region;
-            this.creds = creds;
-            this.verifySSL = verifySSL;
-            this.computeName = computeName;
+            this.Infra = infra;
+            this.Region = region;
+            this.Creds = creds;
+            this.VerifySSL = verifySSL;
+            this.ComputeName = computeName;
         }
         public CloudConnection(
             Connection conn,
@@ -76,7 +76,7 @@ namespace Com.RelationalAI
             RAICredentials creds = null,
             bool verifySSL = DEFAULT_VERIFY_SSL,
             string computeName = null
-        ) : this(conn.dbname, conn.defaultOpenMode, conn.scheme, conn.host, conn.port, infra, region, creds, verifySSL, computeName)
+        ) : this(conn.DbName, conn.DefaultOpenMode, conn.Scheme, conn.Host, conn.Port, infra, region, creds, verifySSL, computeName)
         {
         }
     }

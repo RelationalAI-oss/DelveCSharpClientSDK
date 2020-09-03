@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
@@ -15,7 +17,7 @@ namespace Com.RelationalAI
     using AnyValue = System.Object;
     public partial class GeneratedDelveClient
     {
-        public const string JSON_CONTENT_TYPE = "application/json; charset=utf-8";
+        public const string JSON_CONTENT_TYPE = "application/json";
         public const string CSV_CONTENT_TYPE = "text/csv";
 
         public Connection conn {get; set;}
@@ -25,13 +27,13 @@ namespace Com.RelationalAI
         {
             var uriBuilder = new UriBuilder(request.RequestUri);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["dbname"] = conn.dbname;
+            query["dbname"] = conn.DbName;
             query["open_mode"] = body.Mode.ToString();
-            query["readonly"] = boolStr(body.Readonly);
-            query["region"] = EnumString.GetDescription(conn.region);
-            query["empty"] = boolStr(body.Actions == null || body.Actions.Count == 0);
-            if(conn.computeName != null) {
-                query["compute_name"] = conn.computeName;
+            query["readonly"] = BoolStr(body.Readonly);
+            query["region"] = EnumString.GetDescription(conn.Region);
+            query["empty"] = BoolStr(body.Actions == null || body.Actions.Count == 0);
+            if(conn.ComputeName != null) {
+                query["compute_name"] = conn.ComputeName;
             }
             uriBuilder.Query = query.ToString();
             request.RequestUri = uriBuilder.Uri;
@@ -40,15 +42,159 @@ namespace Com.RelationalAI
             request.Headers.Clear();
             request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(JSON_CONTENT_TYPE);
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
-            raiRequest.sign(debugLevel: debugLevel);
+            raiRequest.Sign(debugLevel: debugLevel);
         }
 
-        private string boolStr(bool val) {
+        private string BoolStr(bool val) {
             return val ? "true" : "false";
+        }
+    }
+
+    partial class RelKey
+    {
+        private static MultiSetComparer<string> comp = new MultiSetComparer<string>();
+
+        public RelKey()
+        {
+        }
+
+        public RelKey(string name, List<string> keyTypes = null, List<string> valueTypes = null)
+        {
+            this.Name = name;
+            this.Keys = keyTypes == null ? new List<string>() : keyTypes;
+            this.Values = valueTypes == null ? new List<string>() : valueTypes;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is RelKey key &&
+                   Name.Equals(key.Name) &&
+                   comp.Equals(Keys, key.Keys) &&
+                   comp.Equals(Values, key.Values);
+        }
+
+        public override int GetHashCode()
+        {
+            return System.HashCode.Combine(Name, Keys, Values);
+        }
+    }
+
+    partial class Relation
+    {
+        public Relation()
+        {
+        }
+
+        public Relation(RelKey relKey, AnyValue[][] columns) : this(relKey, ToCollection(columns))
+        {
+        }
+
+        public Relation(RelKey relKey, ICollection<ICollection<AnyValue>> columns) : this()
+        {
+            this.Rel_key = relKey;
+            this.Columns = columns;
+        }
+
+        public HashSet<HashSet<AnyValue>> ColumnsToHashSet(ICollection<ICollection<AnyValue>> columns)
+        {
+            return columns.Select(col => col.ToHashSet()).ToHashSet();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+
+            if ( obj is Relation relation ) {
+                return EqualityComparer<RelKey>.Default.Equals(Rel_key, relation.Rel_key) &&
+                       EqualsToCollection(relation.Columns);
+            } else if ( obj.GetType().IsArray ) {
+                AnyValue[] arr = (AnyValue[]) obj;
+                if( arr.Length == 0 ) {
+                    return Columns.Count == 0 || Columns.First().Count == 0;
+                } else if ( arr[0].GetType().IsArray ) {
+                    return EqualsToArr((dynamic) arr);
+                }
+            }
+            return false;
+        }
+
+        public static ICollection<ICollection<AnyValue>> ToCollection(AnyValue[][] arr)
+        {
+            return arr.Select(col => (ICollection<AnyValue>)(col.Cast<AnyValue>().ToHashSet())).ToHashSet();
+        }
+
+        private bool EqualsToArr(AnyValue[][] arr) {
+            return EqualsToCollection(ToCollection(arr));
+        }
+
+        private bool EqualsToCollection(ICollection<ICollection<AnyValue>> col) {
+            var x1 = ColumnsToHashSet(Columns);
+            var x2 = ColumnsToHashSet(col);
+            return x1.All(elem1 => x2.Any(elem2 => elem1.SetEquals(elem2))) && x2.All(elem2 => x1.Any(elem1 => elem2.SetEquals(elem1)));
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Rel_key, ColumnsToHashSet(Columns));
+        }
+    }
+
+    public partial class Source
+    {
+        public Source()
+        {
+        }
+        public Source(string path) : this("", path, "")
+        {
+        }
+        public Source(string name, string value) : this(name, name, value)
+        {
+        }
+        public Source(string name, string path, string value) : this()
+        {
+            Name = name;
+            Path = path;
+            Value = value;
+        }
+    }
+
+    public partial class CSVFileSchema : FileSchema
+    {
+        public CSVFileSchema(params string[] types)
+        {
+            this.Types = types.ToList();
+        }
+    }
+
+    public partial class CSVFileSyntax : FileSyntax
+    {
+        public CSVFileSyntax(
+            ICollection<string> header = null,
+            int headerRow = -1,
+            bool normalizeNames = false,
+            int dataRow = -1,
+            ICollection<string> missingStrings = null,
+            string delim = ",",
+            bool ignoreRepeated = false,
+            string quoteChar = "\"",
+            string escapeChar = "\\"
+        )
+        {
+            if( missingStrings == null ) missingStrings = new List<string>();
+
+            this.Header = header;
+            this.Header_row = headerRow;
+            this.Normalizenames = normalizeNames;
+            this.Datarow = dataRow;
+            this.Missingstrings = missingStrings;
+            this.Delim = delim;
+            this.Ignorerepeated = ignoreRepeated;
+            this.Quotechar = quoteChar;
+            this.Escapechar = escapeChar;
         }
     }
 
@@ -58,15 +204,19 @@ namespace Com.RelationalAI
             if( verifySSL ) {
                 return new HttpClient();
             } else {
+                // If we don't want to verify SSL certificate (from the Server), we need to
+                // specifically attach a `HttpClientHandler` to `HttpClient` for accepting
+                // any certificate from the server. This is useful for testing purposes, but
+                // should not be used in production.
                 var handler = new HttpClientHandler()
                 {
                     SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
-                    ServerCertificateCustomValidationCallback = ValidateServerCertificate
+                    ServerCertificateCustomValidationCallback = AcceptAllServerCertificate
                 };
                 return new HttpClient(handler);
             }
         }
-        public static bool ValidateServerCertificate(
+        public static bool AcceptAllServerCertificate(
             object sender,
             X509Certificate certificate,
             X509Chain chain,
@@ -82,13 +232,21 @@ namespace Com.RelationalAI
             }
         }
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
-        private static HttpClient httpClient = createHttpClient(httpClientVerifySSL);
+        private static HttpClient httpClient = CreateHttpClient(httpClientVerifySSL);
 
-        private static HttpClient getHttpClient(Uri url, bool verifySSL)
+        public string DbName { get { return conn.DbName; } }
+
+        private static HttpClient GetHttpClient(Uri url, bool verifySSL)
         {
-            if( url.Scheme == "https" && httpClientVerifySSL != verifySSL) {
+            if( "https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL) {
+                // we keep a single static HttpClient instance and keep reusing it instead
+                // of creating an instance for each request. This is a proven best practice.
+                // However, if we are going to handle a `https` request and suddenly
+                // decide a value for `verifySSL` other than its default value (or the value
+                // used in the previous requests), then this section disposes the existing
+                // HttpClient instance and creates a new one.
                 httpClient.Dispose();
-                httpClient = createHttpClient(verifySSL);
+                httpClient = CreateHttpClient(verifySSL);
                 httpClientVerifySSL = verifySSL;
             }
             return httpClient;
@@ -105,16 +263,16 @@ namespace Com.RelationalAI
         public DelveClient(string url, bool verifySSL = true) : this(new Uri(url), verifySSL)
         {
         }
-        public DelveClient(Uri url, bool verifySSL = true) : base(getHttpClient(url, verifySSL))
+        public DelveClient(Uri url, bool verifySSL = true) : base(GetHttpClient(url, verifySSL))
         {
             this.BaseUrl = url.ToString();
         }
-        public DelveClient(Connection conn) : this(conn.baseUrl, conn.verifySSL)
+        public DelveClient(Connection conn) : this(conn.BaseUrl, conn.VerifySSL)
         {
             this.conn = conn;
         }
 
-        public TransactionResult runTransaction(Transaction xact)
+        public TransactionResult RunTransaction(Transaction xact)
         {
             if(this.debugLevel > 0) {
                 Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
@@ -128,17 +286,22 @@ namespace Com.RelationalAI
             return response;
         }
 
-        public ActionResult runAction(Connection conn, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
-        {
-            return runAction(conn, "single", action, isReadOnly, mode);
+        public ActionResult RunAction(Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN) {
+            return RunAction("single", action, out success, isReadOnly, mode);
         }
-        public ActionResult runAction(Connection conn, String name, Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
+
+        public ActionResult RunAction(Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
+        {
+            bool success;
+            return RunAction("single", action, out success, isReadOnly, mode);
+        }
+        public ActionResult RunAction(String name, Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
             this.conn = conn;
 
             var xact = new Transaction();
             xact.Mode = mode;
-            xact.Dbname = conn.dbname;
+            xact.Dbname = conn.DbName;
 
             var labeledAction = new LabeledAction();
             labeledAction.Name = name;
@@ -147,104 +310,120 @@ namespace Com.RelationalAI
             xact.Actions.Add(labeledAction);
             xact.Readonly = isReadOnly;
 
-            TransactionResult response = runTransaction(xact);
+            TransactionResult response = RunTransaction(xact);
 
-
-            if (is_success(response))
+            success = IsSuccess(response);
+            foreach (LabeledActionResult act in response.Actions)
             {
-                foreach (LabeledActionResult act in response.Actions)
+                if (name.Equals(act.Name))
                 {
-                    if (name.Equals(act.Name))
-                    {
-                        ActionResult res = (ActionResult)act.Result;
-                        return res;
-                    }
+                    ActionResult res = (ActionResult)act.Result;
+                    return res;
                 }
             }
             return null;
         }
-        private bool is_success(TransactionResult response) {
+        private bool IsSuccess(TransactionResult response) {
             return !response.Aborted && response.Problems.Count == 0;
         }
 
-        public bool branchdatabase(Connection conn, string sourceDbname)
+        public bool BranchDatabase(string sourceDbname)
         {
             var xact = new Transaction();
             xact.Mode = TransactionMode.BRANCH;
-            xact.Dbname = conn.dbname;
+            xact.Dbname = conn.DbName;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Source_dbname = sourceDbname;
             xact.Readonly = false;
-            TransactionResult response = runTransaction(xact);
+            TransactionResult response = RunTransaction(xact);
 
-            return is_success(response);
+            return IsSuccess(response);
         }
 
-        public bool createDatabase(Connection conn, bool overwrite)
+        public bool CreateDatabase(bool overwrite = false)
         {
             this.conn = conn;
 
             var xact = new Transaction();
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
-            xact.Dbname = conn.dbname;
+            xact.Dbname = conn.DbName;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Readonly = false;
 
             TransactionResult response = null;
             try {
-                response = runTransaction(xact);
+                response = RunTransaction(xact);
             } catch (Exception e) {
-                string fullError = ExceptionUtils.flattenException(e);
-                Console.WriteLine("Error while creating the database (" + conn.dbname + "): " + fullError);
+                string fullError = ExceptionUtils.FlattenException(e);
+                Console.WriteLine("Error while creating the database (" + conn.DbName + "): " + fullError);
                 return false;
             }
 
-            return is_success(response);
+            return IsSuccess(response);
         }
 
-        public InstallActionResult installSource(Connection conn, String name, String srcStr)
+        public bool InstallSource(String name, String srcStr)
         {
-            return installSource(conn, name, name, srcStr);
+            return InstallSource(name, name, srcStr);
         }
-        public InstallActionResult installSource(Connection conn, String name, String path, String srcStr)
+        public bool InstallSource(String name, String path, String srcStr)
         {
             Source src = new Source();
             src.Name = name;
             src.Path = path;
             src.Value = srcStr;
 
-            return installSource(conn, src);
+            return InstallSource(src);
         }
-        public InstallActionResult installSource(Connection conn, Source src)
+        public bool InstallSource(Source src)
         {
-            return installSource(conn, new List<Source>() { src });
+            return InstallSource(new List<Source>() { src });
         }
 
-        public InstallActionResult installSource(Connection conn, ICollection<Source> srcList)
+        public bool InstallSource(ICollection<Source> srcList)
         {
             var action = new InstallAction();
+            foreach(Source src in srcList) {
+                _readFileFromPath(src);
+            }
             action.Sources = srcList;
 
-            return (InstallActionResult)runAction(conn, action);
+            return RunAction(action) != null;
         }
 
-        public ModifyWorkspaceActionResult deleteSource(Connection conn, ICollection<string> srcNameList)
+        private void _readFileFromPath(Source src)
+        {
+            if(!_isEmpty(src.Path)) {
+                if(_isEmpty(src.Value)) {
+                    if(!File.Exists(src.Path)) {
+                        src.Value = File.ReadAllText(src.Path);
+                    }
+                }
+                if(_isEmpty(src.Name)) {
+                    src.Name = Path.GetFileNameWithoutExtension(src.Path);
+                }
+            }
+        }
+
+        public bool DeleteSource(ICollection<string> srcNameList)
         {
             var action = new ModifyWorkspaceAction();
             action.Delete_source = srcNameList;
 
-            return (ModifyWorkspaceActionResult)runAction(conn, action);
+            bool success;
+            var actionRes = (ModifyWorkspaceActionResult)RunAction(action, out success);
+            return success && actionRes != null;
         }
 
-        public ModifyWorkspaceActionResult deleteSource(Connection conn, string srcName)
+        public bool DeleteSource(string srcName)
         {
-            return deleteSource(conn, new List<string>() { srcName });
+            return DeleteSource(new List<string>() { srcName });
         }
 
-        public IDictionary<string, Source> list_source(Connection conn)
+        public IDictionary<string, Source> listSource()
         {
             var action = new ListSourceAction();
-            var actionRes = (ListSourceActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (ListSourceActionResult)RunAction(action, isReadOnly: true);
 
             var resultDict = new Dictionary<string, Source>();
             foreach(Source src in actionRes.Sources) {
@@ -254,8 +433,7 @@ namespace Com.RelationalAI
             return resultDict;
         }
 
-        public QueryActionResult query(
-            Connection conn,
+        public IDictionary<RelKey, Relation> Query(
             string output,
             string name = "query",
             string path = null,
@@ -266,11 +444,10 @@ namespace Com.RelationalAI
             TransactionMode? mode = null
         )
         {
-            return query(conn, name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
+            return Query(name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
         }
 
-        public QueryActionResult query(
-            Connection conn,
+        public IDictionary<RelKey, Relation> Query(
             string name = "query",
             string path = null,
             string srcStr = "",
@@ -288,11 +465,17 @@ namespace Com.RelationalAI
             src.Path = path;
             src.Value = srcStr;
 
-            return query(conn, src, inputs, outputs, persist, is_readonly, mode);
+            return _filterDictionary(Query(src, inputs, outputs, persist, is_readonly, mode), outputs);
         }
 
-        public QueryActionResult query(
-            Connection conn,
+        private IDictionary<RelKey, Relation> _filterDictionary(IDictionary<RelKey, Relation> dict, ICollection<string> outputs)
+        {
+            if(dict.All(kvp => outputs.Contains(kvp.Key.Name))) return dict;
+            return dict.Where(kvp => outputs.Contains(kvp.Key.Name))
+                       .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
+        public IDictionary<RelKey, Relation> Query(
             Source src = null,
             ICollection<Relation> inputs = null,
             ICollection<string> outputs = null,
@@ -318,35 +501,55 @@ namespace Com.RelationalAI
             action.Outputs = outputs;
             action.Persist = persist;
 
-            return (QueryActionResult)runAction(
-                conn,
+            var actionRes = (QueryActionResult)RunAction(
                 action,
                 isReadOnly.GetValueOrDefault(persist.Count == 0),
-                mode.GetValueOrDefault(conn.defaultOpenMode)
+                mode.GetValueOrDefault(conn.DefaultOpenMode)
             );
+
+            return actionRes == null ? null : _convertToDictionary(actionRes.Output);
         }
 
-        public UpdateActionResult updateEDB(
-            Connection conn,
+        private IDictionary<RelKey, Relation> _convertToDictionary(ICollection<Relation> output)
+        {
+            var outDict = new Dictionary<RelKey, Relation>();
+            if(output != null) {
+                foreach(Relation rel in output) {
+                    outDict[rel.Rel_key] = rel;
+                }
+            }
+            return outDict;
+        }
+
+        private static ICollection<Pair_AnyValue_AnyValue_> _convertCollection(ICollection<Tuple<AnyValue, AnyValue>> data)
+        {
+            var res = new List<Pair_AnyValue_AnyValue_>();
+            foreach(var tpl in data) {
+                var pair = new Pair_AnyValue_AnyValue_();
+                pair.First = tpl.Item1;
+                pair.Second = tpl.Item2;
+                res.Add(pair);
+            }
+            return res;
+        }
+
+        public void UpdateEdb(
             RelKey rel,
-            ICollection<Pair_AnyValue_AnyValue_> updates = null,
-            ICollection<Pair_AnyValue_AnyValue_> delta = null
+            ICollection<Tuple<AnyValue, AnyValue>> updates = null,
+            ICollection<Tuple<AnyValue, AnyValue>> delta = null
         )
         {
-            if(updates == null) updates = new List<Pair_AnyValue_AnyValue_>();
-            if(delta == null) delta = new List<Pair_AnyValue_AnyValue_>();
-
             var action = new UpdateAction();
             action.Rel = rel;
-            action.Updates = updates;
-            action.Delta = delta;
+            if(updates != null) action.Updates = _convertCollection(updates);
+            if(delta != null)action.Delta = _convertCollection(delta);
 
-            return (UpdateActionResult)runAction(conn, action, isReadOnly: true);
+            RunAction(action, isReadOnly: false);
         }
 
         private void _handleNullFieldsForLoadData(LoadData loadData)
         {
-            if(!isEmpty(loadData.Path) && !isEmpty(loadData.Data)) {
+            if(!_isEmpty(loadData.Path) && !_isEmpty(loadData.Data)) {
                 var message = string.Format(
                     "Either `Path` or `Data` should be specified for `LoadData`." +
                     "You have provided both: `Path`={0} and `Data`={1}",
@@ -356,147 +559,123 @@ namespace Com.RelationalAI
                 throw new ArgumentException(message);
             }
 
-            if(isEmpty(loadData.Path) && isEmpty(loadData.Data)) {
+            if(_isEmpty(loadData.Path) && _isEmpty(loadData.Data)) {
                 var message = "Either `Path` or `Data` is required.";
                 throw new ArgumentException(message);
             }
 
-            if(isEmpty(loadData.Content_type)) {
+            if(_isEmpty(loadData.Content_type)) {
                 throw new ArgumentException("`ContentType` is required.");
             }
 
-            if(!loadData.Content_type.Equals(JSON_CONTENT_TYPE) && !loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
+            if(!loadData.Content_type.StartsWith(JSON_CONTENT_TYPE) && !loadData.Content_type.StartsWith(CSV_CONTENT_TYPE)) {
                 throw new ArgumentException(string.Format("`ContentType`={0} is not supported.", loadData.Content_type));
             }
-
-            // if(loadData.Key == null) loadData.Key = new List<string>();
-
-            // if(loadData.File_syntax == null) {
-            //     if(loadData.Content_type.Equals(JSON_CONTENT_TYPE)) {
-            //         loadData.File_syntax = new JSONFileSyntax();
-            //     } else if(loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
-            //         loadData.File_syntax = new CSVFileSyntax();
-            //     } else {
-            //         throw new InvalidOperationException();
-            //     }
-            // }
-
-            // if(loadData.File_schema == null) {
-            //     if(loadData.Content_type.Equals(JSON_CONTENT_TYPE)) {
-            //         loadData.File_schema = new JSONFileSchema();
-            //     } else if(loadData.Content_type.Equals(CSV_CONTENT_TYPE)) {
-            //         loadData.File_schema = new CSVFileSchema();
-            //     } else {
-            //         throw new InvalidOperationException();
-            //     }
-            // }
         }
-        private bool isEmpty(string str)
+        private bool _isEmpty(string str)
         {
             return str == null || str.Length == 0;
         }
         private void _readFileFromPath(LoadData loadData)
         {
-            if(!isEmpty(loadData.Path) && isEmpty(loadData.Data)) {
-                if(!File.Exists(loadData.Path)) {
-                    throw new FileLoadException(string.Format("Could not load file from {0}", loadData.Path));
+            if(!_isEmpty(loadData.Path) && _isEmpty(loadData.Data)) {
+                if(File.Exists(loadData.Path)) {
+                    loadData.Data = File.ReadAllText(loadData.Path);
                 }
-                loadData.Data = File.ReadAllText(loadData.Path);
-                loadData.Path = null;
             }
         }
 
-        public LoadData jsonString(
+        public LoadData JsonString(
             string data,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Data = data;
             loadData.Content_type = JSON_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
 
-        public LoadData jsonFile(
+        public LoadData JsonFile(
             string filePath,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Path = filePath;
             loadData.Content_type = JSON_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
 
-        public LoadData csvString(
+        public LoadData CsvString(
             string data,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Data = data;
             loadData.Content_type = CSV_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
 
-        public LoadData csvFile(
+        public LoadData CsvFile(
             string filePath,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
             var loadData = new LoadData();
             loadData.Path = filePath;
             loadData.Content_type = CSV_CONTENT_TYPE;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
             return loadData;
         }
 
-        public LoadDataActionResult loadEDB(
-            Connection conn,
+        public bool LoadEdb(
             string rel,
             string contentType,
             string data = null,
             string path = null,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
+            if(key == null) key = new int[] {};
+
             var loadData = new LoadData();
             loadData.Content_type = contentType;
             loadData.Data = data;
             loadData.Path = path;
             loadData.Key = key;
-            loadData.File_syntax = fileSyntax;
-            loadData.File_schema = fileSchema;
+            loadData.File_syntax = syntax;
+            loadData.File_schema = schema;
 
-            return loadEDB(conn, rel, loadData);
+            return LoadEdb(rel, loadData);
         }
-        public LoadDataActionResult loadEDB(
-            Connection conn,
+        public bool LoadEdb(
             string rel,
             LoadData value
         )
@@ -507,90 +686,142 @@ namespace Com.RelationalAI
             action.Rel = rel;
             action.Value = value;
 
-            return (LoadDataActionResult)runAction(conn, action, isReadOnly: true);
+            return RunAction(action, isReadOnly: false) != null;
         }
 
-        public LoadDataActionResult loadCSV(
-            Connection conn,
+        private static string _typeToString(Type tp)
+        {
+            var str = tp.ToString();
+            return tp.Name;
+        }
+
+        public bool LoadEdb(
+            string relName, AnyValue[][] columns
+        )
+        {
+            return LoadEdb(relName, Relation.ToCollection(columns));
+        }
+
+        public bool LoadEdb(
+            string relName, ICollection<ICollection<AnyValue>> columns
+        )
+        {
+            var rel = new Relation();
+            rel.Rel_key = new RelKey(relName);
+            if( columns != null && columns.Count > 0 && columns.First().Count > 0) {
+                Debug.Assert(columns.All(col => col.Count == columns.First().Count));
+                foreach(var col in columns) {
+                    rel.Rel_key.Keys.Add(_typeToString(col.First().GetType()));
+                }
+            }
+
+            rel.Columns = columns;
+            return LoadEdb(rel);
+        }
+
+        public bool loadEdb(
+            RelKey relKey, ICollection<ICollection<AnyValue>> columns
+        )
+        {
+            var rel = new Relation();
+            rel.Rel_key = relKey;
+            rel.Columns = columns;
+            return LoadEdb(rel);
+        }
+        public bool LoadEdb(
+            Relation value
+        )
+        {
+            return LoadEdb( new List<Relation>() { value } );
+        }
+        public bool LoadEdb(
+            ICollection<Relation> value
+        )
+        {
+            var action = new ImportAction();
+            action.Inputs = value;
+
+            return RunAction(action, isReadOnly: false) != null;
+        }
+
+        public bool LoadCSV(
             string rel,
             string data = null,
             string path = null,
             AnyValue key = null,
-            FileSyntax fileSyntax = null,
-            FileSchema fileSchema = null
+            FileSyntax syntax = null,
+            FileSchema schema = null
         )
         {
-            return loadEDB(conn, rel, CSV_CONTENT_TYPE, data, path, key, fileSyntax, fileSchema);
+            return LoadEdb(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema);
         }
 
-        public LoadDataActionResult loadJSON(
-            Connection conn,
+        public bool LoadJSON(
             string rel,
             string data = null,
             string path = null,
             AnyValue key = null
         )
         {
-            return loadEDB(conn, rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
+            return LoadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
         }
 
-        public ICollection<RelKey> listEdb(Connection conn)
+        public ICollection<RelKey> ListEdb()
         {
             var action = new ListEdbAction();
-            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (ListEdbActionResult)RunAction(action, isReadOnly: true);
             return actionRes.Rels;
         }
 
-        public ICollection<RelKey> listEdb(Connection conn, string relName)
+        public ICollection<RelKey> ListEdb(string relName)
         {
             var action = new ListEdbAction();
             action.Relname = relName;
-            var actionRes = (ListEdbActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (ListEdbActionResult)RunAction(action, isReadOnly: true);
             return actionRes.Rels;
         }
 
-        public ICollection<RelKey> deleteEdb(Connection conn, string relName)
+        public ICollection<RelKey> DeleteEdb(string relName)
         {
             var action = new ModifyWorkspaceAction();
             action.Delete_edb = relName;
-            var actionRes = (ModifyWorkspaceActionResult)runAction(conn, action);
+            var actionRes = (ModifyWorkspaceActionResult)RunAction(action);
             return actionRes.Delete_edb_result;
         }
 
-        public ModifyWorkspaceActionResult enableLibrary(Connection conn, string srcName)
+        public bool EnableLibrary(string srcName)
         {
             var action = new ModifyWorkspaceAction();
             action.Enable_library = srcName;
-            return (ModifyWorkspaceActionResult)runAction(conn, action);
+            return RunAction(action) != null;
         }
 
-        public CardinalityActionResult cardinality(Connection conn)
+        public ICollection<Relation> Cardinality()
         {
             var action = new CardinalityAction();
-            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+            return ((CardinalityActionResult)RunAction(action, isReadOnly: true)).Result;
         }
 
-        public CardinalityActionResult cardinality(Connection conn, string relName)
+        public ICollection<Relation> Cardinality(string relName)
         {
             var action = new CardinalityAction();
             action.Relname = relName;
-            return (CardinalityActionResult)runAction(conn, action, isReadOnly: true);
+            return ((CardinalityActionResult)RunAction(action, isReadOnly: true)).Result;
         }
 
-        public ICollection<AbstractProblem> collectProblems(Connection conn)
+        public ICollection<AbstractProblem> CollectProblems()
         {
             var action = new CollectProblemsAction();
-            var actionRes = (CollectProblemsActionResult)runAction(conn, action, isReadOnly: true);
+            var actionRes = (CollectProblemsActionResult)RunAction(action, isReadOnly: true);
             return actionRes.Problems;
         }
 
-        public SetOptionsActionResult configure(
-            Connection conn,
-            bool? debug,
-            bool? debugTrace,
-            bool? broken,
-            bool? silent,
-            bool? abortOnError
+        public bool Configure(
+            bool? debug = null,
+            bool? debugTrace = null,
+            bool? broken = null,
+            bool? silent = null,
+            bool? abortOnError = null
         )
         {
             var action = new SetOptionsAction();
@@ -599,7 +830,7 @@ namespace Com.RelationalAI
             action.Broken = broken;
             action.Silent = silent;
             action.Abort_on_error = abortOnError;
-            return (SetOptionsActionResult)runAction(conn, action, isReadOnly: true);
+            return RunAction(action, isReadOnly: false) != null;
         }
     }
 }
