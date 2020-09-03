@@ -24,7 +24,7 @@ namespace Com.RelationalAI
 
         public static void createCloudConnection(string dbname, out DelveClient api) {
             var conn = new CloudConnection(
-                new Connection(dbname),
+                new LocalConnection(dbname),
                 creds: new RAICredentials(
                     "e3536f8d-cbc6-4ed8-9de6-74cf4cb724a1",
                     "484aiIGKitw91qppUTR0m8ge4grU+hUp65/MZ4bO0MY="

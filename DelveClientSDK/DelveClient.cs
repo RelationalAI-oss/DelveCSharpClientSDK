@@ -62,11 +62,11 @@ namespace Com.RelationalAI
         {
         }
 
-        public RelKey(string name, List<string> keyTypes = null, List<string> valueTypes = null)
+        public RelKey(string name, List<string> keys = null, List<string> values = null)
         {
             this.Name = name;
-            this.Keys = keyTypes == null ? new List<string>() : keyTypes;
-            this.Values = valueTypes == null ? new List<string>() : valueTypes;
+            this.Keys = keys == null ? new List<string>() : keys;
+            this.Values = values == null ? new List<string>() : values;
         }
 
         public override bool Equals(object obj)
@@ -97,6 +97,14 @@ namespace Com.RelationalAI
         {
             this.Rel_key = relKey;
             this.Columns = columns;
+        }
+
+        public static AnyValue[][] ToRelData(params AnyValue[] vals) {
+            return new AnyValue[][] { vals };
+        }
+
+        public static AnyValue[][] ToRelData(params AnyValue[][] vals) {
+            return vals;
         }
 
         public HashSet<HashSet<AnyValue>> ColumnsToHashSet(ICollection<ICollection<AnyValue>> columns)
@@ -420,7 +428,7 @@ namespace Com.RelationalAI
             return DeleteSource(new List<string>() { srcName });
         }
 
-        public IDictionary<string, Source> listSource()
+        public IDictionary<string, Source> ListSource()
         {
             var action = new ListSourceAction();
             var actionRes = (ListSourceActionResult)RunAction(action, isReadOnly: true);
@@ -440,11 +448,11 @@ namespace Com.RelationalAI
             string srcStr = "",
             ICollection<Relation> inputs = null,
             ICollection<string> persist = null,
-            bool? is_readonly = null,
+            bool? isReadOnly = null,
             TransactionMode? mode = null
         )
         {
-            return Query(name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
+            return Query(name, path, srcStr, inputs, new List<string>() { output }, persist, isReadOnly, mode);
         }
 
         public IDictionary<RelKey, Relation> Query(
@@ -454,7 +462,7 @@ namespace Com.RelationalAI
             ICollection<Relation> inputs = null,
             ICollection<string> outputs = null,
             ICollection<string> persist = null,
-            bool? is_readonly = null,
+            bool? isReadOnly = null,
             TransactionMode? mode = null
         )
         {
@@ -465,7 +473,7 @@ namespace Com.RelationalAI
             src.Path = path;
             src.Value = srcStr;
 
-            return _filterDictionary(Query(src, inputs, outputs, persist, is_readonly, mode), outputs);
+            return _filterDictionary(Query(src, inputs, outputs, persist, isReadOnly, mode), outputs);
         }
 
         private IDictionary<RelKey, Relation> _filterDictionary(IDictionary<RelKey, Relation> dict, ICollection<string> outputs)
@@ -533,7 +541,7 @@ namespace Com.RelationalAI
             return res;
         }
 
-        public void UpdateEdb(
+        public bool UpdateEdb(
             RelKey rel,
             ICollection<Tuple<AnyValue, AnyValue>> updates = null,
             ICollection<Tuple<AnyValue, AnyValue>> delta = null
@@ -544,7 +552,7 @@ namespace Com.RelationalAI
             if(updates != null) action.Updates = _convertCollection(updates);
             if(delta != null)action.Delta = _convertCollection(delta);
 
-            RunAction(action, isReadOnly: false);
+            return RunAction(action, isReadOnly: false) != null;
         }
 
         private void _handleNullFieldsForLoadData(LoadData loadData)
@@ -748,7 +756,7 @@ namespace Com.RelationalAI
             string rel,
             string data = null,
             string path = null,
-            AnyValue key = null,
+            AnyValue[] key = null,
             FileSyntax syntax = null,
             FileSchema schema = null
         )
@@ -760,23 +768,16 @@ namespace Com.RelationalAI
             string rel,
             string data = null,
             string path = null,
-            AnyValue key = null
+            AnyValue[] key = null
         )
         {
             return LoadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
         }
 
-        public ICollection<RelKey> ListEdb()
+        public ICollection<RelKey> ListEdb(string relName = null)
         {
             var action = new ListEdbAction();
-            var actionRes = (ListEdbActionResult)RunAction(action, isReadOnly: true);
-            return actionRes.Rels;
-        }
-
-        public ICollection<RelKey> ListEdb(string relName)
-        {
-            var action = new ListEdbAction();
-            action.Relname = relName;
+            if(relName != null) action.Relname = relName;
             var actionRes = (ListEdbActionResult)RunAction(action, isReadOnly: true);
             return actionRes.Rels;
         }
@@ -796,16 +797,10 @@ namespace Com.RelationalAI
             return RunAction(action) != null;
         }
 
-        public ICollection<Relation> Cardinality()
+        public ICollection<Relation> Cardinality(string relName = null)
         {
             var action = new CardinalityAction();
-            return ((CardinalityActionResult)RunAction(action, isReadOnly: true)).Result;
-        }
-
-        public ICollection<Relation> Cardinality(string relName)
-        {
-            var action = new CardinalityAction();
-            action.Relname = relName;
+            if(relName != null) action.Relname = relName;
             return ((CardinalityActionResult)RunAction(action, isReadOnly: true)).Result;
         }
 

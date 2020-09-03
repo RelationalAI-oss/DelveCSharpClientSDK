@@ -17,13 +17,11 @@ namespace Com.RelationalAI
         }
 
         public static void createCloudConnection(string dbname, out DelveClient api) {
-            string profile = "default";
             string computeName = dbname;
             var conn = new CloudConnection(
                 dbname,
-                creds: RAICredentials.FromFile(profile: profile),
                 scheme: "https",
-                host: string.Format("azure-ssh.relationalai.com", profile),
+                host: "azure-ssh.relationalai.com",
                 port: 443,
                 verifySSL: false,
                 computeName: computeName
