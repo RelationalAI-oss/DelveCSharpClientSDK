@@ -37,7 +37,7 @@ namespace DelveClientSDKSamples
 
             // creates a resource managemnt client
             this.mngtClient = new DelveCloudClient(conn: this.cloudConn);
-            // creates a database csharpcompute client for data load.
+            // creates a database client for data load.
             this.delveClient = new DelveClient(conn: this.cloudConn);
             // we are working on merging both clients into single one
             
@@ -51,7 +51,7 @@ namespace DelveClientSDKSamples
         public void runCloudWorkflow()
         {
             // list computes for the current account
-            /* Computes ==> {                                
+            /* Expected output: {                                
             "compute_requests_list": [                                                                                    
             {                            
                 "id": "5170d1ac-e5f4-4547-a4f4-37dbca58048a",                                                             
@@ -66,13 +66,13 @@ namespace DelveClientSDKSamples
                 "computeState": "DELETED",
                 "computeId": "b4d958cf-8772-48f4-8b2c-7a37bdd415b5",
                 "_etag": "\"0a002297-0000-0100-0000-5f4d07c30000\""
-            }, ... ]
+            }, ... ]}
               */
             var computes = this.mngtClient.ListComputes();
             Console.WriteLine("=> Computes: " + JObject.FromObject(computes));
 
             // list databases for the current account
-            /* samples ==>
+            /* Expected output: {
             "databases": [
                 {
                   "account_name": "relationalai-db",
@@ -87,14 +87,13 @@ namespace DelveClientSDKSamples
                   "region": "us-east",
                   "database_id": "05e90e99-5601-4630-8696-5656eb0b31d2",
                   "status": "CREATED"
-                }, ... ]
+                }, ... ]}
             */
             var databases = this.mngtClient.ListDatabases();
             Console.WriteLine("=> Databases: " + JObject.FromObject(databases).ToString());
 
             // list users for the current account
-            // Users ==>
-            /*
+            /* Expected output: {
               "users": [
                   {
                     "account_name": "account_name",
@@ -105,7 +104,7 @@ namespace DelveClientSDKSamples
                     "status": "ACTIVE",
                     "access_key1": "xxxxxxxxxxxxxxxxxxxxxx"
                   }, ...
-                ]
+                ]}
             */ 
             var users = this.mngtClient.ListUsers();
             Console.WriteLine("=> Users: " + JObject.FromObject(users).ToString());
