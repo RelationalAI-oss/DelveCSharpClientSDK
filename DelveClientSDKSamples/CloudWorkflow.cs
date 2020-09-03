@@ -18,8 +18,9 @@ namespace DelveClientSDKSamples
         int maxAttempts;
         int sleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute9", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
+        public CloudWorkflow(string computeName = "csharpcompute", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
         {
+            // Loads data from ~/.rai/config (rai cloud configuration)
             IniData ini = Config.LoadDotRaiConfig();
             this.maxAttempts = maxAttempts;
             this.sleepTime = sleepTime;
@@ -34,39 +35,101 @@ namespace DelveClientSDKSamples
                 computeName: computeName
             );
 
-            this.delveClient = new DelveClient(conn: this.cloudConn);
+            // creates a resource managemnt client
             this.mngtClient = new DelveCloudClient(conn: this.cloudConn);
+            // creates a database csharpcompute client for data load.
+            this.delveClient = new DelveClient(conn: this.cloudConn);
+            // we are working on merging both clients into single one
+            
             this.delveClient.debugLevel = 1;
         }
+
+        /*
+         * Cloud workflow using RAICloud         
+         *   
+        */
         public void runCloudWorkflow()
         {
-            // list computes
+            // list computes for the current account
+            /* Computes ==> {                                
+            "compute_requests_list": [                                                                                    
+            {                            
+                "id": "5170d1ac-e5f4-4547-a4f4-37dbca58048a",                                                             
+                "accountName": "relationalai-db",                                                                         
+                "createdBy": "924c1f35-5062-4e78-9ce9-10157c29dc61",
+                "computeName": "csharpcompute",
+                "computeSize": "XS",                                                                                      
+                "computeRegion": "us-east",
+                "requestedOn": "2020-08-27T15:50:18.488Z",
+                "createdOn": "2020-08-27T15:52:10.040Z",
+                "deletedOn": "2020-08-27T23:38:34.062Z",
+                "computeState": "DELETED",
+                "computeId": "b4d958cf-8772-48f4-8b2c-7a37bdd415b5",
+                "_etag": "\"0a002297-0000-0100-0000-5f4d07c30000\""
+            }, ... ]
+              */
             var computes = this.mngtClient.ListComputes();
             Console.WriteLine("=> Computes: " + JObject.FromObject(computes));
 
-            // list databases
+            // list databases for the current account
+            /* samples ==>
+            "databases": [
+                {
+                  "account_name": "relationalai-db",
+                  "name": "csharpdbtest",
+                  "region": "us-east",
+                  "database_id": "a659009a-dae8-4a90-8438-41f5ac6bbb2d",
+                  "status": "CREATED"
+                },
+                {
+                  "account_name": "relationalai-db",
+                  "name": "csharpcompute2",
+                  "region": "us-east",
+                  "database_id": "05e90e99-5601-4630-8696-5656eb0b31d2",
+                  "status": "CREATED"
+                }, ... ]
+            */
             var databases = this.mngtClient.ListDatabases();
             Console.WriteLine("=> Databases: " + JObject.FromObject(databases).ToString());
 
-            // list users
+            // list users for the current account
+            // Users ==>
+            /*
+              "users": [
+                  {
+                    "account_name": "account_name",
+                    "username": "username",
+                    "first_name": "firstname",
+                    "last_name": "lastname",
+                    "email": "user@relational.ai",
+                    "status": "ACTIVE",
+                    "access_key1": "xxxxxxxxxxxxxxxxxxxxxx"
+                  }, ...
+                ]
+            */ 
             var users = this.mngtClient.ListUsers();
             Console.WriteLine("=> Users: " + JObject.FromObject(users).ToString());
 
             // create compute
-            var createComputeResponse = this.mngtClient.CreateCompute(conn: cloudConn, size: "XS");
+            var createComputeResponse = this.mngtClient.CreateCompute(size: "XS");
             Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
 
             // wait for compute to be provisioned
+            // a compute is a single tenant VM used for the current account (provisioning time ~ 5 mins)
             if(!WaitForCompute(this.cloudConn.ComputeName))
                 return;
 
-            // create database
+            // create database with the name as specificied in the CloudConnection
             this.delveClient.CreateDatabase(overwrite: true);
-
+             
             this.delveClient.LoadCSV(
+                // import data into edge_csv relation
                 rel: "edge_csv",
+                // data type mapping
                 schema: new CSVFileSchema("Int64", "Int64"),
                 syntax: new CSVFileSyntax(header: new List<string>() { "src", "dest" }, delim: "|"),
+                // data imported over the wire
+                // alternative options are to specify a datasource that is a path for an azure blob storage file
                 data: @"
                         30|31
                         33|30
@@ -76,15 +139,20 @@ namespace DelveClientSDKSamples
                     "
             );
 
-            this.delveClient.Query(
+            // persisting vertex and edges for future computations
+            var edges = this.delveClient.Query(
                 srcStr: @"
                     def vertex(id) = exists(pos: edge_csv(pos, :src, id) or edge_csv(pos, :dest, id))
                     def edge(a, b) = exists(pos: edge_csv(pos, :src, a) and edge_csv(pos, :dest, b))
                 ",
                 persist: new List<string>() { "vertex", "edge" },
+                // this the result of the query
                 output: "edge"
             );
-
+            
+            Console.WriteLine("==> Query output: " + JObject.FromObject(edges).ToString());
+            
+            // Jaccard Similarity query
             string queryString = @"
                 def uedge(a, b) = edge(a, b) or edge(b, a)
                 def tmp(a, b, x) = uedge(x,a) and uedge(x,b) and a > b
@@ -95,18 +163,24 @@ namespace DelveClientSDKSamples
 
             var queryResult = this.delveClient.Query(
                 srcStr: queryString,
+                // query output
                 output: "result"
             );
 
-            Console.WriteLine("=> Jaccard Similarity query result: " + queryResult);
+            Console.WriteLine("=> Jaccard Similarity query result: " + JObject.FromObject(queryResult).ToString());
 
-            // remove default compute
+            // remove default compute (disassociate database from compute)
             this.mngtClient.RemoveDefaultCompute(conn: this.cloudConn);
 
-            // delete compute
-            var deleteComputeResponse = this.mngtClient.DeleteCompute(conn: this.cloudConn);
+            // delete compute => stop charging for the compute
+            var deleteComputeResponse = this.mngtClient.DeleteCompute();
             Console.WriteLine("=> DeleteComputeResponse: " + JObject.FromObject(deleteComputeResponse).ToString());
         }
+
+        /*
+         * Helpers
+         *
+         */
 
         private bool WaitForCompute(string computeName)
         {

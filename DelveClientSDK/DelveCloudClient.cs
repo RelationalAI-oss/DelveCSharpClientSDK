@@ -34,9 +34,9 @@ namespace Com.RelationalAI
 
         public ListComputesResponseProtocol ListComputes() {return this.ComputeGetAsync().Result;}
 
-        public CreateComputeResponseProtocol CreateCompute(CloudConnection conn, string size, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string size, bool dryRun = false)
         {
-            return this.CreateCompute(conn.ComputeName, size, EnumString.GetDescription(conn.Region), dryRun);
+            return this.CreateCompute(this.conn.ComputeName, size, EnumString.GetDescription(conn.Region), dryRun);
         }
 
         public CreateComputeResponseProtocol CreateCompute(string displayName, string size, string region, bool dryRun = false)
@@ -49,9 +49,9 @@ namespace Com.RelationalAI
             return this.ComputePutAsync(request).Result;
         }
 
-        public DeleteComputeResponseProtocol DeleteCompute(CloudConnection conn, bool dryRun = false)
+        public DeleteComputeResponseProtocol DeleteCompute(bool dryRun = false)
         {
-            return this.DeleteCompute(conn.ComputeName, dryRun);
+            return this.DeleteCompute(this.conn.ComputeName, dryRun);
         }
 
         public DeleteComputeResponseProtocol DeleteCompute(string computeName, bool dryRun = false)
