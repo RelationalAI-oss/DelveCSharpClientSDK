@@ -533,7 +533,7 @@ namespace Com.RelationalAI
             return res;
         }
 
-        public void updateEDB(
+        public void updateEdb(
             RelKey rel,
             ICollection<Tuple<AnyValue, AnyValue>> updates = null,
             ICollection<Tuple<AnyValue, AnyValue>> delta = null
@@ -653,7 +653,7 @@ namespace Com.RelationalAI
             return loadData;
         }
 
-        public bool loadEDB(
+        public bool loadEdb(
             string rel,
             string contentType,
             string data = null,
@@ -673,9 +673,9 @@ namespace Com.RelationalAI
             loadData.File_syntax = syntax;
             loadData.File_schema = schema;
 
-            return loadEDB(rel, loadData);
+            return loadEdb(rel, loadData);
         }
-        public bool loadEDB(
+        public bool loadEdb(
             string rel,
             LoadData value
         )
@@ -695,14 +695,14 @@ namespace Com.RelationalAI
             return tp.Name;
         }
 
-        public bool loadEDB(
+        public bool loadEdb(
             string relName, AnyValue[][] columns
         )
         {
-            return loadEDB(relName, Relation.toCollection(columns));
+            return loadEdb(relName, Relation.toCollection(columns));
         }
 
-        public bool loadEDB(
+        public bool loadEdb(
             string relName, ICollection<ICollection<AnyValue>> columns
         )
         {
@@ -716,25 +716,25 @@ namespace Com.RelationalAI
             }
 
             rel.Columns = columns;
-            return loadEDB(rel);
+            return loadEdb(rel);
         }
 
-        public bool loadEDB(
+        public bool loadEdb(
             RelKey relKey, ICollection<ICollection<AnyValue>> columns
         )
         {
             var rel = new Relation();
             rel.Rel_key = relKey;
             rel.Columns = columns;
-            return loadEDB(rel);
+            return loadEdb(rel);
         }
-        public bool loadEDB(
+        public bool loadEdb(
             Relation value
         )
         {
-            return loadEDB( new List<Relation>() { value } );
+            return loadEdb( new List<Relation>() { value } );
         }
-        public bool loadEDB(
+        public bool loadEdb(
             ICollection<Relation> value
         )
         {
@@ -753,7 +753,7 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            return loadEDB(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema);
+            return loadEdb(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema);
         }
 
         public bool loadJSON(
@@ -763,7 +763,7 @@ namespace Com.RelationalAI
             AnyValue key = null
         )
         {
-            return loadEDB(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
+            return loadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
         }
 
         public ICollection<RelKey> listEdb()
