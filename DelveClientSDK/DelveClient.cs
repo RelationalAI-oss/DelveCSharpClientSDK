@@ -688,8 +688,8 @@ namespace Com.RelationalAI
             LoadData value
         )
         {
-            _readFileFromPath(value);
             _handleNullFieldsForLoadData(value);
+            _readFileFromPath(value);
             var action = new LoadDataAction();
             action.Rel = rel;
             action.Value = value;
