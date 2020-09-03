@@ -18,9 +18,9 @@ namespace Com.RelationalAI
             request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            
+
             RAIRequest raiReq = new RAIRequest(request, conn);
-            raiReq.sign();
+            raiReq.Sign();
         }
     }
 
@@ -29,7 +29,7 @@ namespace Com.RelationalAI
         public DelveCloudClient(Connection conn) : base(new HttpClient())
         {
             this.conn = conn;
-            this.BaseUrl = "https://" + this.conn.host;
+            this.BaseUrl = "https://" + this.conn.Host;
         }
 
         public ListComputesResponseProtocol listComputes() {return this.ComputeGetAsync().Result;}

@@ -53,11 +53,11 @@ namespace Com.RelationalAI
             httpReq.Headers.Host = "127.0.0.1";
             RAIRequest req = new RAIRequest(httpReq, cloudApi.conn, service: "database+list");
 
-            req.sign(DateTime.Parse("2020-05-04T10:36:00"), debugLevel: cloudApi.debugLevel);
+            req.Sign(DateTime.Parse("2020-05-04T10:36:00"), debugLevel: cloudApi.debugLevel);
 
             string output = string.Join(
                 "\n",
-                from header in req.innerReq.Headers.Union(req.innerReq.Content.Headers)
+                from header in req.InnerReq.Headers.Union(req.InnerReq.Content.Headers)
                 orderby header.Key.ToLower()
                 select string.Format(
                     "{0}: {1}",

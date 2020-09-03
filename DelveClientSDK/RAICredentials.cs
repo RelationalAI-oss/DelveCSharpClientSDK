@@ -19,13 +19,13 @@ namespace Com.RelationalAI
     */
     public class RAICredentials
     {
-        public string accessKey { get; }
-        public string privateKey { get; } // pragma: allowlist secret
+        public string AccessKey { get; }
+        public string PrivateKey { get; } // pragma: allowlist secret
 
         public RAICredentials(string accessKey, string privateKey)
         {
-            this.accessKey = accessKey;
-            this.privateKey = privateKey; // pragma: allowlist secret
+            this.AccessKey = accessKey;
+            this.PrivateKey = privateKey; // pragma: allowlist secret
         }
 
         /*
@@ -52,12 +52,12 @@ namespace Com.RelationalAI
             3. `[profile]` doesn't contain the `private_key_filename` key
             4. the private key's Json file doesn't contain a private key
         */
-        public static RAICredentials fromFile(string path=null, string profile="default")
+        public static RAICredentials FromFile(string path=null, string profile="default")
         {
-            if( path == null) path = Config.dotRaiConfigPath();
+            if( path == null) path = Config.DotRaiConfigPath();
             if(!File.Exists(path)) return null;
-            IniData ini = Config.loadDotRaiConfig(path);
-            return raiGetCredentials(ini, profile, pkDir:Path.GetDirectoryName(path));
+            IniData ini = Config.LoadDotRaiConfig(path);
+            return RaiGetCredentials(ini, profile, pkDir:Path.GetDirectoryName(path));
         }
 
         /*
@@ -85,13 +85,13 @@ namespace Com.RelationalAI
             3. `[profile]` doesn't contain the `private_key_filename` key
             4. the private key's Json file doesn't contain a private key
         */
-        public static RAICredentials raiGetCredentials(
+        public static RAICredentials RaiGetCredentials(
             IniData ini,
             string profile="default",
             string pkDir=null
         )
         {
-            if(pkDir == null) pkDir = Path.GetDirectoryName(Config.dotRaiConfigPath());
+            if(pkDir == null) pkDir = Path.GetDirectoryName(Config.DotRaiConfigPath());
             return _raiGetCredentials(ini, profile, pkDir);
         }
 
@@ -127,12 +127,12 @@ namespace Com.RelationalAI
             string pkDir
         )
         {
-            string accessKey = Config.getIniValue(ini, profile, "access_key");
+            string accessKey = Config.GetIniValue(ini, profile, "access_key");
             if(accessKey == "notfound")
             {
                 throw new KeyNotFoundException("access_key");
             }
-            string privateKeyFileName = Config.getIniValue(ini, profile, "private_key_filename");
+            string privateKeyFileName = Config.GetIniValue(ini, profile, "private_key_filename");
             if(privateKeyFileName == "notfound")
             {
                 throw new KeyNotFoundException("private_key_filename");

@@ -24,17 +24,17 @@ namespace Com.RelationalAI
     public class RAIRequest {
         public const string DEFAULT_SERVICE = "transaction";
 
-        public RAICredentials creds { get; }
+        public RAICredentials Creds { get; }
         // verb, url, headers, content
-        public HttpRequestMessage innerReq { get; }
-        public RAIRegion region { get; }
-        public string service { get; }
+        public HttpRequestMessage InnerReq { get; }
+        public RAIRegion Region { get; }
+        public string Service { get; }
 
         public RAIRequest(
             HttpRequestMessage innerReq,
             Connection conn,
             string service = DEFAULT_SERVICE
-        ): this(innerReq, conn.creds, conn.region, service)
+        ): this(innerReq, conn.Creds, conn.Region, service)
         {
         }
 
@@ -45,37 +45,37 @@ namespace Com.RelationalAI
             string service = DEFAULT_SERVICE
         )
         {
-            this.creds = creds;
-            this.innerReq = innerReq;
-            this.region = region;
-            this.service = service;
+            this.Creds = creds;
+            this.InnerReq = innerReq;
+            this.Region = region;
+            this.Service = service;
         }
 
-        public void sign(int debugLevel=1) {
-            sign(DateTime.UtcNow, debugLevel);
+        public void Sign(int debugLevel=1) {
+            Sign(DateTime.UtcNow, debugLevel);
         }
 
-        public void sign(DateTime t, int debugLevel=1) {
-            if(this.creds == null) return;
+        public void Sign(DateTime t, int debugLevel=1) {
+            if(this.Creds == null) return;
 
             // ISO8601 date/time strings for time of request
             string date = String.Format("{0:yyyyMMdd}", t);
 
             // Authentication scope
             string scope = string.Join("/", new string[]{
-                date, EnumString.GetDescription(this.region), this.service, "rai01_request"
+                date, EnumString.GetDescription(this.Region), this.Service, "rai01_request"
             });
 
             // SHA256 hash of content
             Sha256 shaw256HashAlgo = new Sha256();
-            byte[] reqContent = innerReq.Content.ReadAsByteArrayAsync().Result;
+            byte[] reqContent = InnerReq.Content.ReadAsByteArrayAsync().Result;
             byte[] sha256Hash = shaw256HashAlgo.Hash(reqContent);
             string contentHash = sha256Hash.ToHex();
 
             // HTTP headers
-            innerReq.Headers.Authorization = null;
+            InnerReq.Headers.Authorization = null;
 
-            var allHeaders = innerReq.Headers.Union(innerReq.Content.Headers);
+            var allHeaders = InnerReq.Headers.Union(InnerReq.Content.Headers);
 
             // Sort and lowercase() Headers to produce canonical form
             string canonicalHeaders = string.Join(
@@ -96,7 +96,7 @@ namespace Com.RelationalAI
             );
 
             // Sort Query String
-            var parsedQuery = HttpUtility.ParseQueryString(innerReq.RequestUri.Query);
+            var parsedQuery = HttpUtility.ParseQueryString(InnerReq.RequestUri.Query);
             var parsedQueryDict = parsedQuery.AllKeys.SelectMany(
                 parsedQuery.GetValues, (k, v) => new {key = k, value = v}
             );
@@ -113,8 +113,8 @@ namespace Com.RelationalAI
             // Create hash of canonical request
             string canonicalForm = string.Format(
                 "{0}\n{1}\n{2}\n{3}\n\n{4}\n{5}",
-                innerReq.Method,
-                HttpUtility.UrlPathEncode(innerReq.RequestUri.AbsolutePath),
+                InnerReq.Method,
+                HttpUtility.UrlPathEncode(InnerReq.RequestUri.AbsolutePath),
                 query,
                 canonicalHeaders,
                 signedHeaders,
@@ -137,7 +137,7 @@ namespace Com.RelationalAI
                 "RAI01-ED25519-SHA256\n{0}\n{1}", scope, canonicalHash
             );
 
-            byte[] seed = Convert.FromBase64String(creds.privateKey);
+            byte[] seed = Convert.FromBase64String(Creds.PrivateKey);
 
             // select the Ed25519 signature algorithm
             var algorithm = SignatureAlgorithm.Ed25519;
@@ -161,13 +161,13 @@ namespace Com.RelationalAI
 
             var authHeader = string.Format(
                 "RAI01-ED25519-SHA256 Credential={0}/{1}, SignedHeaders={2}, Signature={3}",
-                creds.accessKey,
+                Creds.AccessKey,
                 scope,
                 signedHeaders,
                 sig
             );
 
-            innerReq.Headers.TryAddWithoutValidation("Authorization", authHeader);
+            InnerReq.Headers.TryAddWithoutValidation("Authorization", authHeader);
         }
     }
 }

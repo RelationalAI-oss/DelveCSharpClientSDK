@@ -155,7 +155,7 @@ namespace Com.RelationalAI
     }
 
     public static class ExceptionUtils {
-        public static string flattenException(Exception exception)
+        public static string FlattenException(Exception exception)
         {
             var stringBuilder = new StringBuilder();
 

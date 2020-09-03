@@ -27,13 +27,13 @@ namespace Com.RelationalAI
         {
             var uriBuilder = new UriBuilder(request.RequestUri);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["dbname"] = conn.dbname;
+            query["dbname"] = conn.DbName;
             query["open_mode"] = body.Mode.ToString();
-            query["readonly"] = boolStr(body.Readonly);
-            query["region"] = EnumString.GetDescription(conn.region);
-            query["empty"] = boolStr(body.Actions == null || body.Actions.Count == 0);
-            if(conn.computeName != null) {
-                query["compute_name"] = conn.computeName;
+            query["readonly"] = BoolStr(body.Readonly);
+            query["region"] = EnumString.GetDescription(conn.Region);
+            query["empty"] = BoolStr(body.Actions == null || body.Actions.Count == 0);
+            if(conn.ComputeName != null) {
+                query["compute_name"] = conn.ComputeName;
             }
             uriBuilder.Query = query.ToString();
             request.RequestUri = uriBuilder.Uri;
@@ -46,10 +46,10 @@ namespace Com.RelationalAI
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
-            raiRequest.sign(debugLevel: debugLevel);
+            raiRequest.Sign(debugLevel: debugLevel);
         }
 
-        private string boolStr(bool val) {
+        private string BoolStr(bool val) {
             return val ? "true" : "false";
         }
     }
@@ -89,7 +89,7 @@ namespace Com.RelationalAI
         {
         }
 
-        public Relation(RelKey relKey, AnyValue[][] columns) : this(relKey, toCollection(columns))
+        public Relation(RelKey relKey, AnyValue[][] columns) : this(relKey, ToCollection(columns))
         {
         }
 
@@ -99,7 +99,7 @@ namespace Com.RelationalAI
             this.Columns = columns;
         }
 
-        public HashSet<HashSet<AnyValue>> columnsToHashSet(ICollection<ICollection<AnyValue>> columns)
+        public HashSet<HashSet<AnyValue>> ColumnsToHashSet(ICollection<ICollection<AnyValue>> columns)
         {
             return columns.Select(col => col.ToHashSet()).ToHashSet();
         }
@@ -110,36 +110,36 @@ namespace Com.RelationalAI
 
             if ( obj is Relation relation ) {
                 return EqualityComparer<RelKey>.Default.Equals(Rel_key, relation.Rel_key) &&
-                       equalsToCollection(relation.Columns);
+                       EqualsToCollection(relation.Columns);
             } else if ( obj.GetType().IsArray ) {
                 AnyValue[] arr = (AnyValue[]) obj;
                 if( arr.Length == 0 ) {
                     return Columns.Count == 0 || Columns.First().Count == 0;
                 } else if ( arr[0].GetType().IsArray ) {
-                    return equalsToArr((dynamic) arr);
+                    return EqualsToArr((dynamic) arr);
                 }
             }
             return false;
         }
 
-        public static ICollection<ICollection<AnyValue>> toCollection(AnyValue[][] arr)
+        public static ICollection<ICollection<AnyValue>> ToCollection(AnyValue[][] arr)
         {
             return arr.Select(col => (ICollection<AnyValue>)(col.Cast<AnyValue>().ToHashSet())).ToHashSet();
         }
 
-        private bool equalsToArr(AnyValue[][] arr) {
-            return equalsToCollection(toCollection(arr));
+        private bool EqualsToArr(AnyValue[][] arr) {
+            return EqualsToCollection(ToCollection(arr));
         }
 
-        private bool equalsToCollection(ICollection<ICollection<AnyValue>> col) {
-            var x1 = columnsToHashSet(Columns);
-            var x2 = columnsToHashSet(col);
+        private bool EqualsToCollection(ICollection<ICollection<AnyValue>> col) {
+            var x1 = ColumnsToHashSet(Columns);
+            var x2 = ColumnsToHashSet(col);
             return x1.All(elem1 => x2.Any(elem2 => elem1.SetEquals(elem2))) && x2.All(elem2 => x1.Any(elem1 => elem2.SetEquals(elem1)));
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Rel_key, columnsToHashSet(Columns));
+            return HashCode.Combine(Rel_key, ColumnsToHashSet(Columns));
         }
     }
 
@@ -200,7 +200,7 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
-        private static HttpClient createHttpClient(bool verifySSL) {
+        private static HttpClient CreateHttpClient(bool verifySSL) {
             if( verifySSL ) {
                 return new HttpClient();
             } else {
@@ -232,11 +232,11 @@ namespace Com.RelationalAI
             }
         }
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
-        private static HttpClient httpClient = createHttpClient(httpClientVerifySSL);
+        private static HttpClient httpClient = CreateHttpClient(httpClientVerifySSL);
 
-        public string dbname { get { return conn.dbname; } }
+        public string DbName { get { return conn.DbName; } }
 
-        private static HttpClient getHttpClient(Uri url, bool verifySSL)
+        private static HttpClient GetHttpClient(Uri url, bool verifySSL)
         {
             if( "https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL) {
                 // we keep a single static HttpClient instance and keep reusing it instead
@@ -246,7 +246,7 @@ namespace Com.RelationalAI
                 // used in the previous requests), then this section disposes the existing
                 // HttpClient instance and creates a new one.
                 httpClient.Dispose();
-                httpClient = createHttpClient(verifySSL);
+                httpClient = CreateHttpClient(verifySSL);
                 httpClientVerifySSL = verifySSL;
             }
             return httpClient;
@@ -263,16 +263,16 @@ namespace Com.RelationalAI
         public DelveClient(string url, bool verifySSL = true) : this(new Uri(url), verifySSL)
         {
         }
-        public DelveClient(Uri url, bool verifySSL = true) : base(getHttpClient(url, verifySSL))
+        public DelveClient(Uri url, bool verifySSL = true) : base(GetHttpClient(url, verifySSL))
         {
             this.BaseUrl = url.ToString();
         }
-        public DelveClient(Connection conn) : this(conn.baseUrl, conn.verifySSL)
+        public DelveClient(Connection conn) : this(conn.BaseUrl, conn.VerifySSL)
         {
             this.conn = conn;
         }
 
-        public TransactionResult runTransaction(Transaction xact)
+        public TransactionResult RunTransaction(Transaction xact)
         {
             if(this.debugLevel > 0) {
                 Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
@@ -286,22 +286,22 @@ namespace Com.RelationalAI
             return response;
         }
 
-        public ActionResult runAction(Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN) {
-            return runAction("single", action, out success, isReadOnly, mode);
+        public ActionResult RunAction(Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN) {
+            return RunAction("single", action, out success, isReadOnly, mode);
         }
 
-        public ActionResult runAction(Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
+        public ActionResult RunAction(Action action, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
             bool success;
-            return runAction("single", action, out success, isReadOnly, mode);
+            return RunAction("single", action, out success, isReadOnly, mode);
         }
-        public ActionResult runAction(String name, Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
+        public ActionResult RunAction(String name, Action action, out bool success, bool isReadOnly = false, TransactionMode mode=TransactionMode.OPEN)
         {
             this.conn = conn;
 
             var xact = new Transaction();
             xact.Mode = mode;
-            xact.Dbname = conn.dbname;
+            xact.Dbname = conn.DbName;
 
             var labeledAction = new LabeledAction();
             labeledAction.Name = name;
@@ -310,9 +310,9 @@ namespace Com.RelationalAI
             xact.Actions.Add(labeledAction);
             xact.Readonly = isReadOnly;
 
-            TransactionResult response = runTransaction(xact);
+            TransactionResult response = RunTransaction(xact);
 
-            success = is_success(response);
+            success = IsSuccess(response);
             foreach (LabeledActionResult act in response.Actions)
             {
                 if (name.Equals(act.Name))
@@ -323,64 +323,64 @@ namespace Com.RelationalAI
             }
             return null;
         }
-        private bool is_success(TransactionResult response) {
+        private bool IsSuccess(TransactionResult response) {
             return !response.Aborted && response.Problems.Count == 0;
         }
 
-        public bool branchdatabase(string sourceDbname)
+        public bool BranchDatabase(string sourceDbname)
         {
             var xact = new Transaction();
             xact.Mode = TransactionMode.BRANCH;
-            xact.Dbname = conn.dbname;
+            xact.Dbname = conn.DbName;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Source_dbname = sourceDbname;
             xact.Readonly = false;
-            TransactionResult response = runTransaction(xact);
+            TransactionResult response = RunTransaction(xact);
 
-            return is_success(response);
+            return IsSuccess(response);
         }
 
-        public bool createDatabase(bool overwrite = false)
+        public bool CreateDatabase(bool overwrite = false)
         {
             this.conn = conn;
 
             var xact = new Transaction();
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
-            xact.Dbname = conn.dbname;
+            xact.Dbname = conn.DbName;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Readonly = false;
 
             TransactionResult response = null;
             try {
-                response = runTransaction(xact);
+                response = RunTransaction(xact);
             } catch (Exception e) {
-                string fullError = ExceptionUtils.flattenException(e);
-                Console.WriteLine("Error while creating the database (" + conn.dbname + "): " + fullError);
+                string fullError = ExceptionUtils.FlattenException(e);
+                Console.WriteLine("Error while creating the database (" + conn.DbName + "): " + fullError);
                 return false;
             }
 
-            return is_success(response);
+            return IsSuccess(response);
         }
 
-        public bool installSource(String name, String srcStr)
+        public bool InstallSource(String name, String srcStr)
         {
-            return installSource(name, name, srcStr);
+            return InstallSource(name, name, srcStr);
         }
-        public bool installSource(String name, String path, String srcStr)
+        public bool InstallSource(String name, String path, String srcStr)
         {
             Source src = new Source();
             src.Name = name;
             src.Path = path;
             src.Value = srcStr;
 
-            return installSource(src);
+            return InstallSource(src);
         }
-        public bool installSource(Source src)
+        public bool InstallSource(Source src)
         {
-            return installSource(new List<Source>() { src });
+            return InstallSource(new List<Source>() { src });
         }
 
-        public bool installSource(ICollection<Source> srcList)
+        public bool InstallSource(ICollection<Source> srcList)
         {
             var action = new InstallAction();
             foreach(Source src in srcList) {
@@ -388,42 +388,42 @@ namespace Com.RelationalAI
             }
             action.Sources = srcList;
 
-            return runAction(action) != null;
+            return RunAction(action) != null;
         }
 
         private void _readFileFromPath(Source src)
         {
-            if(!isEmpty(src.Path)) {
-                if(isEmpty(src.Value)) {
+            if(!_isEmpty(src.Path)) {
+                if(_isEmpty(src.Value)) {
                     if(!File.Exists(src.Path)) {
                         src.Value = File.ReadAllText(src.Path);
                     }
                 }
-                if(isEmpty(src.Name)) {
+                if(_isEmpty(src.Name)) {
                     src.Name = Path.GetFileNameWithoutExtension(src.Path);
                 }
             }
         }
 
-        public bool deleteSource(ICollection<string> srcNameList)
+        public bool DeleteSource(ICollection<string> srcNameList)
         {
             var action = new ModifyWorkspaceAction();
             action.Delete_source = srcNameList;
 
             bool success;
-            var actionRes = (ModifyWorkspaceActionResult)runAction(action, out success);
+            var actionRes = (ModifyWorkspaceActionResult)RunAction(action, out success);
             return success && actionRes != null;
         }
 
-        public bool deleteSource(string srcName)
+        public bool DeleteSource(string srcName)
         {
-            return deleteSource(new List<string>() { srcName });
+            return DeleteSource(new List<string>() { srcName });
         }
 
         public IDictionary<string, Source> listSource()
         {
             var action = new ListSourceAction();
-            var actionRes = (ListSourceActionResult)runAction(action, isReadOnly: true);
+            var actionRes = (ListSourceActionResult)RunAction(action, isReadOnly: true);
 
             var resultDict = new Dictionary<string, Source>();
             foreach(Source src in actionRes.Sources) {
@@ -433,7 +433,7 @@ namespace Com.RelationalAI
             return resultDict;
         }
 
-        public IDictionary<RelKey, Relation> query(
+        public IDictionary<RelKey, Relation> Query(
             string output,
             string name = "query",
             string path = null,
@@ -444,10 +444,10 @@ namespace Com.RelationalAI
             TransactionMode? mode = null
         )
         {
-            return query(name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
+            return Query(name, path, srcStr, inputs, new List<string>() { output }, persist, is_readonly, mode);
         }
 
-        public IDictionary<RelKey, Relation> query(
+        public IDictionary<RelKey, Relation> Query(
             string name = "query",
             string path = null,
             string srcStr = "",
@@ -465,17 +465,17 @@ namespace Com.RelationalAI
             src.Path = path;
             src.Value = srcStr;
 
-            return filterDictionary(query(src, inputs, outputs, persist, is_readonly, mode), outputs);
+            return _filterDictionary(Query(src, inputs, outputs, persist, is_readonly, mode), outputs);
         }
 
-        private IDictionary<RelKey, Relation> filterDictionary(IDictionary<RelKey, Relation> dict, ICollection<string> outputs)
+        private IDictionary<RelKey, Relation> _filterDictionary(IDictionary<RelKey, Relation> dict, ICollection<string> outputs)
         {
             if(dict.All(kvp => outputs.Contains(kvp.Key.Name))) return dict;
             return dict.Where(kvp => outputs.Contains(kvp.Key.Name))
                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
-        public IDictionary<RelKey, Relation> query(
+        public IDictionary<RelKey, Relation> Query(
             Source src = null,
             ICollection<Relation> inputs = null,
             ICollection<string> outputs = null,
@@ -501,16 +501,16 @@ namespace Com.RelationalAI
             action.Outputs = outputs;
             action.Persist = persist;
 
-            var actionRes = (QueryActionResult)runAction(
+            var actionRes = (QueryActionResult)RunAction(
                 action,
                 isReadOnly.GetValueOrDefault(persist.Count == 0),
-                mode.GetValueOrDefault(conn.defaultOpenMode)
+                mode.GetValueOrDefault(conn.DefaultOpenMode)
             );
 
-            return actionRes == null ? null : convertToDictionary(actionRes.Output);
+            return actionRes == null ? null : _convertToDictionary(actionRes.Output);
         }
 
-        private IDictionary<RelKey, Relation> convertToDictionary(ICollection<Relation> output)
+        private IDictionary<RelKey, Relation> _convertToDictionary(ICollection<Relation> output)
         {
             var outDict = new Dictionary<RelKey, Relation>();
             if(output != null) {
@@ -521,7 +521,7 @@ namespace Com.RelationalAI
             return outDict;
         }
 
-        private static ICollection<Pair_AnyValue_AnyValue_> convertCollection(ICollection<Tuple<AnyValue, AnyValue>> data)
+        private static ICollection<Pair_AnyValue_AnyValue_> _convertCollection(ICollection<Tuple<AnyValue, AnyValue>> data)
         {
             var res = new List<Pair_AnyValue_AnyValue_>();
             foreach(var tpl in data) {
@@ -533,7 +533,7 @@ namespace Com.RelationalAI
             return res;
         }
 
-        public void updateEdb(
+        public void UpdateEdb(
             RelKey rel,
             ICollection<Tuple<AnyValue, AnyValue>> updates = null,
             ICollection<Tuple<AnyValue, AnyValue>> delta = null
@@ -541,15 +541,15 @@ namespace Com.RelationalAI
         {
             var action = new UpdateAction();
             action.Rel = rel;
-            if(updates != null) action.Updates = convertCollection(updates);
-            if(delta != null)action.Delta = convertCollection(delta);
+            if(updates != null) action.Updates = _convertCollection(updates);
+            if(delta != null)action.Delta = _convertCollection(delta);
 
-            runAction(action, isReadOnly: false);
+            RunAction(action, isReadOnly: false);
         }
 
         private void _handleNullFieldsForLoadData(LoadData loadData)
         {
-            if(!isEmpty(loadData.Path) && !isEmpty(loadData.Data)) {
+            if(!_isEmpty(loadData.Path) && !_isEmpty(loadData.Data)) {
                 var message = string.Format(
                     "Either `Path` or `Data` should be specified for `LoadData`." +
                     "You have provided both: `Path`={0} and `Data`={1}",
@@ -559,12 +559,12 @@ namespace Com.RelationalAI
                 throw new ArgumentException(message);
             }
 
-            if(isEmpty(loadData.Path) && isEmpty(loadData.Data)) {
+            if(_isEmpty(loadData.Path) && _isEmpty(loadData.Data)) {
                 var message = "Either `Path` or `Data` is required.";
                 throw new ArgumentException(message);
             }
 
-            if(isEmpty(loadData.Content_type)) {
+            if(_isEmpty(loadData.Content_type)) {
                 throw new ArgumentException("`ContentType` is required.");
             }
 
@@ -572,20 +572,20 @@ namespace Com.RelationalAI
                 throw new ArgumentException(string.Format("`ContentType`={0} is not supported.", loadData.Content_type));
             }
         }
-        private bool isEmpty(string str)
+        private bool _isEmpty(string str)
         {
             return str == null || str.Length == 0;
         }
         private void _readFileFromPath(LoadData loadData)
         {
-            if(!isEmpty(loadData.Path) && isEmpty(loadData.Data)) {
+            if(!_isEmpty(loadData.Path) && _isEmpty(loadData.Data)) {
                 if(File.Exists(loadData.Path)) {
                     loadData.Data = File.ReadAllText(loadData.Path);
                 }
             }
         }
 
-        public LoadData jsonString(
+        public LoadData JsonString(
             string data,
             AnyValue key = null,
             FileSyntax syntax = null,
@@ -602,7 +602,7 @@ namespace Com.RelationalAI
             return loadData;
         }
 
-        public LoadData jsonFile(
+        public LoadData JsonFile(
             string filePath,
             AnyValue key = null,
             FileSyntax syntax = null,
@@ -619,7 +619,7 @@ namespace Com.RelationalAI
             return loadData;
         }
 
-        public LoadData csvString(
+        public LoadData CsvString(
             string data,
             AnyValue key = null,
             FileSyntax syntax = null,
@@ -636,7 +636,7 @@ namespace Com.RelationalAI
             return loadData;
         }
 
-        public LoadData csvFile(
+        public LoadData CsvFile(
             string filePath,
             AnyValue key = null,
             FileSyntax syntax = null,
@@ -653,7 +653,7 @@ namespace Com.RelationalAI
             return loadData;
         }
 
-        public bool loadEdb(
+        public bool LoadEdb(
             string rel,
             string contentType,
             string data = null,
@@ -673,9 +673,9 @@ namespace Com.RelationalAI
             loadData.File_syntax = syntax;
             loadData.File_schema = schema;
 
-            return loadEdb(rel, loadData);
+            return LoadEdb(rel, loadData);
         }
-        public bool loadEdb(
+        public bool LoadEdb(
             string rel,
             LoadData value
         )
@@ -686,23 +686,23 @@ namespace Com.RelationalAI
             action.Rel = rel;
             action.Value = value;
 
-            return runAction(action, isReadOnly: false) != null;
+            return RunAction(action, isReadOnly: false) != null;
         }
 
-        private static string typeToString(Type tp)
+        private static string _typeToString(Type tp)
         {
             var str = tp.ToString();
             return tp.Name;
         }
 
-        public bool loadEdb(
+        public bool LoadEdb(
             string relName, AnyValue[][] columns
         )
         {
-            return loadEdb(relName, Relation.toCollection(columns));
+            return LoadEdb(relName, Relation.ToCollection(columns));
         }
 
-        public bool loadEdb(
+        public bool LoadEdb(
             string relName, ICollection<ICollection<AnyValue>> columns
         )
         {
@@ -711,12 +711,12 @@ namespace Com.RelationalAI
             if( columns != null && columns.Count > 0 && columns.First().Count > 0) {
                 Debug.Assert(columns.All(col => col.Count == columns.First().Count));
                 foreach(var col in columns) {
-                    rel.Rel_key.Keys.Add(typeToString(col.First().GetType()));
+                    rel.Rel_key.Keys.Add(_typeToString(col.First().GetType()));
                 }
             }
 
             rel.Columns = columns;
-            return loadEdb(rel);
+            return LoadEdb(rel);
         }
 
         public bool loadEdb(
@@ -726,25 +726,25 @@ namespace Com.RelationalAI
             var rel = new Relation();
             rel.Rel_key = relKey;
             rel.Columns = columns;
-            return loadEdb(rel);
+            return LoadEdb(rel);
         }
-        public bool loadEdb(
+        public bool LoadEdb(
             Relation value
         )
         {
-            return loadEdb( new List<Relation>() { value } );
+            return LoadEdb( new List<Relation>() { value } );
         }
-        public bool loadEdb(
+        public bool LoadEdb(
             ICollection<Relation> value
         )
         {
             var action = new ImportAction();
             action.Inputs = value;
 
-            return runAction(action, isReadOnly: false) != null;
+            return RunAction(action, isReadOnly: false) != null;
         }
 
-        public bool loadCSV(
+        public bool LoadCSV(
             string rel,
             string data = null,
             string path = null,
@@ -753,70 +753,70 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            return loadEdb(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema);
+            return LoadEdb(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema);
         }
 
-        public bool loadJSON(
+        public bool LoadJSON(
             string rel,
             string data = null,
             string path = null,
             AnyValue key = null
         )
         {
-            return loadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
+            return LoadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
         }
 
-        public ICollection<RelKey> listEdb()
+        public ICollection<RelKey> ListEdb()
         {
             var action = new ListEdbAction();
-            var actionRes = (ListEdbActionResult)runAction(action, isReadOnly: true);
+            var actionRes = (ListEdbActionResult)RunAction(action, isReadOnly: true);
             return actionRes.Rels;
         }
 
-        public ICollection<RelKey> listEdb(string relName)
+        public ICollection<RelKey> ListEdb(string relName)
         {
             var action = new ListEdbAction();
             action.Relname = relName;
-            var actionRes = (ListEdbActionResult)runAction(action, isReadOnly: true);
+            var actionRes = (ListEdbActionResult)RunAction(action, isReadOnly: true);
             return actionRes.Rels;
         }
 
-        public ICollection<RelKey> deleteEdb(string relName)
+        public ICollection<RelKey> DeleteEdb(string relName)
         {
             var action = new ModifyWorkspaceAction();
             action.Delete_edb = relName;
-            var actionRes = (ModifyWorkspaceActionResult)runAction(action);
+            var actionRes = (ModifyWorkspaceActionResult)RunAction(action);
             return actionRes.Delete_edb_result;
         }
 
-        public bool enableLibrary(string srcName)
+        public bool EnableLibrary(string srcName)
         {
             var action = new ModifyWorkspaceAction();
             action.Enable_library = srcName;
-            return runAction(action) != null;
+            return RunAction(action) != null;
         }
 
-        public ICollection<Relation> cardinality()
+        public ICollection<Relation> Cardinality()
         {
             var action = new CardinalityAction();
-            return ((CardinalityActionResult)runAction(action, isReadOnly: true)).Result;
+            return ((CardinalityActionResult)RunAction(action, isReadOnly: true)).Result;
         }
 
-        public ICollection<Relation> cardinality(string relName)
+        public ICollection<Relation> Cardinality(string relName)
         {
             var action = new CardinalityAction();
             action.Relname = relName;
-            return ((CardinalityActionResult)runAction(action, isReadOnly: true)).Result;
+            return ((CardinalityActionResult)RunAction(action, isReadOnly: true)).Result;
         }
 
-        public ICollection<AbstractProblem> collectProblems()
+        public ICollection<AbstractProblem> CollectProblems()
         {
             var action = new CollectProblemsAction();
-            var actionRes = (CollectProblemsActionResult)runAction(action, isReadOnly: true);
+            var actionRes = (CollectProblemsActionResult)RunAction(action, isReadOnly: true);
             return actionRes.Problems;
         }
 
-        public bool configure(
+        public bool Configure(
             bool? debug = null,
             bool? debugTrace = null,
             bool? broken = null,
@@ -830,7 +830,7 @@ namespace Com.RelationalAI
             action.Broken = broken;
             action.Silent = silent;
             action.Abort_on_error = abortOnError;
-            return runAction(action, isReadOnly: false) != null;
+            return RunAction(action, isReadOnly: false) != null;
         }
     }
 }

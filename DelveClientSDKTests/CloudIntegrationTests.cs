@@ -21,7 +21,7 @@ namespace Com.RelationalAI
             string computeName = dbname;
             var conn = new CloudConnection(
                 dbname,
-                creds: RAICredentials.fromFile(profile: profile),
+                creds: RAICredentials.FromFile(profile: profile),
                 scheme: "https",
                 host: string.Format("azure-ssh.relationalai.com", profile),
                 port: 443,
