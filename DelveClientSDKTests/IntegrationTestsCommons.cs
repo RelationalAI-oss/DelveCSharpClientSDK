@@ -21,8 +21,8 @@ namespace Com.RelationalAI
             return string.Format("{0}-{1}", prefix, Math.Abs(rnd.Next()));
         }
 
-        private static AnyValue[][] toRelData(params AnyValue[] vals) {
-            return new AnyValue[][] { vals };
+        private static AnyValue[][] ToRelData(params AnyValue[] vals) {
+            return Relation.ToRelData(vals);
         }
 
         private static void queryResEquals(IDictionary<RelKey, Relation> queryRes, AnyValue[][] expectedRes)
@@ -43,7 +43,7 @@ namespace Com.RelationalAI
         {
             Assert.True(installSourceRes);
             Assert.IsEmpty(api.CollectProblems());
-            Assert.True(api.listSource().ContainsKey(name));
+            Assert.True(api.ListSource().ContainsKey(name));
         }
         private static void testInstallSource(DelveClient api, String name, String srcStr)
         {
@@ -66,8 +66,8 @@ namespace Com.RelationalAI
 
             // create_database
             // =============================================================================
-            Assert.IsTrue(api.CreateDatabase(true));
-            Assert.IsFalse(api.CreateDatabase(false));
+            Assert.IsTrue(api.CreateDatabase());
+            Assert.IsFalse(api.CreateDatabase());
 
             // install_source
             // =============================================================================
@@ -104,8 +104,8 @@ namespace Com.RelationalAI
             // =============================================================================
             connFunc(out api);
             api.CreateDatabase();
-            Console.WriteLine("api.listSource().Keys: " + DictionaryToString(api.listSource()));
-            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(api.listSource().Keys));
+            Console.WriteLine("api.listSource().Keys: " + DictionaryToString(api.ListSource()));
+            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(api.ListSource().Keys));
 
             // query
             // =============================================================================
@@ -115,22 +115,22 @@ namespace Com.RelationalAI
             queryResEquals(api.Query(
                 srcStr: "def bar = 2",
                 output: "bar"
-            ), toRelData( 2L ));
+            ), ToRelData( 2L ));
 
             queryResEquals(api.Query(
                 srcStr: "def p = {(1,); (2,); (3,)}",
                 output: "p"
-            ), toRelData( 1L, 2L, 3L ));
+            ), ToRelData( 1L, 2L, 3L ));
 
             queryResEquals(api.Query(
                 srcStr: "def p = {(1.1,); (2.2,); (3.4,)}",
                 output: "p"
-            ), toRelData( 1.1D, 2.2D, 3.4D ));
+            ), ToRelData( 1.1D, 2.2D, 3.4D ));
 
             queryResEquals(api.Query(
                 srcStr: "def p = {(parse_decimal[64, 2, \"1.1\"],); (parse_decimal[64, 2, \"2.2\"],); (parse_decimal[64, 2, \"3.4\"],)}",
                 output: "p"
-            ), toRelData( 1.1D, 2.2D, 3.4D ));
+            ), ToRelData( 1.1D, 2.2D, 3.4D ));
 
             queryResEquals(api.Query(
                 srcStr: "def p = {(1, 5); (2, 7); (3, 9)}",
@@ -146,27 +146,27 @@ namespace Com.RelationalAI
 
             api.CreateDatabase();
             testInstallSource(api, "name", "def x = {(1,); (2,); (3,)}");
-            queryResEquals(api.Query(output: "x"), toRelData( 1L, 2L, 3L ));
+            queryResEquals(api.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
             // Branch from conn to conn2
             api2.BranchDatabase(api.DbName);
-            queryResEquals(api2.Query(output: "x"), toRelData( 1L, 2L, 3L ));
+            queryResEquals(api2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
             testInstallSource(api, "name", "def x = {(1,); (2,); (3,); (4,)}");
-            queryResEquals(api.Query(output: "x"), toRelData( 1L, 2L, 3L, 4L ));
-            queryResEquals(api2.Query(output: "x"), toRelData( 1L, 2L, 3L ));
+            queryResEquals(api.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(api2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
             testInstallSource(api2, "name", "def x = {(1,); (2,); (3,); (4,); (5,)}");
-            queryResEquals(api2.Query(output: "x"), toRelData( 1L, 2L, 3L, 4L, 5L ));
-            queryResEquals(api.Query(output: "x"), toRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(api2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L, 5L ));
+            queryResEquals(api.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
 
             // update_edb
             // =============================================================================
             connFunc(out api);
             api.CreateDatabase();
-            api.LoadEdb("p", toRelData( 1L, 2L, 3L ));
+            api.LoadEdb("p", ToRelData( 1L, 2L, 3L ));
             var pQuery = api.Query(output: "p");
-            queryResEquals(pQuery, toRelData( 1L, 2L, 3L ));
+            queryResEquals(pQuery, ToRelData( 1L, 2L, 3L ));
 
             var pRelKey = pQuery.First().Key;
 
@@ -180,7 +180,7 @@ namespace Com.RelationalAI
                 new Tuple<AnyValue, AnyValue>(new int[] { 5 } , +1),
             });
 
-            queryResEquals(api.Query(output: "p"), toRelData( 1L, 2L, 5L ));
+            queryResEquals(api.Query(output: "p"), ToRelData( 1L, 2L, 5L ));
 
             // load_csv
             // =============================================================================
@@ -197,7 +197,7 @@ namespace Com.RelationalAI
             queryResEquals(api.Query(
                 srcStr: "def result = count[pos: csv[pos, :A]]",
                 output: "result"
-            ), toRelData( 2L ));
+            ), ToRelData( 2L ));
 
             Assert.True(api.LoadCSV("bar",
                 syntax: new CSVFileSyntax(delim: "|"),
@@ -213,7 +213,7 @@ namespace Com.RelationalAI
             queryResEquals(api.Query(
                 srcStr: "def result = count[pos: bar[pos, :D]]",
                 output: "result"
-            ), toRelData( 4L ));
+            ), ToRelData( 4L ));
 
             // load_json
             // =============================================================================
@@ -230,7 +230,7 @@ namespace Com.RelationalAI
                     def cityRes(x) = exists(pos: json(:address, :city, x))
                 ",
                 output: "cityRes"
-            ), toRelData( "Vancouver" ));
+            ), ToRelData( "Vancouver" ));
 
             Assert.True(api.LoadJSON("json",
                 data: @"
@@ -258,7 +258,7 @@ namespace Com.RelationalAI
             queryResEquals(api.Query(
                 srcStr: "def p = {(1,); (2,); (3,)}",
                 persist: new List<string>() { "p" }
-            ), toRelData());
+            ), ToRelData());
             var cardRels = api.Cardinality("p");
             Assert.AreEqual(cardRels.Count, 1);
             var pCar = cardRels.ElementAt(0);
@@ -266,7 +266,7 @@ namespace Com.RelationalAI
                 pCar,
                 new Relation(
                     new RelKey("p", new List<string>() { "Int64" }),
-                    toRelData( 3L )
+                    ToRelData( 3L )
                 )
             );
             var deleteRes = api.DeleteEdb("p");
