@@ -683,10 +683,7 @@ namespace Com.RelationalAI
 
             return LoadEdb(rel, loadData);
         }
-        public bool LoadEdb(
-            string rel,
-            LoadData value
-        )
+        public bool LoadEdb(string rel, LoadData value)
         {
             _handleNullFieldsForLoadData(value);
             _readFileFromPath(value);
@@ -703,16 +700,12 @@ namespace Com.RelationalAI
             return tp.Name;
         }
 
-        public bool LoadEdb(
-            string relName, AnyValue[][] columns
-        )
+        public bool LoadEdb(string relName, AnyValue[][] columns)
         {
             return LoadEdb(relName, Relation.ToCollection(columns));
         }
 
-        public bool LoadEdb(
-            string relName, ICollection<ICollection<AnyValue>> columns
-        )
+        public bool LoadEdb(string relName, ICollection<ICollection<AnyValue>> columns)
         {
             var rel = new Relation();
             rel.Rel_key = new RelKey(relName);
@@ -727,24 +720,18 @@ namespace Com.RelationalAI
             return LoadEdb(rel);
         }
 
-        public bool loadEdb(
-            RelKey relKey, ICollection<ICollection<AnyValue>> columns
-        )
+        public bool loadEdb(RelKey relKey, ICollection<ICollection<AnyValue>> columns)
         {
             var rel = new Relation();
             rel.Rel_key = relKey;
             rel.Columns = columns;
             return LoadEdb(rel);
         }
-        public bool LoadEdb(
-            Relation value
-        )
+        public bool LoadEdb(Relation value)
         {
             return LoadEdb( new List<Relation>() { value } );
         }
-        public bool LoadEdb(
-            ICollection<Relation> value
-        )
+        public bool LoadEdb(ICollection<Relation> value)
         {
             var action = new ImportAction();
             action.Inputs = value;
