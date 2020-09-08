@@ -22,6 +22,12 @@ namespace Com.RelationalAI
 
         public int DebugLevel = Connection.DEFAULT_DEBUG_LEVEL;
 
+        public GeneratedDelveClient(Connection conn) : base(conn)
+        {
+            _httpClient = DelveClient.GetHttpClient(conn.BaseUrl, conn.VerifySSL);
+            _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings);
+        }
+
         partial void PrepareRequest(Transaction body, HttpClient client, HttpRequestMessage request, string url)
         {
             var uriBuilder = new UriBuilder(request.RequestUri);
@@ -247,7 +253,7 @@ namespace Com.RelationalAI
 
         public string DbName { get { return conn.DbName; } }
 
-        private static HttpClient GetHttpClient(Uri url, bool verifySSL)
+        public static HttpClient GetHttpClient(Uri url, bool verifySSL)
         {
             if( "https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL) {
                 // we keep a single static HttpClient instance and keep reusing it instead
@@ -263,14 +269,11 @@ namespace Com.RelationalAI
             return httpClient;
         }
 
-        private DelveClient(Uri url, bool verifySSL = true) : base(GetHttpClient(url, verifySSL))
-        {
-            this.BaseUrl = url.ToString();
-        }
-        public DelveClient(Connection conn) : this(conn.BaseUrl, conn.VerifySSL)
+        public DelveClient(Connection conn) : base(conn)
         {
             this.conn = conn;
             conn.Client = this;
+            this.BaseUrl = conn.BaseUrl.ToString();
         }
 
         public TransactionResult RunTransaction(Transaction xact)

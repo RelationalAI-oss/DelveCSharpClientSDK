@@ -28,9 +28,12 @@ namespace Com.RelationalAI
     {
         public DelveCloudClient(HttpClient client) : base(client)
         {
+            // This constructor is only here to avoid touching the generated code.
+            // THIS CONSTRUCTOR SHOULD NOT BE USED.
+            throw new InvalidOperationException();
         }
 
-        public DelveCloudClient(CloudConnection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
+        public DelveCloudClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
         {
             this.conn = conn;
             this.conn.Client = this;
