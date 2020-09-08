@@ -16,25 +16,25 @@ namespace Com.RelationalAI
         public const bool DEFAULT_VERIFY_SSL = true;
         public const int DEFAULT_DEBUG_LEVEL = 0;
 
-        public virtual string DbName => throw new NotImplementedException();
+        public virtual string DbName => throw new InvalidOperationException();
 
-        public virtual TransactionMode DefaultOpenMode => throw new NotImplementedException();
+        public virtual TransactionMode DefaultOpenMode => throw new InvalidOperationException();
 
-        public virtual string Scheme => throw new NotImplementedException();
+        public virtual string Scheme => throw new InvalidOperationException();
 
-        public virtual string Host => throw new NotImplementedException();
+        public virtual string Host => throw new InvalidOperationException();
 
-        public virtual int Port => throw new NotImplementedException();
+        public virtual int Port => throw new InvalidOperationException();
 
-        public virtual RAIInfra Infra => throw new NotImplementedException();
+        public virtual RAIInfra Infra => throw new InvalidOperationException();
 
-        public virtual RAIRegion Region => throw new NotImplementedException();
+        public virtual RAIRegion Region => throw new InvalidOperationException();
 
-        public virtual RAICredentials Creds => throw new NotImplementedException();
+        public virtual RAICredentials Creds => throw new InvalidOperationException();
 
-        public virtual bool VerifySSL => throw new NotImplementedException();
+        public virtual bool VerifySSL => throw new InvalidOperationException();
 
-        public virtual string ComputeName => throw new NotImplementedException();
+        public virtual string ComputeName => throw new InvalidOperationException();
 
         public Uri BaseUrl {
             get { return new UriBuilder(this.Scheme, this.Host, this.Port).Uri; }
