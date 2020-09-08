@@ -363,7 +363,15 @@ namespace Com.RelationalAI
     public class ManagementConnection : Connection
     {
 
-        public ManagementConnection(string scheme, string host, int port, RAIInfra infra, RAIRegion region, RAICredentials creds, bool verifySSL)
+        public ManagementConnection(
+                string scheme,
+                string host,
+                int port,
+                RAICredentials creds,
+                bool verifySSL,
+                RAIInfra infra = Connection.DEFAULT_INFRA,
+                RAIRegion region = Connection.DEFAULT_REGION
+            )
         {
             Scheme = scheme;
             Host = host;
@@ -390,10 +398,10 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).ListComputes();
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string displayName, string size, string region, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string computeName, string size, bool dryRun = false)
         {
             Client.conn = this;
-            return ((DelveCloudClient) Client).CreateCompute(displayName, size, region, dryRun);
+            return ((DelveCloudClient) Client).CreateCompute(computeName, size, dryRun);
         }
 
         public DeleteComputeResponseProtocol DeleteCompute(string computeName, bool dryRun = false)
@@ -489,7 +497,7 @@ namespace Com.RelationalAI
             string computeName = null
         ) : base(dbname, defaultOpenMode, scheme, host, port)
         {
-            this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL);
+            this.managementConn = new ManagementConnection(scheme, host, port, creds, verifySSL, infra, region);
             this.ComputeName = computeName;
 
             new DelveClient(this); //to register the connection with a client
