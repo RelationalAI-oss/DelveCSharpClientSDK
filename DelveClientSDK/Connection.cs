@@ -367,6 +367,49 @@ namespace Com.RelationalAI
         public override RAIRegion Region { get; }
         public override RAICredentials Creds { get; }
         public override bool VerifySSL { get; }
+
+        public ListComputesResponseProtocol ListComputes()
+        {
+            Client.conn = this;
+            return ((DelveCloudClient) Client).ListComputes();
+        }
+
+        public CreateComputeResponseProtocol CreateCompute(string displayName, string size, string region, bool dryRun = false)
+        {
+            Client.conn = this;
+            return ((DelveCloudClient) Client).CreateCompute(displayName, size, region, dryRun);
+        }
+
+        public DeleteComputeResponseProtocol DeleteCompute(string computeName, bool dryRun = false)
+        {
+            Client.conn = this;
+            return ((DelveCloudClient) Client).DeleteCompute(computeName, dryRun);
+        }
+
+        public ListUsersResponseProtocol ListUsers()
+        {
+            Client.conn = this;
+            return ((DelveCloudClient) Client).ListUsers();
+        }
+
+        public CreateUserResponseProtocol CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
+        {
+            Client.conn = this;
+            return ((DelveCloudClient) Client).CreateUser(username, firstName, lastName, email, dryRun);
+        }
+
+        public ListDatabasesResponseProtocol ListDatabases()
+        {
+            Client.conn = this;
+            return ((DelveCloudClient) Client).ListDatabases();
+        }
+
+        public void RemoveDefaultCompute(string dbname)
+        {
+            Client.conn = this;
+            ((DelveCloudClient) Client).RemoveDefaultCompute(dbname);
+        }
+
     }
 
     /// <summary>
@@ -440,5 +483,11 @@ namespace Com.RelationalAI
         public override RAICredentials Creds { get { return managementConn.Creds; } }
         public override bool VerifySSL { get { return managementConn.VerifySSL; } }
         public override string ComputeName { get; }
+
+        public bool CreateDatabase(bool overwrite = false)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).CreateDatabase(overwrite);
+        }
     }
 }
