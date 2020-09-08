@@ -33,6 +33,7 @@ namespace Com.RelationalAI
         public DelveCloudClient(CloudConnection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
         {
             this.conn = conn;
+            this.conn.Client = this;
             this.BaseUrl = conn.BaseUrl.ToString();
         }
 

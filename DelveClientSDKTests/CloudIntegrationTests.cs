@@ -10,15 +10,15 @@ namespace Com.RelationalAI
         {
         }
 
-        public static void createCloudConnection(out DelveClient api) {
+        public static void createCloudConnection(out CloudConnection conn) {
             string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
 
-            createCloudConnection(dbname, out api);
+            createCloudConnection(dbname, out conn);
         }
 
-        public static void createCloudConnection(string dbname, out DelveClient api) {
+        public static void createCloudConnection(string dbname, out CloudConnection conn) {
             string computeName = dbname;
-            var conn = new CloudConnection(
+            conn = new CloudConnection(
                 dbname,
                 scheme: "https",
                 host: "azure-ssh.relationalai.com",
@@ -27,8 +27,7 @@ namespace Com.RelationalAI
                 computeName: computeName
             );
 
-            api = new DelveClient(conn);
-            api.debugLevel = 1;
+            new DelveClient(conn); //to register the connection with a client
         }
 
         [Test]

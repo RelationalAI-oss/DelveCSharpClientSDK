@@ -13,7 +13,7 @@ namespace DelveClientSDKSamples
             Connection conn = new LocalConnection(dbname);
 
             DelveClient client = new DelveClient(conn);
-            client.debugLevel = 1;
+            client.DebugLevel = 1;
 
             client.CreateDatabase(true);
 

@@ -39,100 +39,100 @@ namespace Com.RelationalAI
             }
         }
 
-        public static void testInstallSource(DelveClient api, string name, bool installSourceRes)
+        public static void testInstallSource(CloudConnection conn, string name, bool installSourceRes)
         {
             Assert.True(installSourceRes);
-            Assert.IsEmpty(api.CollectProblems());
-            Assert.True(api.ListSource().ContainsKey(name));
+            Assert.IsEmpty(conn.CollectProblems());
+            Assert.True(conn.ListSource().ContainsKey(name));
         }
-        private static void testInstallSource(DelveClient api, String name, String srcStr)
+        private static void testInstallSource(CloudConnection conn, String name, String srcStr)
         {
-            testInstallSource(api, name, api.InstallSource(name, srcStr));
+            testInstallSource(conn, name, conn.InstallSource(name, srcStr));
         }
-        private static void testInstallSource(DelveClient api, String name, String path, String srcStr)
+        private static void testInstallSource(CloudConnection conn, String name, String path, String srcStr)
         {
-            testInstallSource(api, name, api.InstallSource(name, path, srcStr));
+            testInstallSource(conn, name, conn.InstallSource(name, path, srcStr));
         }
-        private static void testInstallSource(DelveClient api, Source src, string name=null)
+        private static void testInstallSource(CloudConnection conn, Source src, string name=null)
         {
-            testInstallSource(api, name == null ? src.Name : name, api.InstallSource(src));
+            testInstallSource(conn, name == null ? src.Name : name, conn.InstallSource(src));
         }
 
-        public delegate void ConnFunc(out DelveClient api);
+        public delegate void ConnFunc(out CloudConnection conn);
         public static void RunAllTests(ConnFunc connFunc)
         {
-            DelveClient api;
-            connFunc(out api);
+            CloudConnection conn;
+            connFunc(out conn);
 
             // create_database
             // =============================================================================
-            Assert.IsTrue(api.CreateDatabase());
-            Assert.IsFalse(api.CreateDatabase());
+            Assert.IsTrue(conn.CreateDatabase());
+            Assert.IsFalse(conn.CreateDatabase());
 
             // install_source
             // =============================================================================
-            testInstallSource(api, "name", "def foo = 1");
+            testInstallSource(conn, "name", "def foo = 1");
 
 
             var src3 = new Source("name", "def foo = ");
-            Assert.True(api.InstallSource(src3));
-            Assert.AreEqual(api.CollectProblems().Count, 2);
+            Assert.True(conn.InstallSource(src3));
+            Assert.AreEqual(conn.CollectProblems().Count, 2);
 
-            testInstallSource(api, "name", "def foo = 1");
+            testInstallSource(conn, "name", "def foo = 1");
 
             try {
                 System.IO.File.WriteAllText(@"test.delve", "def foo = 1");
 
                 var src4 = new Source(@"test.delve");
-                testInstallSource(api, src4, "test");
+                testInstallSource(conn, src4, "test");
 
 
                 var src5 = new Source(src4.Path);
                 src5.Name = "not_" + src4.Name;
-                testInstallSource(api, src5);
+                testInstallSource(conn, src5);
             } finally {
                 System.IO.File.Delete(@"test.delve");
             }
 
             // delete_source
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Assert.True(api.DeleteSource("stdlib"));
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Assert.True(conn.DeleteSource("stdlib"));
 
             // list_source
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Console.WriteLine("api.listSource().Keys: " + DictionaryToString(api.ListSource()));
-            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(api.ListSource().Keys));
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Console.WriteLine("conn.listSource().Keys: " + DictionaryToString(conn.ListSource()));
+            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(conn.ListSource().Keys));
 
             // query
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
+            connFunc(out conn);
+            conn.CreateDatabase();
 
-            queryResEquals(api.Query(
+            queryResEquals(conn.Query(
                 srcStr: "def bar = 2",
                 output: "bar"
             ), ToRelData( 2L ));
 
-            queryResEquals(api.Query(
+            queryResEquals(conn.Query(
                 srcStr: "def p = {(1,); (2,); (3,)}",
                 output: "p"
             ), ToRelData( 1L, 2L, 3L ));
 
-            queryResEquals(api.Query(
+            queryResEquals(conn.Query(
                 srcStr: "def p = {(1.1,); (2.2,); (3.4,)}",
                 output: "p"
             ), ToRelData( 1.1D, 2.2D, 3.4D ));
 
-            queryResEquals(api.Query(
+            queryResEquals(conn.Query(
                 srcStr: "def p = {(parse_decimal[64, 2, \"1.1\"],); (parse_decimal[64, 2, \"2.2\"],); (parse_decimal[64, 2, \"3.4\"],)}",
                 output: "p"
             ), ToRelData( 1.1D, 2.2D, 3.4D ));
 
-            queryResEquals(api.Query(
+            queryResEquals(conn.Query(
                 srcStr: "def p = {(1, 5); (2, 7); (3, 9)}",
                 output: "p"
             ), new AnyValue[][] { new AnyValue[] { 1L, 2L, 3L }, new AnyValue[] { 5L, 7L, 9L } });
@@ -140,37 +140,37 @@ namespace Com.RelationalAI
             // branch_database
             // =============================================================================
 
-            DelveClient api2;
-            connFunc(out api);
-            connFunc(out api2);
+            CloudConnection conn2;
+            connFunc(out conn);
+            connFunc(out conn2);
 
-            api.CreateDatabase();
-            testInstallSource(api, "name", "def x = {(1,); (2,); (3,)}");
-            queryResEquals(api.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
+            conn.CreateDatabase();
+            testInstallSource(conn, "name", "def x = {(1,); (2,); (3,)}");
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
             // Branch from conn to conn2
-            api2.BranchDatabase(api.DbName);
-            queryResEquals(api2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
+            conn2.BranchDatabase(conn.DbName);
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
-            testInstallSource(api, "name", "def x = {(1,); (2,); (3,); (4,)}");
-            queryResEquals(api.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
-            queryResEquals(api2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
+            testInstallSource(conn, "name", "def x = {(1,); (2,); (3,); (4,)}");
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
-            testInstallSource(api2, "name", "def x = {(1,); (2,); (3,); (4,); (5,)}");
-            queryResEquals(api2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L, 5L ));
-            queryResEquals(api.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            testInstallSource(conn2, "name", "def x = {(1,); (2,); (3,); (4,); (5,)}");
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L, 5L ));
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
 
             // update_edb
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            api.LoadEdb("p", ToRelData( 1L, 2L, 3L ));
-            var pQuery = api.Query(output: "p");
+            connFunc(out conn);
+            conn.CreateDatabase();
+            conn.LoadEdb("p", ToRelData( 1L, 2L, 3L ));
+            var pQuery = conn.Query(output: "p");
             queryResEquals(pQuery, ToRelData( 1L, 2L, 3L ));
 
             var pRelKey = pQuery.First().Key;
 
-            api.UpdateEdb(pRelKey, updates: new List<Tuple<AnyValue, AnyValue>>() {
+            conn.UpdateEdb(pRelKey, updates: new List<Tuple<AnyValue, AnyValue>>() {
                 new Tuple<AnyValue, AnyValue>(new int[] { 1 } , +1),
                 new Tuple<AnyValue, AnyValue>(new int[] { 3 } , -1),
                 new Tuple<AnyValue, AnyValue>(new int[] { 8 } , -1),
@@ -180,13 +180,13 @@ namespace Com.RelationalAI
                 new Tuple<AnyValue, AnyValue>(new int[] { 5 } , +1),
             });
 
-            queryResEquals(api.Query(output: "p"), ToRelData( 1L, 2L, 5L ));
+            queryResEquals(conn.Query(output: "p"), ToRelData( 1L, 2L, 5L ));
 
             // load_csv
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Assert.True(api.LoadCSV("csv",
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Assert.True(conn.LoadCSV("csv",
                 schema: new CSVFileSchema("Int64", "Int64", "Int64"),
                 data: @"
                     A,B,C
@@ -194,12 +194,12 @@ namespace Com.RelationalAI
                     4,5,6
                 "
             ));
-            queryResEquals(api.Query(
+            queryResEquals(conn.Query(
                 srcStr: "def result = count[pos: csv[pos, :A]]",
                 output: "result"
             ), ToRelData( 2L ));
 
-            Assert.True(api.LoadCSV("bar",
+            Assert.True(conn.LoadCSV("bar",
                 syntax: new CSVFileSyntax(delim: "|"),
                 schema: new CSVFileSchema("Int64", "Int64", "Int64"),
                 data: @"
@@ -210,56 +210,56 @@ namespace Com.RelationalAI
                     1|2|3
                 "
             ));
-            queryResEquals(api.Query(
+            queryResEquals(conn.Query(
                 srcStr: "def result = count[pos: bar[pos, :D]]",
                 output: "result"
             ), ToRelData( 4L ));
 
             // load_json
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Assert.True(api.LoadJSON("json",
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Assert.True(conn.LoadJSON("json",
                 data: @"
                     { ""address"": { ""city"": ""Vancouver"", ""state"": ""BC"" } }
                 "
             ));
-            Assert.AreEqual(api.ListEdb().Count, 2);
-            queryResEquals(api.Query(
+            Assert.AreEqual(conn.ListEdb().Count, 2);
+            queryResEquals(conn.Query(
                 srcStr: @"
                     def cityRes(x) = exists(pos: json(:address, :city, x))
                 ",
                 output: "cityRes"
             ), ToRelData( "Vancouver" ));
 
-            Assert.True(api.LoadJSON("json",
+            Assert.True(conn.LoadJSON("json",
                 data: @"
                     { ""name"": ""Martin"", ""height"": 185.5 }
                 "
             ));
-            Assert.AreEqual(api.ListEdb().Count, 4);
+            Assert.AreEqual(conn.ListEdb().Count, 4);
 
             // list_edb
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Assert.AreEqual(api.ListEdb().Count, 0);// list_edb
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Assert.AreEqual(conn.ListEdb().Count, 0);// list_edb
 
             // enable_library
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Assert.True(api.EnableLibrary("stdlib"));
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Assert.True(conn.EnableLibrary("stdlib"));
 
             // cardinality
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            queryResEquals(api.Query(
+            connFunc(out conn);
+            conn.CreateDatabase();
+            queryResEquals(conn.Query(
                 srcStr: "def p = {(1,); (2,); (3,)}",
                 persist: new List<string>() { "p" }
             ), ToRelData());
-            var cardRels = api.Cardinality("p");
+            var cardRels = conn.Cardinality("p");
             Assert.AreEqual(cardRels.Count, 1);
             var pCar = cardRels.ElementAt(0);
             Assert.AreEqual(
@@ -269,24 +269,24 @@ namespace Com.RelationalAI
                     ToRelData( 3L )
                 )
             );
-            var deleteRes = api.DeleteEdb("p");
+            var deleteRes = conn.DeleteEdb("p");
             Assert.AreEqual(deleteRes.Count, 1);
             Assert.AreEqual(deleteRes.ElementAt(0), new RelKey("p", new List<string>() { "Int64" }));
 
             // Collect problems
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Assert.AreEqual(api.CollectProblems().Count, 0);
-            api.InstallSource(new Source("name", "", "def foo = "));
-            Assert.AreEqual(api.CollectProblems().Count, 2);
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Assert.AreEqual(conn.CollectProblems().Count, 0);
+            conn.InstallSource(new Source("name", "", "def foo = "));
+            Assert.AreEqual(conn.CollectProblems().Count, 2);
 
             // Set options
             // =============================================================================
-            connFunc(out api);
-            api.CreateDatabase();
-            Assert.True(api.Configure(debug: true));
-            Assert.True(api.Configure(debug: false));
+            connFunc(out conn);
+            conn.CreateDatabase();
+            Assert.True(conn.Configure(debug: true));
+            Assert.True(conn.Configure(debug: false));
         }
     }
 }

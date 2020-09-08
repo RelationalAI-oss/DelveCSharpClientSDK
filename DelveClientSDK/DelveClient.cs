@@ -20,7 +20,7 @@ namespace Com.RelationalAI
         public const string JSON_CONTENT_TYPE = "application/json";
         public const string CSV_CONTENT_TYPE = "text/csv";
 
-        public int debugLevel = 0;
+        public int DebugLevel = Connection.DEFAULT_DEBUG_LEVEL;
 
         partial void PrepareRequest(Transaction body, HttpClient client, HttpRequestMessage request, string url)
         {
@@ -45,7 +45,7 @@ namespace Com.RelationalAI
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
-            raiRequest.Sign(debugLevel: debugLevel);
+            raiRequest.Sign(debugLevel: DebugLevel);
         }
 
         private string BoolStr(bool val) {
@@ -259,35 +259,25 @@ namespace Com.RelationalAI
             return httpClient;
         }
 
-        public DelveClient(
-            string scheme = Connection.DEFAULT_SCHEME,
-            string host = Connection.DEFAULT_HOST,
-            int port = Connection.DEFAULT_PORT,
-            bool verifySSL = Connection.DEFAULT_VERIFY_SSL
-        ) : this(new UriBuilder(scheme, host, port).Uri, verifySSL)
-        {
-        }
-        public DelveClient(string url, bool verifySSL = true) : this(new Uri(url), verifySSL)
-        {
-        }
-        public DelveClient(Uri url, bool verifySSL = true) : base(GetHttpClient(url, verifySSL))
+        private DelveClient(Uri url, bool verifySSL = true) : base(GetHttpClient(url, verifySSL))
         {
             this.BaseUrl = url.ToString();
         }
         public DelveClient(Connection conn) : this(conn.BaseUrl, conn.VerifySSL)
         {
             this.conn = conn;
+            conn.Client = this;
         }
 
         public TransactionResult RunTransaction(Transaction xact)
         {
-            if(this.debugLevel > 0) {
+            if(this.DebugLevel > 0) {
                 Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
             }
             Task<TransactionResult> responseTask = this.TransactionAsync(xact);
             TransactionResult response = responseTask.Result;
 
-            if(this.debugLevel > 0) {
+            if(this.DebugLevel > 0) {
                 Console.WriteLine("TransactionOutput: " + JObject.FromObject(response).ToString());
             }
             return response;
@@ -719,7 +709,7 @@ namespace Com.RelationalAI
             return LoadEdb(rel);
         }
 
-        public bool loadEdb(RelKey relKey, ICollection<ICollection<AnyValue>> columns)
+        public bool LoadEdb(RelKey relKey, ICollection<ICollection<AnyValue>> columns)
         {
             var rel = new Relation();
             rel.Rel_key = relKey;

@@ -38,7 +38,7 @@ namespace DelveClientSDKSamples
             this.DelveClient = new DelveClient(conn: this.CloudConn);
             // we are working on merging both clients into single one
 
-            this.DelveClient.debugLevel = 1;
+            this.DelveClient.DebugLevel = 1;
         }
 
         /*

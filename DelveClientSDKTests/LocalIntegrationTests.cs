@@ -8,22 +8,22 @@ namespace Com.RelationalAI
 {
     public class UnitTests
     {
-        private DelveClient cloudApi;
+        private CloudConnection cloudConn;
 
         [SetUp]
         public void Setup()
         {
-            createCloudConnection("testcsharpclient", out cloudApi);
+            createCloudConnection("testcsharpclient", out cloudConn);
         }
 
-        public static void createCloudConnection(out DelveClient api) {
+        public static void createCloudConnection(out CloudConnection conn) {
             string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
 
-            createCloudConnection(dbname, out api);
+            createCloudConnection(dbname, out conn);
         }
 
-        public static void createCloudConnection(string dbname, out DelveClient api) {
-            var conn = new CloudConnection(
+        public static void createCloudConnection(string dbname, out CloudConnection conn) {
+            conn = new CloudConnection(
                 new LocalConnection(dbname),
                 creds: new RAICredentials(
                     "e3536f8d-cbc6-4ed8-9de6-74cf4cb724a1",
@@ -31,8 +31,7 @@ namespace Com.RelationalAI
                 ),
                 verifySSL: false
             );
-            api = new DelveClient(conn);
-            api.debugLevel = 1;
+            new DelveClient(conn); //to register the connection with a client
         }
 
         [Test]
@@ -51,9 +50,9 @@ namespace Com.RelationalAI
             httpReq.Content = new StringContent("{}");
             httpReq.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             httpReq.Headers.Host = "127.0.0.1";
-            RAIRequest req = new RAIRequest(httpReq, cloudApi.conn, service: "database+list");
+            RAIRequest req = new RAIRequest(httpReq, cloudConn, service: "database+list");
 
-            req.Sign(DateTime.Parse("2020-05-04T10:36:00"), debugLevel: cloudApi.debugLevel);
+            req.Sign(DateTime.Parse("2020-05-04T10:36:00"), debugLevel: cloudConn.DebugLevel);
 
             string output = string.Join(
                 "\n",

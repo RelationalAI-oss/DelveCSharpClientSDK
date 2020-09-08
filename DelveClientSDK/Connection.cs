@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Com.RelationalAI
 {
+    using AnyValue = System.Object;
+
     public abstract class Connection
     {
         public const string DEFAULT_SCHEME = "http";
@@ -11,6 +14,7 @@ namespace Com.RelationalAI
         public const RAIInfra DEFAULT_INFRA = RAIInfra.AZURE;
         public const RAIRegion DEFAULT_REGION = RAIRegion.US_EAST;
         public const bool DEFAULT_VERIFY_SSL = true;
+        public const int DEFAULT_DEBUG_LEVEL = 0;
 
         public virtual string DbName => throw new NotImplementedException();
 
@@ -35,6 +39,10 @@ namespace Com.RelationalAI
         public Uri BaseUrl {
             get { return new UriBuilder(this.Scheme, this.Host, this.Port).Uri; }
         }
+
+        public DelveCloudClient Client { get; set; }
+
+        public int DebugLevel { get{ return Client is DelveClient ? ((DelveClient) Client).DebugLevel : DEFAULT_DEBUG_LEVEL; } }
     }
 
     /// <summary>
@@ -69,6 +77,273 @@ namespace Com.RelationalAI
         public override string Scheme { get; }
         public override string Host { get; }
         public override int Port { get; }
+
+        public bool BranchDatabase(string sourceDbname)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).BranchDatabase(sourceDbname);
+        }
+
+        public bool CreateDatabase(bool overwrite = false)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).CreateDatabase(overwrite);
+        }
+
+        public bool InstallSource(Source src)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).InstallSource(src);
+        }
+
+        public bool InstallSource(String name, String srcStr)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).InstallSource(name, srcStr);
+        }
+
+        public bool InstallSource(String name, String path, String srcStr)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).InstallSource(name, path, srcStr);
+        }
+
+        public bool InstallSource(ICollection<Source> srcList)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).InstallSource(srcList);
+        }
+
+        public bool DeleteSource(ICollection<string> srcNameList)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).DeleteSource(srcNameList);
+        }
+
+        public bool DeleteSource(string srcName)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).DeleteSource(srcName);
+        }
+
+        public IDictionary<string, Source> ListSource()
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).ListSource();
+        }
+
+        public IDictionary<RelKey, Relation> Query(
+            string output,
+            string name = "query",
+            string path = null,
+            string srcStr = "",
+            ICollection<Relation> inputs = null,
+            ICollection<string> persist = null,
+            bool? isReadOnly = null,
+            TransactionMode? mode = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).Query(output, name, path, srcStr, inputs, persist, isReadOnly, mode);
+        }
+
+        public IDictionary<RelKey, Relation> Query(
+            string name = "query",
+            string path = null,
+            string srcStr = "",
+            ICollection<Relation> inputs = null,
+            ICollection<string> outputs = null,
+            ICollection<string> persist = null,
+            bool? isReadOnly = null,
+            TransactionMode? mode = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).Query(name, path, srcStr, inputs, outputs, persist, isReadOnly, mode);
+        }
+
+        public IDictionary<RelKey, Relation> Query(
+            Source src = null,
+            ICollection<Relation> inputs = null,
+            ICollection<string> outputs = null,
+            ICollection<string> persist = null,
+            bool? isReadOnly = null,
+            TransactionMode? mode = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).Query(src, inputs, outputs, persist, isReadOnly, mode);
+        }
+
+        public bool UpdateEdb(
+            RelKey rel,
+            ICollection<Tuple<AnyValue, AnyValue>> updates = null,
+            ICollection<Tuple<AnyValue, AnyValue>> delta = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).UpdateEdb(rel, updates, delta);
+        }
+
+        public LoadData JsonString(
+            string data,
+            AnyValue key = null,
+            FileSyntax syntax = null,
+            FileSchema schema = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).JsonString(data, key, syntax, schema);
+        }
+
+        public LoadData JsonFile(
+            string filePath,
+            AnyValue key = null,
+            FileSyntax syntax = null,
+            FileSchema schema = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).JsonString(filePath, key, syntax, schema);
+        }
+
+        public LoadData CsvString(
+            string data,
+            AnyValue key = null,
+            FileSyntax syntax = null,
+            FileSchema schema = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).JsonString(data, key, syntax, schema);
+        }
+
+        public LoadData CsvFile(
+            string filePath,
+            AnyValue key = null,
+            FileSyntax syntax = null,
+            FileSchema schema = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).CsvFile(filePath, key, syntax, schema);
+        }
+
+        public bool LoadEdb(
+            string rel,
+            string contentType,
+            string data = null,
+            string path = null,
+            AnyValue key = null,
+            FileSyntax syntax = null,
+            FileSchema schema = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadEdb(rel, contentType, data, path, key, syntax, schema);
+        }
+
+        public bool LoadEdb(string rel, LoadData value)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadEdb(rel, value);
+        }
+
+        public bool LoadEdb(string relName, AnyValue[][] columns)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadEdb(relName, columns);
+        }
+
+        public bool LoadEdb(string relName, ICollection<ICollection<AnyValue>> columns)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadEdb(relName, columns);
+        }
+
+        public bool LoadEdb(RelKey relKey, ICollection<ICollection<AnyValue>> columns)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadEdb(relKey, columns);
+        }
+
+        public bool LoadEdb(Relation value)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadEdb(value);
+        }
+
+        public bool LoadEdb(ICollection<Relation> value)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadEdb(value);
+        }
+
+        public bool LoadCSV(
+            string rel,
+            string data = null,
+            string path = null,
+            AnyValue[] key = null,
+            FileSyntax syntax = null,
+            FileSchema schema = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadCSV(rel, data, path, key, syntax, schema);
+        }
+
+        public bool LoadJSON(
+            string rel,
+            string data = null,
+            string path = null,
+            AnyValue[] key = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).LoadJSON(rel, data, path, key);
+        }
+
+        public ICollection<RelKey> ListEdb(string relName = null)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).ListEdb(relName);
+        }
+
+        public ICollection<RelKey> DeleteEdb(string relName)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).DeleteEdb(relName);
+        }
+
+        public bool EnableLibrary(string srcName)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).EnableLibrary(srcName);
+        }
+
+        public ICollection<Relation> Cardinality(string relName = null)
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).Cardinality(relName);
+        }
+
+        public ICollection<AbstractProblem> CollectProblems()
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).CollectProblems();
+        }
+
+        public bool Configure(
+            bool? debug = null,
+            bool? debugTrace = null,
+            bool? broken = null,
+            bool? silent = null,
+            bool? abortOnError = null
+        )
+        {
+            Client.conn = this;
+            return ((DelveClient) Client).Configure(debug, debugTrace, broken, silent, abortOnError);
+        }
     }
 
     public class ManagementConnection : Connection
@@ -107,7 +382,7 @@ namespace Com.RelationalAI
     /// will be picked to fulfill the transaction. A default compute can be set through
     /// `createDatabase` (implicitly) or through `setDefaultCompute` (explicitly).
     /// </summary>
-    public class CloudConnection : Connection
+    public class CloudConnection : LocalConnection
     {
         /// <summary>
         /// CloudConnection constructor
@@ -153,20 +428,13 @@ namespace Com.RelationalAI
             RAICredentials creds = null,
             bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
             string computeName = null
-        )
+        ) : base(dbname, defaultOpenMode, scheme, host, port)
         {
-            this.DbName = dbname;
-            this.DefaultOpenMode = defaultOpenMode;
             this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL);
             this.ComputeName = computeName;
         }
 
-        public override string DbName { get; }
-        public override TransactionMode DefaultOpenMode { get; }
         private ManagementConnection managementConn { get; }
-        public override string Scheme { get { return managementConn.Scheme; } }
-        public override string Host { get { return managementConn.Host; } }
-        public override int Port { get { return managementConn.Port; } }
         public override RAIInfra Infra { get { return managementConn.Infra; } }
         public override RAIRegion Region { get { return managementConn.Region; } }
         public override RAICredentials Creds { get { return managementConn.Creds; } }
