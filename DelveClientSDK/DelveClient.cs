@@ -267,6 +267,7 @@ namespace Com.RelationalAI
         {
             this.conn = conn;
             conn.Client = this;
+            conn.Client.BaseUrl = this.BaseUrl;
         }
 
         public TransactionResult RunTransaction(Transaction xact)
