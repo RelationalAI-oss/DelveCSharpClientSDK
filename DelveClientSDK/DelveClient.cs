@@ -15,12 +15,11 @@ using System.Web;
 namespace Com.RelationalAI
 {
     using AnyValue = System.Object;
-    public partial class GeneratedDelveClient
+    public partial class GeneratedDelveClient : DelveCloudClient
     {
         public const string JSON_CONTENT_TYPE = "application/json";
         public const string CSV_CONTENT_TYPE = "text/csv";
 
-        public Connection conn {get; set;}
         public int debugLevel = 0;
 
         partial void PrepareRequest(Transaction body, HttpClient client, HttpRequestMessage request, string url)

@@ -2,40 +2,35 @@
 
 namespace Com.RelationalAI
 {
-    public class Connection
+    public abstract class Connection
     {
-        public const TransactionMode DEFAULT_OPEN_MODE = TransactionMode.OPEN;
         public const string DEFAULT_SCHEME = "http";
         public const string DEFAULT_HOST = "127.0.0.1";
         public const int DEFAULT_PORT = 8010;
+        public const TransactionMode DEFAULT_OPEN_MODE = TransactionMode.OPEN;
         public const RAIInfra DEFAULT_INFRA = RAIInfra.AZURE;
         public const RAIRegion DEFAULT_REGION = RAIRegion.US_EAST;
         public const bool DEFAULT_VERIFY_SSL = true;
 
-        public Connection(
-            string dbname,
-            TransactionMode defaultOpenMode = DEFAULT_OPEN_MODE,
-            string scheme = DEFAULT_SCHEME,
-            string host = DEFAULT_HOST,
-            int port = DEFAULT_PORT)
-        {
-            this.DbName = dbname;
-            this.DefaultOpenMode = defaultOpenMode;
-            this.Scheme = scheme;
-            this.Host = host;
-            this.Port = port;
-        }
+        public virtual string DbName => throw new NotImplementedException();
 
-        public string DbName { get; }
-        public TransactionMode DefaultOpenMode { get; }
-        public string Scheme { get; }
-        public string Host { get; }
-        public int Port { get; }
-        public virtual RAIInfra Infra { get{ return DEFAULT_INFRA; } }
-        public virtual RAIRegion Region { get{ return DEFAULT_REGION; } }
-        public virtual RAICredentials Creds { get{ return null; } }
-        public virtual bool VerifySSL { get{ return DEFAULT_VERIFY_SSL; } }
-        public virtual string ComputeName { get{ return null; } }
+        public virtual TransactionMode DefaultOpenMode => throw new NotImplementedException();
+
+        public virtual string Scheme => throw new NotImplementedException();
+
+        public virtual string Host => throw new NotImplementedException();
+
+        public virtual int Port => throw new NotImplementedException();
+
+        public virtual RAIInfra Infra => throw new NotImplementedException();
+
+        public virtual RAIRegion Region => throw new NotImplementedException();
+
+        public virtual RAICredentials Creds => throw new NotImplementedException();
+
+        public virtual bool VerifySSL => throw new NotImplementedException();
+
+        public virtual string ComputeName => throw new NotImplementedException();
 
         public Uri BaseUrl {
             get { return new UriBuilder(this.Scheme, this.Host, this.Port).Uri; }
@@ -47,7 +42,6 @@ namespace Com.RelationalAI
     /// </summary>
     public class LocalConnection : Connection
     {
-
         /// <summary>
         /// Connection working with databases in a locally running Delve server.
         /// </summary>
@@ -61,9 +55,43 @@ namespace Com.RelationalAI
             TransactionMode defaultOpenMode = DEFAULT_OPEN_MODE,
             string scheme = DEFAULT_SCHEME,
             string host = DEFAULT_HOST,
-            int port = DEFAULT_PORT) : base(dbname, defaultOpenMode, scheme, host, port)
+            int port = DEFAULT_PORT)
         {
+            this.DbName = dbname;
+            this.DefaultOpenMode = defaultOpenMode;
+            this.Scheme = scheme;
+            this.Host = host;
+            this.Port = port;
         }
+
+        public override string DbName { get; }
+        public override TransactionMode DefaultOpenMode { get; }
+        public override string Scheme { get; }
+        public override string Host { get; }
+        public override int Port { get; }
+    }
+
+    public class ManagementConnection : Connection
+    {
+
+        public ManagementConnection(string scheme, string host, int port, RAIInfra infra, RAIRegion region, RAICredentials creds, bool verifySSL)
+        {
+            Scheme = scheme;
+            Host = host;
+            Port = port;
+            Infra = infra;
+            Region = region;
+            Creds = creds;
+            VerifySSL = verifySSL;
+        }
+
+        public override string Scheme { get; }
+        public override string Host { get; }
+        public override int Port { get; }
+        public override RAIInfra Infra { get; }
+        public override RAIRegion Region { get; }
+        public override RAICredentials Creds { get; }
+        public override bool VerifySSL { get; }
     }
 
     /// <summary>
@@ -92,10 +120,10 @@ namespace Com.RelationalAI
         /// <param name="computeName">Compute to be used for this connection. If not specified, the default compute will be used.</param>
         public CloudConnection(
             Connection conn,
-            RAIInfra infra = DEFAULT_INFRA,
-            RAIRegion region = DEFAULT_REGION,
+            RAIInfra infra = Connection.DEFAULT_INFRA,
+            RAIRegion region = Connection.DEFAULT_REGION,
             RAICredentials creds = null,
-            bool verifySSL = DEFAULT_VERIFY_SSL,
+            bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
             string computeName = null
         ) : this(conn.DbName, conn.DefaultOpenMode, conn.Scheme, conn.Host, conn.Port, infra, region, creds, verifySSL, computeName)
         {
@@ -116,28 +144,33 @@ namespace Com.RelationalAI
         /// <param name="computeName">Compute to be used for this connection. If not specified, the default compute will be used.</param>
         public CloudConnection(
             string dbname,
-            TransactionMode defaultOpenMode = DEFAULT_OPEN_MODE,
-            string scheme = DEFAULT_SCHEME,
-            string host = DEFAULT_HOST,
-            int port = DEFAULT_PORT,
-            RAIInfra infra = DEFAULT_INFRA,
-            RAIRegion region = DEFAULT_REGION,
+            TransactionMode defaultOpenMode = Connection.DEFAULT_OPEN_MODE,
+            string scheme = Connection.DEFAULT_SCHEME,
+            string host = Connection.DEFAULT_HOST,
+            int port = Connection.DEFAULT_PORT,
+            RAIInfra infra = Connection.DEFAULT_INFRA,
+            RAIRegion region = Connection.DEFAULT_REGION,
             RAICredentials creds = null,
-            bool verifySSL = DEFAULT_VERIFY_SSL,
+            bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
             string computeName = null
-        ) : base(dbname, defaultOpenMode, scheme, host, port)
+        )
         {
-            this.Infra = infra;
-            this.Region = region;
-            this.Creds = creds == null ? RAICredentials.FromFile() : creds;
-            this.VerifySSL = verifySSL;
+            this.DbName = dbname;
+            this.DefaultOpenMode = defaultOpenMode;
+            this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL);
             this.ComputeName = computeName;
         }
 
-        public override RAIInfra Infra { get; }
-        public override RAIRegion Region { get; }
-        public override RAICredentials Creds { get; }
-        public override bool VerifySSL { get; }
+        public override string DbName { get; }
+        public override TransactionMode DefaultOpenMode { get; }
+        private ManagementConnection managementConn { get; }
+        public override string Scheme { get { return managementConn.Scheme; } }
+        public override string Host { get { return managementConn.Host; } }
+        public override int Port { get { return managementConn.Port; } }
+        public override RAIInfra Infra { get { return managementConn.Infra; } }
+        public override RAIRegion Region { get { return managementConn.Region; } }
+        public override RAICredentials Creds { get { return managementConn.Creds; } }
+        public override bool VerifySSL { get { return managementConn.VerifySSL; } }
         public override string ComputeName { get; }
     }
 }

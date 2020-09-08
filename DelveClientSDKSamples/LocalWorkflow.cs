@@ -10,7 +10,7 @@ namespace DelveClientSDKSamples
         public void runLocalWorkflow()
         {
             string dbname = "localcsharpdatabase";
-            Connection conn = new Connection(dbname);
+            Connection conn = new LocalConnection(dbname);
 
             DelveClient client = new DelveClient(conn);
             client.debugLevel = 1;
@@ -33,7 +33,7 @@ namespace DelveClientSDKSamples
 
             client.Query(
                 srcStr: @"
-                    def vertex(id) = exists(pos: edge_csv(pos, :src, id) or edge_csv(pos, :dest, id))                                                                                                                                           
+                    def vertex(id) = exists(pos: edge_csv(pos, :src, id) or edge_csv(pos, :dest, id))
                     def edge(a, b) = exists(pos: edge_csv(pos, :src, a) and edge_csv(pos, :dest, b))
                 ",
                 persist: new List<string>() { "vertex", "edge" },
@@ -41,9 +41,9 @@ namespace DelveClientSDKSamples
             );
             // Jaccard Similarity Query
             string queryString = @"
-                def uedge(a, b) = edge(a, b) or edge(b, a)                                                                                                                                                                                      
-                def tmp(a, b, x) = uedge(x,a) and uedge(x,b) and a > b                                                                                                              
-                def jaccard_similarity(a,b,v) = (count[x : tmp(a,b,x)] / count[x: (uedge(a, x) or uedge(b, x)) and tmp(a,b,_)])(v)                                                                                                         
+                def uedge(a, b) = edge(a, b) or edge(b, a)
+                def tmp(a, b, x) = uedge(x,a) and uedge(x,b) and a > b
+                def jaccard_similarity(a,b,v) = (count[x : tmp(a,b,x)] / count[x: (uedge(a, x) or uedge(b, x)) and tmp(a,b,_)])(v)
 
                 def result = jaccard_similarity
             ";

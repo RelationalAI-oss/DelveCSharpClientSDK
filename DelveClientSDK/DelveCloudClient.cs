@@ -26,6 +26,10 @@ namespace Com.RelationalAI
 
     public class DelveCloudClient : GeneratedDelveCloudClient
     {
+        public DelveCloudClient(HttpClient client) : base(client)
+        {
+        }
+
         public DelveCloudClient(CloudConnection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
         {
             this.conn = conn;
@@ -87,4 +91,3 @@ namespace Com.RelationalAI
         }
     }
 }
-

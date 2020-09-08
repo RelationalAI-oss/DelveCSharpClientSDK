@@ -13,7 +13,6 @@ namespace DelveClientSDKSamples
     {
         CloudConnection CloudConn;
         DelveClient DelveClient;
-        DelveCloudClient MngtClient;
 
         int MaxAttempts;
         int SleepTime;
@@ -35,30 +34,28 @@ namespace DelveClientSDKSamples
                 computeName: computeName
             );
 
-            // creates a resource managemnt client
-            this.MngtClient = new DelveCloudClient(conn: this.CloudConn);
             // creates a database client for data load.
             this.DelveClient = new DelveClient(conn: this.CloudConn);
             // we are working on merging both clients into single one
-            
+
             this.DelveClient.debugLevel = 1;
         }
 
         /*
-         * Cloud workflow using RAICloud         
-         *   
+         * Cloud workflow using RAICloud
+         *
         */
         public void runCloudWorkflow()
         {
             // list computes for the current account
-            /* Expected output: {                                
-            "compute_requests_list": [                                                                                    
-            {                            
-                "id": "5170d1ac-e5f4-4547-a4f4-37dbca58048a",                                                             
-                "accountName": "relationalai-db",                                                                         
+            /* Expected output: {
+            "compute_requests_list": [
+            {
+                "id": "5170d1ac-e5f4-4547-a4f4-37dbca58048a",
+                "accountName": "relationalai-db",
                 "createdBy": "924c1f35-5062-4e78-9ce9-10157c29dc61",
                 "computeName": "csharpcompute",
-                "computeSize": "XS",                                                                                      
+                "computeSize": "XS",
                 "computeRegion": "us-east",
                 "requestedOn": "2020-08-27T15:50:18.488Z",
                 "createdOn": "2020-08-27T15:52:10.040Z",
@@ -68,7 +65,7 @@ namespace DelveClientSDKSamples
                 "_etag": "\"0a002297-0000-0100-0000-5f4d07c30000\""
             }, ... ]}
               */
-            var computes = this.MngtClient.ListComputes();
+            var computes = this.DelveClient.ListComputes();
             Console.WriteLine("=> Computes: " + JObject.FromObject(computes));
 
             // list databases for the current account
@@ -89,7 +86,7 @@ namespace DelveClientSDKSamples
                   "status": "CREATED"
                 }, ... ]}
             */
-            var databases = this.MngtClient.ListDatabases();
+            var databases = this.DelveClient.ListDatabases();
             Console.WriteLine("=> Databases: " + JObject.FromObject(databases).ToString());
 
             // list users for the current account
@@ -105,12 +102,12 @@ namespace DelveClientSDKSamples
                     "access_key1": "xxxxxxxxxxxxxxxxxxxxxx"
                   }, ...
                 ]}
-            */ 
-            var users = this.MngtClient.ListUsers();
+            */
+            var users = this.DelveClient.ListUsers();
             Console.WriteLine("=> Users: " + JObject.FromObject(users).ToString());
 
             // create compute
-            var createComputeResponse = this.MngtClient.CreateCompute(computeName: this.CloudConn.ComputeName, size: "XS");
+            var createComputeResponse = this.DelveClient.CreateCompute(computeName: this.CloudConn.ComputeName, size: "XS");
             Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
 
             // wait for compute to be provisioned
@@ -120,7 +117,7 @@ namespace DelveClientSDKSamples
 
             // create database with the name as specificied in the CloudConnection
             this.DelveClient.CreateDatabase(overwrite: true);
-             
+
             this.DelveClient.LoadCSV(
                 // import data into edge_csv relation
                 rel: "edge_csv",
@@ -148,9 +145,9 @@ namespace DelveClientSDKSamples
                 // this the result of the query
                 output: "edge"
             );
-            
+
             Console.WriteLine("==> Query output: " + JObject.FromObject(edges).ToString());
-            
+
             // Jaccard Similarity query
             string queryString = @"
                 def uedge(a, b) = edge(a, b) or edge(b, a)
@@ -169,10 +166,10 @@ namespace DelveClientSDKSamples
             Console.WriteLine("=> Jaccard Similarity query result: " + JObject.FromObject(queryResult).ToString());
 
             // remove default compute (disassociate database from compute)
-            this.MngtClient.RemoveDefaultCompute(dbname: this.CloudConn.DbName);
+            this.DelveClient.RemoveDefaultCompute(dbname: this.CloudConn.DbName);
 
             // delete compute => stop charging for the compute
-            var deleteComputeResponse = this.MngtClient.DeleteCompute(computeName: this.CloudConn.ComputeName);
+            var deleteComputeResponse = this.DelveClient.DeleteCompute(computeName: this.CloudConn.ComputeName);
             Console.WriteLine("=> DeleteComputeResponse: " + JObject.FromObject(deleteComputeResponse).ToString());
         }
 
@@ -207,7 +204,7 @@ namespace DelveClientSDKSamples
 
         private JToken GetByField(string field, string value)
         {
-            var computes = this.MngtClient.ListComputes();
+            var computes = this.DelveClient.ListComputes();
 
             foreach (var compute in JObject.FromObject(computes)["compute_requests_list"])
             {
