@@ -10,13 +10,13 @@ namespace Com.RelationalAI
         {
         }
 
-        public static void createCloudConnection(out CloudConnection conn) {
+        public static void createCloudConnection(out LocalConnection conn) {
             string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
 
             createCloudConnection(dbname, out conn);
         }
 
-        public static void createCloudConnection(string dbname, out CloudConnection conn) {
+        public static void createCloudConnection(string dbname, out LocalConnection conn) {
             string computeName = dbname;
             conn = new CloudConnection(
                 dbname,

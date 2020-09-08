@@ -39,29 +39,29 @@ namespace Com.RelationalAI
             }
         }
 
-        public static void testInstallSource(CloudConnection conn, string name, bool installSourceRes)
+        public static void testInstallSource(LocalConnection conn, string name, bool installSourceRes)
         {
             Assert.True(installSourceRes);
             Assert.IsEmpty(conn.CollectProblems());
             Assert.True(conn.ListSource().ContainsKey(name));
         }
-        private static void testInstallSource(CloudConnection conn, String name, String srcStr)
+        private static void testInstallSource(LocalConnection conn, String name, String srcStr)
         {
             testInstallSource(conn, name, conn.InstallSource(name, srcStr));
         }
-        private static void testInstallSource(CloudConnection conn, String name, String path, String srcStr)
+        private static void testInstallSource(LocalConnection conn, String name, String path, String srcStr)
         {
             testInstallSource(conn, name, conn.InstallSource(name, path, srcStr));
         }
-        private static void testInstallSource(CloudConnection conn, Source src, string name=null)
+        private static void testInstallSource(LocalConnection conn, Source src, string name=null)
         {
             testInstallSource(conn, name == null ? src.Name : name, conn.InstallSource(src));
         }
 
-        public delegate void ConnFunc(out CloudConnection conn);
+        public delegate void ConnFunc(out LocalConnection conn);
         public static void RunAllTests(ConnFunc connFunc)
         {
-            CloudConnection conn;
+            LocalConnection conn;
             connFunc(out conn);
 
             // create_database
@@ -140,7 +140,7 @@ namespace Com.RelationalAI
             // branch_database
             // =============================================================================
 
-            CloudConnection conn2;
+            LocalConnection conn2;
             connFunc(out conn);
             connFunc(out conn2);
 

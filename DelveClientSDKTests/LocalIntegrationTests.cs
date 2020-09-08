@@ -8,22 +8,35 @@ namespace Com.RelationalAI
 {
     public class UnitTests
     {
-        private CloudConnection cloudConn;
 
         [SetUp]
         public void Setup()
         {
-            createCloudConnection("testcsharpclient", out cloudConn);
         }
 
-        public static void createCloudConnection(out CloudConnection conn) {
+        public static void createLocalConnection(out LocalConnection conn) {
             string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
 
-            createCloudConnection(dbname, out conn);
+            createLocalConnection(dbname, out conn);
         }
 
-        public static void createCloudConnection(string dbname, out CloudConnection conn) {
-            conn = new CloudConnection(
+        public static void createLocalConnection(string dbname, out LocalConnection conn) {
+            conn = new LocalConnection(dbname);
+            new DelveClient(conn); //to register the connection with a client
+        }
+
+        [Test]
+        public void Test1()
+        {
+            IntegrationTestsCommons.RunAllTests(createLocalConnection);
+        }
+
+        [Test]
+        public void Test2()
+        {
+            string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
+
+            CloudConnection cloudConn = new CloudConnection(
                 new LocalConnection(dbname),
                 creds: new RAICredentials(
                     "e3536f8d-cbc6-4ed8-9de6-74cf4cb724a1",
@@ -31,18 +44,6 @@ namespace Com.RelationalAI
                 ),
                 verifySSL: false
             );
-            new DelveClient(conn); //to register the connection with a client
-        }
-
-        [Test]
-        public void Test1()
-        {
-            IntegrationTestsCommons.RunAllTests(createCloudConnection);
-        }
-
-        [Test]
-        public void Test2()
-        {
 
             HttpRequestMessage httpReq = new HttpRequestMessage();
             httpReq.Method = HttpMethod.Get;

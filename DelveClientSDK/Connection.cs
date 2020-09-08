@@ -77,6 +77,7 @@ namespace Com.RelationalAI
         public override string Scheme { get; }
         public override string Host { get; }
         public override int Port { get; }
+        public override bool VerifySSL => DEFAULT_VERIFY_SSL;
 
         public bool BranchDatabase(string sourceDbname)
         {
@@ -483,11 +484,5 @@ namespace Com.RelationalAI
         public override RAICredentials Creds { get { return managementConn.Creds; } }
         public override bool VerifySSL { get { return managementConn.VerifySSL; } }
         public override string ComputeName { get; }
-
-        public bool CreateDatabase(bool overwrite = false)
-        {
-            Client.conn = this;
-            return ((DelveClient) Client).CreateDatabase(overwrite);
-        }
     }
 }

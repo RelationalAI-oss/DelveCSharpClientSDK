@@ -34,7 +34,11 @@ namespace Com.RelationalAI
             HttpRequestMessage innerReq,
             Connection conn,
             string service = DEFAULT_SERVICE
-        ): this(innerReq, conn.Creds, conn.Region, service)
+        ): this(
+            innerReq,
+            (conn is CloudConnection || conn is ManagementConnection) ? conn.Creds : null,
+            (conn is CloudConnection || conn is ManagementConnection) ? conn.Region : Connection.DEFAULT_REGION,
+            service)
         {
         }
 

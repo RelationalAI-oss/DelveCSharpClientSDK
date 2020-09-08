@@ -26,12 +26,16 @@ namespace Com.RelationalAI
         {
             var uriBuilder = new UriBuilder(request.RequestUri);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["dbname"] = conn.DbName;
+            if(conn is LocalConnection || conn is CloudConnection) {
+                query["dbname"] = conn.DbName;
+            }
             query["open_mode"] = body.Mode.ToString();
             query["readonly"] = BoolStr(body.Readonly);
-            query["region"] = EnumString.GetDescription(conn.Region);
             query["empty"] = BoolStr(body.Actions == null || body.Actions.Count == 0);
-            if(conn.ComputeName != null) {
+            if(conn is ManagementConnection || conn is CloudConnection) {
+                query["region"] = EnumString.GetDescription(conn.Region);
+            }
+            if(conn is CloudConnection) {
                 query["compute_name"] = conn.ComputeName;
             }
             uriBuilder.Query = query.ToString();
@@ -267,7 +271,6 @@ namespace Com.RelationalAI
         {
             this.conn = conn;
             conn.Client = this;
-            conn.Client.BaseUrl = this.BaseUrl;
         }
 
         public TransactionResult RunTransaction(Transaction xact)
