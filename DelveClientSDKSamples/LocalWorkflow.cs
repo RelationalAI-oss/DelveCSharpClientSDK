@@ -10,14 +10,13 @@ namespace DelveClientSDKSamples
         public void runLocalWorkflow()
         {
             string dbname = "localcsharpdatabase";
-            Connection conn = new LocalConnection(dbname);
+            LocalConnection conn = new LocalConnection(dbname);
 
-            DelveClient client = new DelveClient(conn);
-            client.DebugLevel = 1;
+            new DelveClient(conn);
 
-            client.CreateDatabase(true);
+            conn.CreateDatabase(true);
 
-            client.LoadCSV(
+            conn.LoadCSV(
                 rel: "edge_csv",
                 schema: new CSVFileSchema("Int64", "Int64"),
                 syntax: new CSVFileSyntax(header: new List<string>() { "src", "dest" }, delim: "|"),
@@ -31,7 +30,7 @@ namespace DelveClientSDKSamples
                 "
                 );
 
-            client.Query(
+            conn.Query(
                 srcStr: @"
                     def vertex(id) = exists(pos: edge_csv(pos, :src, id) or edge_csv(pos, :dest, id))
                     def edge(a, b) = exists(pos: edge_csv(pos, :src, a) and edge_csv(pos, :dest, b))
@@ -48,7 +47,7 @@ namespace DelveClientSDKSamples
                 def result = jaccard_similarity
             ";
 
-            var queryResult = client.Query(
+            var queryResult = conn.Query(
                 srcStr: queryString,
                 output: "result"
             );
