@@ -42,7 +42,10 @@ namespace Com.RelationalAI
 
         public DelveCloudClient Client { get; set; }
 
-        public int DebugLevel { get{ return Client is DelveClient ? ((DelveClient) Client).DebugLevel : DEFAULT_DEBUG_LEVEL; } }
+        public int DebugLevel {
+            get{ return Client is DelveClient ? ((DelveClient) Client).DebugLevel : DEFAULT_DEBUG_LEVEL; }
+            set { if(Client is DelveClient) ((DelveClient) Client).DebugLevel = value; }
+        }
     }
 
     /// <summary>
@@ -70,6 +73,16 @@ namespace Com.RelationalAI
             this.Scheme = scheme;
             this.Host = host;
             this.Port = port;
+
+            if(this.GetType() == typeof(LocalConnection))
+            {
+                new DelveClient(this); //to register the connection with a client
+            }
+            else
+            {
+                // If it's a subtype of `LocalConnection`, then its association to a `DelveClient`
+                // is done separately in the leaf class.
+            }
         }
 
         public override string DbName { get; }
@@ -359,6 +372,8 @@ namespace Com.RelationalAI
             Region = region;
             Creds = creds;
             VerifySSL = verifySSL;
+
+            new DelveClient(this); //to register the connection with a client
         }
 
         public override string Scheme { get; }
@@ -476,6 +491,8 @@ namespace Com.RelationalAI
         {
             this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL);
             this.ComputeName = computeName;
+
+            new DelveClient(this); //to register the connection with a client
         }
 
         private ManagementConnection managementConn { get; }

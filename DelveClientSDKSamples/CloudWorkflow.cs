@@ -12,6 +12,7 @@ namespace DelveClientSDKSamples
     class CloudWorkflow
     {
         CloudConnection CloudConn;
+
         DelveClient DelveClient;
 
         int MaxAttempts;
@@ -34,11 +35,9 @@ namespace DelveClientSDKSamples
                 computeName: computeName
             );
 
-            // creates a database client for data load.
-            this.DelveClient = new DelveClient(conn: this.CloudConn);
-            // we are working on merging both clients into single one
+            this.CloudConn.DebugLevel = 1;
 
-            this.DelveClient.DebugLevel = 1;
+            DelveClient = (DelveClient) this.CloudConn.Client;
         }
 
         /*

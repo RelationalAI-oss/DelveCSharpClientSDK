@@ -22,7 +22,6 @@ namespace Com.RelationalAI
 
         public static void createLocalConnection(string dbname, out LocalConnection conn) {
             conn = new LocalConnection(dbname);
-            new DelveClient(conn); //to register the connection with a client
         }
 
         [Test]
