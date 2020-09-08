@@ -29,6 +29,3 @@ dotnet test
 # to run samples
 dotnet run --project DelveClientSDKSamples/DelveClientSDKSamples.csproj
 ```
-## Notice
-`DelveClientSDKSamples` project contains both `LocalWorkflow.cs` and `CloudWorkflow.cs`. To be able to run CloudSamples we need to set access key and private key inside `DelveClientSDKSamples/CloudWorkflow.cs`.
-
