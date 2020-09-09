@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Com.RelationalAI
 {
-    public class IntegrationTests
+    public class CloudIntegrationTests
     {
 
         [SetUp]
@@ -10,15 +10,15 @@ namespace Com.RelationalAI
         {
         }
 
-        public static void createCloudConnection(out LocalConnection conn) {
-            string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
+        public static CloudConnection CreateCloudConnection() {
+            string dbname = "testclientdb-0aa5c968-9ca1-4d14-9e76-06fc67bce463";
 
-            createCloudConnection(dbname, out conn);
+            return CreateCloudConnection(dbname);
         }
 
-        public static void createCloudConnection(string dbname, out LocalConnection conn) {
+        public static CloudConnection CreateCloudConnection(string dbname) {
             string computeName = dbname;
-            conn = new CloudConnection(
+            return new CloudConnection(
                 dbname,
                 scheme: "https",
                 host: "azure-ssh.relationalai.com",
@@ -27,13 +27,12 @@ namespace Com.RelationalAI
                 computeName: computeName
             );
 
-            new DelveClient(conn); //to register the connection with a client
         }
 
         [Test]
         public void Test1()
         {
-            IntegrationTestsCommons.RunAllTests(createCloudConnection);
+            IntegrationTestsCommons.RunAllTests(CreateCloudConnection);
         }
     }
 }

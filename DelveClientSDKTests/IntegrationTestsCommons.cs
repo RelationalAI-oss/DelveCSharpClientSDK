@@ -30,11 +30,11 @@ namespace Com.RelationalAI
             Assert.IsNotNull(queryRes);
             if ( expectedRes[0].Count() == 0 )
             {
-                Assert.AreEqual(queryRes.Count, 0);
+                Assert.AreEqual(0, queryRes.Count);
             }
             else
             {
-                Assert.AreEqual(queryRes.Count, 1);
+                Assert.AreEqual(1, queryRes.Count);
                 Assert.AreEqual(queryRes.First().Value, expectedRes);
             }
         }
@@ -58,15 +58,14 @@ namespace Com.RelationalAI
             testInstallSource(conn, name == null ? src.Name : name, conn.InstallSource(src));
         }
 
-        public delegate void ConnFunc(out LocalConnection conn);
+        public delegate LocalConnection ConnFunc();
         public static void RunAllTests(ConnFunc connFunc)
         {
-            LocalConnection conn;
-            connFunc(out conn);
+            var conn = connFunc();
 
             // create_database
             // =============================================================================
-            Assert.IsTrue(conn.CreateDatabase());
+            Assert.IsTrue(conn.CreateDatabase(overwrite: true));
             Assert.IsFalse(conn.CreateDatabase());
 
             // install_source
@@ -96,21 +95,21 @@ namespace Com.RelationalAI
 
             // delete_source
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             Assert.True(conn.DeleteSource("stdlib"));
 
             // list_source
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
-            Console.WriteLine("conn.listSource().Keys: " + DictionaryToString(conn.ListSource()));
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
+            Console.WriteLine("conn.listSource(): " + DictionaryToString(conn.ListSource()));
             Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(conn.ListSource().Keys));
 
             // query
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
 
             queryResEquals(conn.Query(
                 srcStr: "def bar = 2",
@@ -140,30 +139,33 @@ namespace Com.RelationalAI
             // branch_database
             // =============================================================================
 
-            LocalConnection conn2;
-            connFunc(out conn);
-            connFunc(out conn2);
+            conn = connFunc();
+            var conn2 = connFunc();
 
-            conn.CreateDatabase();
+            conn.CreateDatabase(overwrite: true);
             testInstallSource(conn, "name", "def x = {(1,); (2,); (3,)}");
             queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
             // Branch from conn to conn2
-            conn2.BranchDatabase(conn.DbName);
-            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
+            if(!(conn2 is CloudConnection))
+            {
+                //Not supported by CloudConnection, yet
+                conn2.BranchDatabase(conn.DbName);
+                queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
-            testInstallSource(conn, "name", "def x = {(1,); (2,); (3,); (4,)}");
-            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
-            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
+                testInstallSource(conn, "name", "def x = {(1,); (2,); (3,); (4,)}");
+                queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+                queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
-            testInstallSource(conn2, "name", "def x = {(1,); (2,); (3,); (4,); (5,)}");
-            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L, 5L ));
-            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+                testInstallSource(conn2, "name", "def x = {(1,); (2,); (3,); (4,); (5,)}");
+                queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L, 5L ));
+                queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            }
 
             // update_edb
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             conn.LoadEdb("p", ToRelData( 1L, 2L, 3L ));
             var pQuery = conn.Query(output: "p");
             queryResEquals(pQuery, ToRelData( 1L, 2L, 3L ));
@@ -184,8 +186,8 @@ namespace Com.RelationalAI
 
             // load_csv
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             Assert.True(conn.LoadCSV("csv",
                 schema: new CSVFileSchema("Int64", "Int64", "Int64"),
                 data: @"
@@ -217,8 +219,8 @@ namespace Com.RelationalAI
 
             // load_json
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             Assert.True(conn.LoadJSON("json",
                 data: @"
                     { ""address"": { ""city"": ""Vancouver"", ""state"": ""BC"" } }
@@ -241,20 +243,20 @@ namespace Com.RelationalAI
 
             // list_edb
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             Assert.AreEqual(conn.ListEdb().Count, 0);// list_edb
 
             // enable_library
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             Assert.True(conn.EnableLibrary("stdlib"));
 
             // cardinality
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             queryResEquals(conn.Query(
                 srcStr: "def p = {(1,); (2,); (3,)}",
                 persist: new List<string>() { "p" }
@@ -275,16 +277,16 @@ namespace Com.RelationalAI
 
             // Collect problems
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             Assert.AreEqual(conn.CollectProblems().Count, 0);
             conn.InstallSource(new Source("name", "", "def foo = "));
             Assert.AreEqual(conn.CollectProblems().Count, 2);
 
             // Set options
             // =============================================================================
-            connFunc(out conn);
-            conn.CreateDatabase();
+            conn = connFunc();
+            conn.CreateDatabase(overwrite: true);
             Assert.True(conn.Configure(debug: true));
             Assert.True(conn.Configure(debug: false));
         }

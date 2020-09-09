@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Com.RelationalAI
 {
-    public class UnitTests
+    public class LocalIntegrationTests
     {
 
         [SetUp]
@@ -14,20 +14,20 @@ namespace Com.RelationalAI
         {
         }
 
-        public static void createLocalConnection(out LocalConnection conn) {
+        public static LocalConnection CreateLocalConnection() {
             string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
 
-            createLocalConnection(dbname, out conn);
+            return CreateLocalConnection(dbname);
         }
 
-        public static void createLocalConnection(string dbname, out LocalConnection conn) {
-            conn = new LocalConnection(dbname);
+        public static LocalConnection CreateLocalConnection(string dbname) {
+            return new LocalConnection(dbname);
         }
 
         [Test]
         public void Test1()
         {
-            IntegrationTestsCommons.RunAllTests(createLocalConnection);
+            IntegrationTestsCommons.RunAllTests(CreateLocalConnection);
         }
 
         [Test]
