@@ -38,11 +38,7 @@ namespace DelveClientSDKSamples
 
             this.CloudConn = new CloudConnection(
                 dbname: computeName,
-                creds: RAICredentials.FromFile(profile: profile),
-                scheme: "https",
-                host: Config.RaiGetHost(ini, profile),
-                port: 443,
-                verifySSL: false,
+                managementConn: this.MngtConn,
                 computeName: computeName
             );
 

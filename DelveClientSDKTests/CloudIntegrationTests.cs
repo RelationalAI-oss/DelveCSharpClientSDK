@@ -11,7 +11,7 @@ namespace Com.RelationalAI
         }
 
         public static CloudConnection CreateCloudConnection() {
-            string dbname = "testclientdb-0aa5c968-9ca1-4d14-9e76-06fc67bce463";
+            string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
 
             return CreateCloudConnection(dbname);
         }
