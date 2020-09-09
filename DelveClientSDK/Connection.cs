@@ -364,14 +364,14 @@ namespace Com.RelationalAI
     {
 
         public ManagementConnection(
-                string scheme,
-                string host,
-                int port,
-                RAICredentials creds,
-                bool verifySSL,
-                RAIInfra infra = Connection.DEFAULT_INFRA,
-                RAIRegion region = Connection.DEFAULT_REGION
-            )
+            string scheme = Connection.DEFAULT_SCHEME,
+            string host = Connection.DEFAULT_HOST,
+            int port = Connection.DEFAULT_PORT,
+            RAIInfra infra = Connection.DEFAULT_INFRA,
+            RAIRegion region = Connection.DEFAULT_REGION,
+            RAICredentials creds = null,
+            bool verifySSL = Connection.DEFAULT_VERIFY_SSL
+        )
         {
             Scheme = scheme;
             Host = host;
@@ -380,6 +380,8 @@ namespace Com.RelationalAI
             Region = region;
             Creds = creds;
             VerifySSL = verifySSL;
+
+            if(creds == null) this.Creds = RAICredentials.FromFile();
 
             new DelveClient(this); //to register the connection with a client
         }
@@ -497,7 +499,20 @@ namespace Com.RelationalAI
             string computeName = null
         ) : base(dbname, defaultOpenMode, scheme, host, port)
         {
-            this.managementConn = new ManagementConnection(scheme, host, port, creds, verifySSL, infra, region);
+            this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL);
+            this.ComputeName = computeName;
+
+            new DelveClient(this); //to register the connection with a client
+        }
+
+        public CloudConnection(
+            string dbname,
+            ManagementConnection managementConn,
+            TransactionMode defaultOpenMode = Connection.DEFAULT_OPEN_MODE,
+            string computeName = null
+        ) : base(dbname, defaultOpenMode, managementConn.Scheme, managementConn.Host, managementConn.Port)
+        {
+            this.managementConn = managementConn;
             this.ComputeName = computeName;
 
             new DelveClient(this); //to register the connection with a client
