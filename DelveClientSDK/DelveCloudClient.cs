@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
@@ -40,7 +41,13 @@ namespace Com.RelationalAI
             this.BaseUrl = conn.BaseUrl.ToString();
         }
 
-        public ListComputesResponseProtocol ListComputes() {return this.ComputeGetAsync().Result;}
+        public ICollection<ComputeData> ListComputes()
+        {
+            var res = this.ComputeGetAsync().Result;
+            if ( res == null ) return null;
+
+            return res.Compute_requests_list;
+        }
 
         public CreateComputeResponseProtocol CreateCompute(string computeName, string size, bool dryRun = false)
         {
@@ -65,7 +72,12 @@ namespace Com.RelationalAI
             return this.ComputeDeleteAsync(request).Result;
         }
 
-        public ListDatabasesResponseProtocol ListDatabases() {return this.DatabaseGetAsync().Result;}
+        public ICollection<DatabaseInfo> ListDatabases() {
+            var res = this.DatabaseGetAsync().Result;
+            if ( res == null ) return null;
+
+            return res.Databases;
+        }
 
         public void RemoveDefaultCompute(string dbname)
         {

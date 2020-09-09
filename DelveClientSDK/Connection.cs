@@ -394,13 +394,13 @@ namespace Com.RelationalAI
         public override RAICredentials Creds { get; }
         public override bool VerifySSL { get; }
 
-        public ListComputesResponseProtocol ListComputes()
+        public ICollection<ComputeData> ListComputes()
         {
             Client.conn = this;
             return ((DelveCloudClient) Client).ListComputes();
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string computeName, string size, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string computeName, string size = "XS", bool dryRun = false)
         {
             Client.conn = this;
             return ((DelveCloudClient) Client).CreateCompute(computeName, size, dryRun);
@@ -424,7 +424,7 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).CreateUser(username, firstName, lastName, email, dryRun);
         }
 
-        public ListDatabasesResponseProtocol ListDatabases()
+        public ICollection<DatabaseInfo> ListDatabases()
         {
             Client.conn = this;
             return ((DelveCloudClient) Client).ListDatabases();
