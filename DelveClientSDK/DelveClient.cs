@@ -215,6 +215,21 @@ namespace Com.RelationalAI
         }
     }
 
+    public partial class ApiException<TResult> : ApiException
+    {
+        public override string Message { get {
+           return "Result: " + Result.ToString() + "\n\n" + base.Message;
+        } }
+    }
+
+    public partial class InfraError
+    {
+        public override string ToString()
+        {
+            return this.Message;
+        }
+    }
+
     public class DelveClient : GeneratedDelveClient
     {
         public static HttpClient CreateHttpClient(bool verifySSL) {
