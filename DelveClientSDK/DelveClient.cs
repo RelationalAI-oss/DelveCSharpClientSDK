@@ -63,6 +63,17 @@ namespace Com.RelationalAI
         }
     }
 
+    public partial class Transaction
+    {
+        public Transaction()
+        {
+            // You can set the default debug level here to control the debugging information
+            // on the server. Currently, any number above 0 results in printing the JSON
+            // value for the requests (Transaction) and responses (TransactionResult)
+            this.Debug_level = 0;
+        }
+    }
+
     partial class RelKey
     {
         private static MultiSetComparer<string> comp = new MultiSetComparer<string>();
