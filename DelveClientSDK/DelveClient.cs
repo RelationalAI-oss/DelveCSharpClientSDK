@@ -425,7 +425,7 @@ namespace Com.RelationalAI
         {
             if(!_isEmpty(src.Path)) {
                 if(_isEmpty(src.Value)) {
-                    if(!File.Exists(src.Path)) {
+                    if(File.Exists(src.Path)) {
                         src.Value = File.ReadAllText(src.Path);
                     }
                 }
