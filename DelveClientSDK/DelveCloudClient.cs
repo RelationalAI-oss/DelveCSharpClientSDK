@@ -99,9 +99,6 @@ namespace Com.RelationalAI
         {
             CreateUserRequestProtocol request = new CreateUserRequestProtocol();
             request.Username = username;
-            request.First_name = firstName;
-            request.Last_name = lastName;
-            request.Email = email;
             request.Dryrun = dryRun;
             return this.UserPutAsync(request).Result;
         }
