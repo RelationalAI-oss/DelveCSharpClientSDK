@@ -111,7 +111,7 @@ namespace DelveClientSDKSamples
             Console.WriteLine("=> Users: " + JObject.FromObject(users).ToString());
 
             // create compute
-            //var createComputeResponse = this.MngtConn.CreateCompute(computeName: ComputeName, size: "XS");
+            //var createComputeResponse = this.MngtConn.CreateCompute(computeName: ComputeName, size: RAIComputeSize.XS);
             //Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
 
             // wait for compute to be provisioned

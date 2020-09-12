@@ -6,6 +6,12 @@ using System.Net.Http.Headers;
 
 namespace Com.RelationalAI
 {
+
+    public enum RAIComputeSize
+    {
+        XS, S, M, L, XL
+    }
+
     public partial class GeneratedDelveCloudClient
     {
         public Connection conn {get; set;}
@@ -49,17 +55,17 @@ namespace Com.RelationalAI
             return res.Compute_requests_list;
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string computeName, string size, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string computeName, RAIComputeSize size, bool dryRun = false)
         {
             return this.CreateCompute(computeName, size, EnumString.GetDescription(this.conn.Region), dryRun);
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string displayName, string size, string region, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string displayName, RAIComputeSize size, string region, bool dryRun = false)
         {
             CreateComputeRequestProtocol request = new CreateComputeRequestProtocol();
             request.Region = region;
             request.Display_name = displayName;
-            request.Size = size;
+            request.Size = EnumString.GetDescription(size);
             request.Dryrun = dryRun;
             return this.ComputePutAsync(request).Result;
         }

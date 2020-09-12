@@ -400,7 +400,7 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).ListComputes();
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string computeName, string size = "XS", bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string computeName, RAIComputeSize size, bool dryRun = false)
         {
             Client.conn = this;
             return ((DelveCloudClient) Client).CreateCompute(computeName, size, dryRun);
