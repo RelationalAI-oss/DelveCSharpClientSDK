@@ -103,7 +103,6 @@ namespace Com.RelationalAI
             // =============================================================================
             conn = connFunc();
             conn.CreateDatabase(overwrite: true);
-            Console.WriteLine("conn.listSource(): " + DictionaryToString(conn.ListSource()));
             Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(conn.ListSource().Keys));
 
             // query

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -20,32 +21,52 @@ namespace Com.RelationalAI
                 verifySSL: false
             );
 
-            var computes = mgmtConn.ListComputes();
-
             ComputeData provisionedCompute = null;
+            bool requestedOrProvisioning = true;
 
-            foreach(var comp in computes) {
-                if( "PROVISIONED".Equals(comp.AdditionalProperties["computeState"]) )
-                {
-                    var databases = mgmtConn.ListDatabases();
-                    foreach(var db in databases) {
-                        if( comp.ComputeName.Equals(db.Default_compute_name) )
-                        {
-                            return CreateCloudConnection(db.Name, comp.ComputeName, mgmtConn);
+            string dbname = "";
+
+            while(requestedOrProvisioning) {
+                requestedOrProvisioning = false;
+
+                var computes = mgmtConn.ListComputes();
+
+                foreach(var comp in computes) {
+                    if( "PROVISIONED".Equals(comp.AdditionalProperties["computeState"]) )
+                    {
+                        var databases = mgmtConn.ListDatabases();
+                        foreach(var db in databases) {
+                            if( comp.ComputeName.Equals(db.Default_compute_name) )
+                            {
+                                return CreateCloudConnection(db.Name, comp.ComputeName, mgmtConn);
+                            }
                         }
+
+                        provisionedCompute = comp;
+                        break;
+                    } else if( "REQUESTED".Equals(comp.AdditionalProperties["computeState"]) || "PROVISIONING".Equals(comp.AdditionalProperties["computeState"]) ) {
+                        requestedOrProvisioning = true;
                     }
-
-                    provisionedCompute = comp;
-                    break;
                 }
-            }
 
-            string dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
-            if( provisionedCompute == null )
-            {
-                var createComputeRes = mgmtConn.CreateCompute(dbname);
-                if( createComputeRes == null ) return null;
-                provisionedCompute = createComputeRes.Compute_data;
+                dbname = IntegrationTestsCommons.genDbname("testcsharpclient");
+
+                if(!requestedOrProvisioning) {
+                    if( provisionedCompute == null )
+                    {
+                        var createComputeRes = mgmtConn.CreateCompute(dbname);
+                        if( createComputeRes == null ) return null;
+                        provisionedCompute = createComputeRes.Compute_data;
+
+                        requestedOrProvisioning = true;
+                    }
+                }
+
+                if(requestedOrProvisioning)
+                {
+                    Console.WriteLine("An instance is being requested or provisioned. Will try again in 10 seconds.");
+                    Thread.Sleep(10000);
+                }
             }
             return CreateCloudConnection(dbname, provisionedCompute.ComputeName, mgmtConn);
         }
