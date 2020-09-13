@@ -54,7 +54,7 @@ namespace Com.RelationalAI
                 if(!requestedOrProvisioning) {
                     if( provisionedCompute == null )
                     {
-                        var createComputeRes = mgmtConn.CreateCompute(dbname);
+                        var createComputeRes = mgmtConn.CreateCompute(dbname, RAIComputeSize.XS);
                         if( createComputeRes == null ) return null;
                         provisionedCompute = createComputeRes.Compute_data;
 

@@ -55,7 +55,7 @@ namespace Com.RelationalAI
             return res.Compute_requests_list;
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string computeName, RAIComputeSize size, bool dryRun = false)
+        public CreateComputeResponseProtocol CreateCompute(string computeName, RAIComputeSize size = RAIComputeSize.XS, bool dryRun = false)
         {
             return this.CreateCompute(computeName, size, EnumString.GetDescription(this.conn.Region), dryRun);
         }

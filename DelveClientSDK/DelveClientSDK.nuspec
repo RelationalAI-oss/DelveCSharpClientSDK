@@ -9,7 +9,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://www.relational.ai/</projectUrl>
-    <icon>favicon.ico</icon>
+    <!-- not support by nuget 4 used by Nix <icon>favicon.ico</icon> -->
     <description>This is the Delve C# client SDK and you can use it to connect to the RelationalAI infrastructure.</description>
     <copyright>Copyright 2017-2020</copyright>
   </metadata>
