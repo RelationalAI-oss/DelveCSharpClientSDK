@@ -505,6 +505,13 @@ namespace Com.RelationalAI
             new DelveClient(this); //to register the connection with a client
         }
 
+        /// <summary>
+        /// CloudConnection constructor
+        /// </summary>
+        /// <param name="dbname">database to execute transactions with</param>
+        /// <param name="managementConn">the management connection instance</param>
+        /// <param name="defaultOpenMode">`= TransactionMode.OPEN`: How to open the database `dbname`</param>
+        /// <param name="computeName">Compute to be used for this connection. If not specified, the default compute will be used.</param>
         public CloudConnection(
             string dbname,
             ManagementConnection managementConn,
