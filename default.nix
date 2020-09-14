@@ -4,7 +4,7 @@ let
   deps = import ./deps.nix {inherit fetchurl;};
 in
 stdenv.mkDerivation rec {
-  name = "ClientSDK-${version}";
+  name = "clientSDK-${version}";
   version = "1.0.0";
   buildInputs = [
     dotnet-sdk_3
@@ -31,9 +31,9 @@ stdenv.mkDerivation rec {
     dotnet restore --source sdk DelveClientSDK.sln
     dotnet build --no-restore -c Release DelveClientSDK.sln
     cd DelveClientSDK
-    nuget pack DelveClientSDK.nuspec  -Version 1.0.0
+    dotnet pack
 
     mkdir -p $out/{bin,lib}
-    mv Relational.AI.1.0.0.nupkg $out/lib
+    mv bin/Debug/DelveClientSDK.1.0.0.nupkg $out/lib
   '';
 }
