@@ -380,13 +380,10 @@ namespace Com.RelationalAI
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Readonly = false;
 
-            TransactionResult response = null;
-            try {
-                response = RunTransaction(xact);
-            } catch (Exception e) {
-                string fullError = ExceptionUtils.FlattenException(e);
-                Console.WriteLine("Error while creating the database (" + conn.DbName + "): " + fullError);
-                return false;
+            TransactionResult response = RunTransaction(xact);
+
+            if(response.Problems.Count > 0) {
+                throw new Exception(response.Problems.ToString());
             }
 
             return IsSuccess(response);

@@ -66,7 +66,7 @@ namespace Com.RelationalAI
             // create_database
             // =============================================================================
             Assert.IsTrue(conn.CreateDatabase(overwrite: true));
-            Assert.IsFalse(conn.CreateDatabase());
+            Assert.Throws<Exception>(() => conn.CreateDatabase());
 
             // install_source
             // =============================================================================
