@@ -421,13 +421,11 @@ namespace Com.RelationalAI
         private void _readFileFromPath(Source src)
         {
             if(!_isEmpty(src.Path)) {
-                if(_isEmpty(src.Value)) {
-                    if(File.Exists(src.Path)) {
-                        src.Value = File.ReadAllText(src.Path);
-                    }
-                }
                 if(_isEmpty(src.Name)) {
                     src.Name = Path.GetFileNameWithoutExtension(src.Path);
+                }
+                if(_isEmpty(src.Value) && File.Exists(src.Path)) {
+                    src.Value = File.ReadAllText(src.Path);
                 }
             }
         }
