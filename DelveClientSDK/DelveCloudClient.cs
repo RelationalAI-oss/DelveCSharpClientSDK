@@ -55,27 +55,24 @@ namespace Com.RelationalAI
             return res.Compute_requests_list;
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string computeName, RAIComputeSize size = RAIComputeSize.XS, bool dryRun = false)
+        public ComputeData CreateCompute(string displayName, RAIComputeSize size = RAIComputeSize.XS, string region = null, bool dryRun = false)
         {
-            return this.CreateCompute(computeName, size, EnumString.GetDescription(this.conn.Region), dryRun);
-        }
+            if(region == null) region = EnumString.GetDescription(this.conn.Region);
 
-        public CreateComputeResponseProtocol CreateCompute(string displayName, RAIComputeSize size, string region, bool dryRun = false)
-        {
             CreateComputeRequestProtocol request = new CreateComputeRequestProtocol();
             request.Region = region;
             request.Display_name = displayName;
             request.Size = EnumString.GetDescription(size);
             request.Dryrun = dryRun;
-            return this.ComputePutAsync(request).Result;
+            return this.ComputePutAsync(request).Result.Compute_data;
         }
 
-        public DeleteComputeResponseProtocol DeleteCompute(string computeName, bool dryRun = false)
+        public DeleteComputeStatus DeleteCompute(string computeName, bool dryRun = false)
         {
             DeleteComputeRequestProtocol request = new DeleteComputeRequestProtocol();
             request.Compute_name = computeName;
             request.Dryrun = dryRun;
-            return this.ComputeDeleteAsync(request).Result;
+            return this.ComputeDeleteAsync(request).Result.Delete_status;
         }
 
         public ICollection<DatabaseInfo> ListDatabases() {
@@ -99,14 +96,18 @@ namespace Com.RelationalAI
             request.Dryrun = dryRun;
             this.DatabasePostAsync(request).Wait();
         }
-        public ListUsersResponseProtocol ListUsers() {return this.UserGetAsync().Result;}
+        public ICollection<UserInfoProtocol> ListUsers()
+        {
+            return this.UserGetAsync().Result.Users;
+        }
 
-        public CreateUserResponseProtocol CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
+        public Tuple<UserInfoProtocol, string> CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
         {
             CreateUserRequestProtocol request = new CreateUserRequestProtocol();
             request.Username = username;
             request.Dryrun = dryRun;
-            return this.UserPutAsync(request).Result;
+            var res = this.UserPutAsync(request).Result;
+            return new Tuple<UserInfoProtocol, string>(res.User, res.Private_key);
         }
     }
 }

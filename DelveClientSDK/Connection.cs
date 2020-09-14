@@ -400,25 +400,25 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).ListComputes();
         }
 
-        public CreateComputeResponseProtocol CreateCompute(string computeName, RAIComputeSize size, bool dryRun = false)
+        public ComputeData CreateCompute(string computeName, RAIComputeSize size = RAIComputeSize.XS, string region = null, bool dryRun = false)
         {
             Client.conn = this;
-            return ((DelveCloudClient) Client).CreateCompute(computeName, size, dryRun);
+            return ((DelveCloudClient) Client).CreateCompute(computeName, size, region, dryRun);
         }
 
-        public DeleteComputeResponseProtocol DeleteCompute(string computeName, bool dryRun = false)
+        public DeleteComputeStatus DeleteCompute(string computeName, bool dryRun = false)
         {
             Client.conn = this;
             return ((DelveCloudClient) Client).DeleteCompute(computeName, dryRun);
         }
 
-        public ListUsersResponseProtocol ListUsers()
+        public ICollection<UserInfoProtocol> ListUsers()
         {
             Client.conn = this;
             return ((DelveCloudClient) Client).ListUsers();
         }
 
-        public CreateUserResponseProtocol CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
+        public Tuple<UserInfoProtocol, string> CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
         {
             Client.conn = this;
             return ((DelveCloudClient) Client).CreateUser(username, firstName, lastName, email, dryRun);
