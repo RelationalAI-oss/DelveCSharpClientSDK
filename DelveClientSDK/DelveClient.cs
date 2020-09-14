@@ -611,6 +611,7 @@ namespace Com.RelationalAI
             if(!_isEmpty(loadData.Path) && _isEmpty(loadData.Data)) {
                 if(File.Exists(loadData.Path)) {
                     loadData.Data = File.ReadAllText(loadData.Path);
+                    loadData.Path = null;
                 }
             }
         }
