@@ -101,7 +101,7 @@ namespace Com.RelationalAI
             return this.UserGetAsync().Result.Users;
         }
 
-        public Tuple<UserInfoProtocol, string> CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
+        public Tuple<UserInfoProtocol, string> CreateUser(string username, bool dryRun = false)
         {
             CreateUserRequestProtocol request = new CreateUserRequestProtocol();
             request.Username = username;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Com.RelationalAI
 {
@@ -418,10 +419,10 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).ListUsers();
         }
 
-        public Tuple<UserInfoProtocol, string> CreateUser(string username, string firstName, string lastName, string email, bool dryRun = false)
+        public Tuple<UserInfoProtocol, string> CreateUser(string username, bool dryRun = false)
         {
             Client.conn = this;
-            return ((DelveCloudClient) Client).CreateUser(username, firstName, lastName, email, dryRun);
+            return ((DelveCloudClient) Client).CreateUser(username, dryRun);
         }
 
         public ICollection<DatabaseInfo> ListDatabases()
