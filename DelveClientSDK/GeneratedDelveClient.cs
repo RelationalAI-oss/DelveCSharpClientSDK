@@ -906,12 +906,15 @@ namespace Com.RelationalAI
     [Newtonsoft.Json.JsonConverter(typeof(JsonInheritanceConverter), "type")]
     [JsonInheritanceAttribute("ClientProblem", typeof(ClientProblem))]
     [JsonInheritanceAttribute("ExceptionProblem", typeof(ExceptionProblem))]
+    [JsonInheritanceAttribute("FrontProblem", typeof(FrontProblem))]
+    [JsonInheritanceAttribute("ArityMismatchError", typeof(ArityMismatchError))]
+    [JsonInheritanceAttribute("ComparisonChainError", typeof(ComparisonChainError))]
+    [JsonInheritanceAttribute("UndefinedError", typeof(UndefinedError))]
     [JsonInheritanceAttribute("IntegrityConstraintProblem", typeof(IntegrityConstraintProblem))]
     [JsonInheritanceAttribute("IntegrityConstraintViolation", typeof(IntegrityConstraintViolation))]
     [JsonInheritanceAttribute("OutputProblem", typeof(OutputProblem))]
     [JsonInheritanceAttribute("PersistProblem", typeof(PersistProblem))]
     [JsonInheritanceAttribute("SyntaxError", typeof(SyntaxError))]
-    [JsonInheritanceAttribute("UndefinedError", typeof(UndefinedError))]
     [JsonInheritanceAttribute("WorkspaceLoadProblem", typeof(WorkspaceLoadProblem))]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class AbstractProblem 
@@ -974,6 +977,183 @@ namespace Com.RelationalAI
     
         [Newtonsoft.Json.JsonProperty("exception_stacktrace", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Exception_stacktrace { get; set; }
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class FrontProblem : AbstractProblem
+    {
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class Point 
+    {
+        [Newtonsoft.Json.JsonProperty("column", Required = Newtonsoft.Json.Required.Always)]
+        public int Column { get; set; } = 0;
+    
+        [Newtonsoft.Json.JsonProperty("row", Required = Newtonsoft.Json.Required.Always)]
+        public int Row { get; set; } = 0;
+    
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public PointType Type { get; set; } = Com.RelationalAI.PointType.Point;
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class Area 
+    {
+        [Newtonsoft.Json.JsonProperty("end_point", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Point End_point { get; set; } = new Point();
+    
+        [Newtonsoft.Json.JsonProperty("start_point", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Point Start_point { get; set; } = new Point();
+    
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public AreaType Type { get; set; } = Com.RelationalAI.AreaType.Area;
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class Range 
+    {
+        [Newtonsoft.Json.JsonProperty("area", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Area Area { get; set; } = new Area();
+    
+        [Newtonsoft.Json.JsonProperty("end_byte", Required = Newtonsoft.Json.Required.Always)]
+        public int End_byte { get; set; } = 0;
+    
+        [Newtonsoft.Json.JsonProperty("input", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AnyValue Input { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("start_byte", Required = Newtonsoft.Json.Required.Always)]
+        public int Start_byte { get; set; } = 0;
+    
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public RangeType Type { get; set; } = Com.RelationalAI.RangeType.Range;
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class ArityMismatchError : FrontProblem
+    {
+        [Newtonsoft.Json.JsonProperty("msg", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Msg { get; set; } = "";
+    
+        [Newtonsoft.Json.JsonProperty("node", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AnyValue Node { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Range Range { get; set; } = new Range();
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class ComparisonChainError : FrontProblem
+    {
+        [Newtonsoft.Json.JsonProperty("msg", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Msg { get; set; } = "";
+    
+        [Newtonsoft.Json.JsonProperty("node", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AnyValue Node { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Range Range { get; set; } = new Range();
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class UndefinedError : FrontProblem
+    {
+        [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Range Range { get; set; } = new Range();
+    
+        [Newtonsoft.Json.JsonProperty("var", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Var { get; set; } = "";
     
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
@@ -1107,93 +1287,6 @@ namespace Com.RelationalAI
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class SyntaxNode 
     {
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
-    
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties; }
-            set { _additionalProperties = value; }
-        }
-    
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class Point 
-    {
-        [Newtonsoft.Json.JsonProperty("column", Required = Newtonsoft.Json.Required.Always)]
-        public int Column { get; set; } = 0;
-    
-        [Newtonsoft.Json.JsonProperty("row", Required = Newtonsoft.Json.Required.Always)]
-        public int Row { get; set; } = 0;
-    
-        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public PointType Type { get; set; } = Com.RelationalAI.PointType.Point;
-    
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
-    
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties; }
-            set { _additionalProperties = value; }
-        }
-    
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class Area 
-    {
-        [Newtonsoft.Json.JsonProperty("end_point", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public Point End_point { get; set; } = new Point();
-    
-        [Newtonsoft.Json.JsonProperty("start_point", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public Point Start_point { get; set; } = new Point();
-    
-        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public AreaType Type { get; set; } = Com.RelationalAI.AreaType.Area;
-    
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
-    
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties; }
-            set { _additionalProperties = value; }
-        }
-    
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class Range 
-    {
-        [Newtonsoft.Json.JsonProperty("area", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public Area Area { get; set; } = new Area();
-    
-        [Newtonsoft.Json.JsonProperty("end_byte", Required = Newtonsoft.Json.Required.Always)]
-        public int End_byte { get; set; } = 0;
-    
-        [Newtonsoft.Json.JsonProperty("input", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public AnyValue Input { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("start_byte", Required = Newtonsoft.Json.Required.Always)]
-        public int Start_byte { get; set; } = 0;
-    
-        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public RangeType Type { get; set; } = Com.RelationalAI.RangeType.Range;
-    
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
         [Newtonsoft.Json.JsonExtensionData]
@@ -1356,29 +1449,6 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonProperty("trace", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public LinkedList Trace { get; set; } = new LinkedList();
-    
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
-    
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties; }
-            set { _additionalProperties = value; }
-        }
-    
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class UndefinedError : AbstractProblem
-    {
-        [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public Range Range { get; set; } = new Range();
-    
-        [Newtonsoft.Json.JsonProperty("var", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Var { get; set; } = "";
     
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
@@ -1770,14 +1840,6 @@ namespace Com.RelationalAI
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
-    public enum ICViolationType
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"ICViolation")]
-        ICViolation = 0,
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public enum PointType
     {
         [System.Runtime.Serialization.EnumMember(Value = @"Point")]
@@ -1798,6 +1860,14 @@ namespace Com.RelationalAI
     {
         [System.Runtime.Serialization.EnumMember(Value = @"Range")]
         Range = 0,
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public enum ICViolationType
+    {
+        [System.Runtime.Serialization.EnumMember(Value = @"ICViolation")]
+        ICViolation = 0,
     
     }
     
@@ -1826,6 +1896,9 @@ namespace Com.RelationalAI
     
         [System.Runtime.Serialization.EnumMember(Value = @"BRANCH")]
         BRANCH = 4,
+    
+        [System.Runtime.Serialization.EnumMember(Value = @"BRANCH_OVERWRITE")]
+        BRANCH_OVERWRITE = 5,
     
     }
     
