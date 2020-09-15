@@ -13,12 +13,7 @@ stdenv.mkDerivation rec {
 
   src = ./.;
 
-  buildCommand = ''
-    TMPDIR="$(mktemp -d)"
-    cp -rv $src/* $TMPDIR
-    cd $TMPDIR
-    chmod -R +rw .
-    
+  buildPhase = ''
     mkdir home
 
     # disable default-source so nuget does not try to download from online-repo
@@ -30,6 +25,9 @@ stdenv.mkDerivation rec {
 
     dotnet restore --source sdk DelveClientSDK.sln
     dotnet build --no-restore -c Release DelveClientSDK.sln
+  '';
+
+  installPhase = ''
     cd DelveClientSDK
     dotnet pack
 
