@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PackageId>DelveClientSDK</PackageId>
+    <Authors>Mohammad Dashti and Helmi Nour</Authors>
+    <Company>RelationalAI</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>
+        This is the Delve C# client SDK and you can use it to connect to the RelationalAI infrastructure.
+    </Description>
   </PropertyGroup>
 
   <ItemGroup>
