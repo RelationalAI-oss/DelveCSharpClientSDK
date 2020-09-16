@@ -1705,8 +1705,8 @@ namespace Com.RelationalAI
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Dbname { get; set; } = "";
     
-        [Newtonsoft.Json.JsonProperty("debug_level", Required = Newtonsoft.Json.Required.Always)]
-        public int Debug_level { get; set; } = 0;
+        [Newtonsoft.Json.JsonProperty("debug_level", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? Debug_level { get; set; }
     
         [Newtonsoft.Json.JsonProperty("mode", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -1773,8 +1773,8 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonProperty("actions", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<LabeledActionResult> Actions { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("debug_level", Required = Newtonsoft.Json.Required.Always)]
-        public int Debug_level { get; set; } = 0;
+        [Newtonsoft.Json.JsonProperty("debug_level", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? Debug_level { get; set; }
     
         [Newtonsoft.Json.JsonProperty("output", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<Relation> Output { get; set; }
