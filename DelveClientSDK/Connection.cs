@@ -363,6 +363,18 @@ namespace Com.RelationalAI
 
     public class ManagementConnection : Connection
     {
+        public ManagementConnection(
+            string configPath,
+            string profile = "default",
+            string scheme = Connection.DEFAULT_SCHEME,
+            string host = Connection.DEFAULT_HOST,
+            int port = Connection.DEFAULT_PORT,
+            RAIInfra infra = Connection.DEFAULT_INFRA,
+            RAIRegion region = Connection.DEFAULT_REGION,
+            bool verifySSL = Connection.DEFAULT_VERIFY_SSL
+        ) : this(scheme, host, port, infra, region, _read_creds(configPath, profile), verifySSL)
+        {
+        }
 
         public ManagementConnection(
             string scheme = Connection.DEFAULT_SCHEME,
@@ -383,16 +395,22 @@ namespace Com.RelationalAI
             VerifySSL = verifySSL;
 
             if(creds == null) {
-                try {
-                    // Try to load the credentials.
-                    this.Creds = RAICredentials.FromFile();
-                } catch (Exception e) {
-                    // No credentials found. It's ok. Let's just warn the user.
-                    Console.WriteLine(string.Format("[WARN] Credential File ({0}) Not Found!"), Config.DotRaiConfigPath());
-                }
+                this.Creds = _read_creds(Config.DotRaiConfigPath());
             }
 
             new DelveClient(this); //to register the connection with a client
+        }
+
+        public static RAICredentials _read_creds(string configPath, string profile="default")
+        {
+            try {
+                // Try to load the credentials.
+                return RAICredentials.FromFile(configPath, profile);
+            } catch (Exception e) {
+                // No credentials found. It's ok. Let's just warn the user.
+                Console.WriteLine(string.Format("[WARN] Credential File ({0}) Not Found!"), Config.DotRaiConfigPath());
+            }
+            return null;
         }
 
         public override string Scheme { get; }
