@@ -382,7 +382,15 @@ namespace Com.RelationalAI
             Creds = creds;
             VerifySSL = verifySSL;
 
-            if(creds == null) this.Creds = RAICredentials.FromFile();
+            if(creds == null) {
+                try {
+                    // Try to load the credentials.
+                    this.Creds = RAICredentials.FromFile();
+                } catch (Exception e) {
+                    // No credentials found. It's ok. Let's just warn the user.
+                    Console.WriteLine(string.Format("[WARN] Credential File ({0}) Not Found!"), Config.DotRaiConfigPath());
+                }
+            }
 
             new DelveClient(this); //to register the connection with a client
         }
