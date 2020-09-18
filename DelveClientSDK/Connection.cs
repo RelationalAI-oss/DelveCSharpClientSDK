@@ -427,16 +427,16 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).ListComputes();
         }
 
-        public ComputeData CreateCompute(string computeName, RAIComputeSize size = RAIComputeSize.XS, string region = null, bool dryRun = false)
+        public ComputeData CreateCompute(string computeName, RAIComputeSize size = RAIComputeSize.XS, string region = null)
         {
             Client.conn = this;
-            return ((DelveCloudClient) Client).CreateCompute(computeName, size, region, dryRun);
+            return ((DelveCloudClient) Client).CreateCompute(computeName, size, region);
         }
 
-        public void DeleteCompute(string computeName, bool dryRun = false)
+        public void DeleteCompute(string computeName)
         {
             Client.conn = this;
-            ((DelveCloudClient) Client).DeleteCompute(computeName, dryRun);
+            ((DelveCloudClient) Client).DeleteCompute(computeName);
             return;
         }
 
@@ -446,10 +446,10 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).ListUsers();
         }
 
-        public Tuple<UserInfoProtocol, string> CreateUser(string username, bool dryRun = false)
+        public Tuple<UserInfoProtocol, string> CreateUser(string username)
         {
             Client.conn = this;
-            return ((DelveCloudClient) Client).CreateUser(username, dryRun);
+            return ((DelveCloudClient) Client).CreateUser(username);
         }
 
         public ICollection<DatabaseInfo> ListDatabases()
