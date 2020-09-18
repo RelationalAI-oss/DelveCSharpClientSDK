@@ -433,10 +433,11 @@ namespace Com.RelationalAI
             return ((DelveCloudClient) Client).CreateCompute(computeName, size, region, dryRun);
         }
 
-        public DeleteComputeStatus DeleteCompute(string computeName, bool dryRun = false)
+        public void DeleteCompute(string computeName, bool dryRun = false)
         {
             Client.conn = this;
-            return ((DelveCloudClient) Client).DeleteCompute(computeName, dryRun);
+            ((DelveCloudClient) Client).DeleteCompute(computeName, dryRun);
+            return;
         }
 
         public ICollection<UserInfoProtocol> ListUsers()

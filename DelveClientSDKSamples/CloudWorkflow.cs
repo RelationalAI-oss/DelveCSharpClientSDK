@@ -173,8 +173,7 @@ namespace DelveClientSDKSamples
             this.MngtConn.RemoveDefaultCompute(dbname: this.MngtConn.DbName);
 
             // delete compute => stop charging for the compute
-            var deleteComputeResponse = this.MngtConn.DeleteCompute(computeName: ComputeName);
-            Console.WriteLine("=> DeleteComputeResponse: " + JObject.FromObject(deleteComputeResponse).ToString());
+            this.MngtConn.DeleteCompute(computeName: ComputeName);
         }
 
         /*
