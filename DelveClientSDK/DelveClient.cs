@@ -15,15 +15,18 @@ using System.Web;
 namespace Com.RelationalAI
 {
     using AnyValue = System.Object;
-    public partial class GeneratedDelveClient : DelveCloudClient
+    public partial class GeneratedDelveClient
     {
+        public Connection conn {get; set;}
+
         public const string JSON_CONTENT_TYPE = "application/json";
         public const string CSV_CONTENT_TYPE = "text/csv";
 
         public int DebugLevel = Connection.DEFAULT_DEBUG_LEVEL;
 
-        public GeneratedDelveClient(Connection conn) : base(conn)
+        public GeneratedDelveClient(Connection conn)
         {
+            this.conn = conn;
             _httpClient = DelveClient.GetHttpClient(conn.BaseUrl, conn.VerifySSL);
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings);
         }
@@ -295,7 +298,7 @@ namespace Com.RelationalAI
             return httpClient;
         }
 
-        public DelveClient(Connection conn) : base(conn)
+        public DelveClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
         {
             this.conn = conn;
             conn.Client = this;

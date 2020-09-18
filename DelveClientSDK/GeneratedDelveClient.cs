@@ -16,13 +16,13 @@ namespace Com.RelationalAI
     using AnyValue = System.Object;
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.7.0.0 (NJsonSchema v10.1.24.0 (Newtonsoft.Json v12.0.0.0))")]
-    public partial class GeneratedDelveClient : DelveCloudClient
+    public partial class GeneratedDelveClient
     {
         private string _baseUrl = "http://127.0.0.1:8010";
         private System.Net.Http.HttpClient _httpClient;
         private System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings;
 
-        public GeneratedDelveClient(System.Net.Http.HttpClient httpClient) : base(httpClient)
+        public GeneratedDelveClient(System.Net.Http.HttpClient httpClient)
         {
             _httpClient = httpClient; 
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings);

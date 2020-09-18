@@ -41,11 +41,17 @@ namespace Com.RelationalAI
             get { return new UriBuilder(this.Scheme, this.Host, this.Port).Uri; }
         }
 
-        public DelveCloudClient Client { get; set; }
+        public DelveClient Client { get; set; }
+        public DelveCloudClient CloudClient { get; set; }
+
+        public void SetConnectionOnClients() {
+            if(Client != null) Client.conn = this;
+            if(CloudClient != null) CloudClient.conn = this;
+        }
 
         public int DebugLevel {
-            get{ return Client is DelveClient ? ((DelveClient) Client).DebugLevel : DEFAULT_DEBUG_LEVEL; }
-            set { if(Client is DelveClient) ((DelveClient) Client).DebugLevel = value; }
+            get{ return Client != null ? Client.DebugLevel : DEFAULT_DEBUG_LEVEL; }
+            set { if(Client != null) Client.DebugLevel = value; }
         }
     }
 
@@ -95,56 +101,56 @@ namespace Com.RelationalAI
 
         public bool BranchDatabase(string sourceDbname)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).BranchDatabase(sourceDbname);
+            SetConnectionOnClients();
+            return Client.BranchDatabase(sourceDbname);
         }
 
         public bool CreateDatabase(bool overwrite = false)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).CreateDatabase(overwrite);
+            SetConnectionOnClients();
+            return Client.CreateDatabase(overwrite);
         }
 
         public bool InstallSource(Source src)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).InstallSource(src);
+            SetConnectionOnClients();
+            return Client.InstallSource(src);
         }
 
         public bool InstallSource(String name, String srcStr)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).InstallSource(name, srcStr);
+            SetConnectionOnClients();
+            return Client.InstallSource(name, srcStr);
         }
 
         public bool InstallSource(String name, String path, String srcStr)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).InstallSource(name, path, srcStr);
+            SetConnectionOnClients();
+            return Client.InstallSource(name, path, srcStr);
         }
 
         public bool InstallSource(ICollection<Source> srcList)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).InstallSource(srcList);
+            SetConnectionOnClients();
+            return Client.InstallSource(srcList);
         }
 
         public bool DeleteSource(ICollection<string> srcNameList)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).DeleteSource(srcNameList);
+            SetConnectionOnClients();
+            return Client.DeleteSource(srcNameList);
         }
 
         public bool DeleteSource(string srcName)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).DeleteSource(srcName);
+            SetConnectionOnClients();
+            return Client.DeleteSource(srcName);
         }
 
         public IDictionary<string, Source> ListSource()
         {
-            Client.conn = this;
-            return ((DelveClient) Client).ListSource();
+            SetConnectionOnClients();
+            return Client.ListSource();
         }
 
         public IDictionary<RelKey, Relation> Query(
@@ -158,8 +164,8 @@ namespace Com.RelationalAI
             TransactionMode? mode = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).Query(output, name, path, srcStr, inputs, persist, isReadOnly, mode);
+            SetConnectionOnClients();
+            return Client.Query(output, name, path, srcStr, inputs, persist, isReadOnly, mode);
         }
 
         public IDictionary<RelKey, Relation> Query(
@@ -173,8 +179,8 @@ namespace Com.RelationalAI
             TransactionMode? mode = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).Query(name, path, srcStr, inputs, outputs, persist, isReadOnly, mode);
+            SetConnectionOnClients();
+            return Client.Query(name, path, srcStr, inputs, outputs, persist, isReadOnly, mode);
         }
 
         public IDictionary<RelKey, Relation> Query(
@@ -186,8 +192,8 @@ namespace Com.RelationalAI
             TransactionMode? mode = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).Query(src, inputs, outputs, persist, isReadOnly, mode);
+            SetConnectionOnClients();
+            return Client.Query(src, inputs, outputs, persist, isReadOnly, mode);
         }
 
         public bool UpdateEdb(
@@ -196,8 +202,8 @@ namespace Com.RelationalAI
             ICollection<Tuple<AnyValue, AnyValue>> delta = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).UpdateEdb(rel, updates, delta);
+            SetConnectionOnClients();
+            return Client.UpdateEdb(rel, updates, delta);
         }
 
         public LoadData JsonString(
@@ -207,8 +213,8 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).JsonString(data, key, syntax, schema);
+            SetConnectionOnClients();
+            return Client.JsonString(data, key, syntax, schema);
         }
 
         public LoadData JsonFile(
@@ -218,8 +224,8 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).JsonString(filePath, key, syntax, schema);
+            SetConnectionOnClients();
+            return Client.JsonString(filePath, key, syntax, schema);
         }
 
         public LoadData CsvString(
@@ -229,8 +235,8 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).JsonString(data, key, syntax, schema);
+            SetConnectionOnClients();
+            return Client.JsonString(data, key, syntax, schema);
         }
 
         public LoadData CsvFile(
@@ -240,8 +246,8 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).CsvFile(filePath, key, syntax, schema);
+            SetConnectionOnClients();
+            return Client.CsvFile(filePath, key, syntax, schema);
         }
 
         public bool LoadEdb(
@@ -254,44 +260,44 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadEdb(rel, contentType, data, path, key, syntax, schema);
+            SetConnectionOnClients();
+            return Client.LoadEdb(rel, contentType, data, path, key, syntax, schema);
         }
 
         public bool LoadEdb(string rel, LoadData value)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadEdb(rel, value);
+            SetConnectionOnClients();
+            return Client.LoadEdb(rel, value);
         }
 
         public bool LoadEdb(string relName, AnyValue[][] columns)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadEdb(relName, columns);
+            SetConnectionOnClients();
+            return Client.LoadEdb(relName, columns);
         }
 
         public bool LoadEdb(string relName, ICollection<ICollection<AnyValue>> columns)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadEdb(relName, columns);
+            SetConnectionOnClients();
+            return Client.LoadEdb(relName, columns);
         }
 
         public bool LoadEdb(RelKey relKey, ICollection<ICollection<AnyValue>> columns)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadEdb(relKey, columns);
+            SetConnectionOnClients();
+            return Client.LoadEdb(relKey, columns);
         }
 
         public bool LoadEdb(Relation value)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadEdb(value);
+            SetConnectionOnClients();
+            return Client.LoadEdb(value);
         }
 
         public bool LoadEdb(ICollection<Relation> value)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadEdb(value);
+            SetConnectionOnClients();
+            return Client.LoadEdb(value);
         }
 
         public bool LoadCSV(
@@ -303,8 +309,8 @@ namespace Com.RelationalAI
             FileSchema schema = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadCSV(rel, data, path, key, syntax, schema);
+            SetConnectionOnClients();
+            return Client.LoadCSV(rel, data, path, key, syntax, schema);
         }
 
         public bool LoadJSON(
@@ -314,38 +320,38 @@ namespace Com.RelationalAI
             AnyValue[] key = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).LoadJSON(rel, data, path, key);
+            SetConnectionOnClients();
+            return Client.LoadJSON(rel, data, path, key);
         }
 
         public ICollection<RelKey> ListEdb(string relName = null)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).ListEdb(relName);
+            SetConnectionOnClients();
+            return Client.ListEdb(relName);
         }
 
         public ICollection<RelKey> DeleteEdb(string relName)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).DeleteEdb(relName);
+            SetConnectionOnClients();
+            return Client.DeleteEdb(relName);
         }
 
         public bool EnableLibrary(string srcName)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).EnableLibrary(srcName);
+            SetConnectionOnClients();
+            return Client.EnableLibrary(srcName);
         }
 
         public ICollection<Relation> Cardinality(string relName = null)
         {
-            Client.conn = this;
-            return ((DelveClient) Client).Cardinality(relName);
+            SetConnectionOnClients();
+            return Client.Cardinality(relName);
         }
 
         public ICollection<AbstractProblem> CollectProblems()
         {
-            Client.conn = this;
-            return ((DelveClient) Client).CollectProblems();
+            SetConnectionOnClients();
+            return Client.CollectProblems();
         }
 
         public bool Configure(
@@ -356,8 +362,8 @@ namespace Com.RelationalAI
             bool? abortOnError = null
         )
         {
-            Client.conn = this;
-            return ((DelveClient) Client).Configure(debug, debugTrace, broken, silent, abortOnError);
+            SetConnectionOnClients();
+            return Client.Configure(debug, debugTrace, broken, silent, abortOnError);
         }
     }
 
@@ -423,45 +429,45 @@ namespace Com.RelationalAI
 
         public ICollection<ComputeData> ListComputes()
         {
-            Client.conn = this;
-            return ((DelveCloudClient) Client).ListComputes();
+            SetConnectionOnClients();
+            return CloudClient.ListComputes();
         }
 
         public ComputeData CreateCompute(string computeName, RAIComputeSize size = RAIComputeSize.XS, string region = null)
         {
-            Client.conn = this;
-            return ((DelveCloudClient) Client).CreateCompute(computeName, size, region);
+            SetConnectionOnClients();
+            return CloudClient.CreateCompute(computeName, size, region);
         }
 
         public void DeleteCompute(string computeName)
         {
-            Client.conn = this;
-            ((DelveCloudClient) Client).DeleteCompute(computeName);
+            SetConnectionOnClients();
+            CloudClient.DeleteCompute(computeName);
             return;
         }
 
         public ICollection<UserInfoProtocol> ListUsers()
         {
-            Client.conn = this;
-            return ((DelveCloudClient) Client).ListUsers();
+            SetConnectionOnClients();
+            return CloudClient.ListUsers();
         }
 
         public Tuple<UserInfoProtocol, string> CreateUser(string username)
         {
-            Client.conn = this;
-            return ((DelveCloudClient) Client).CreateUser(username);
+            SetConnectionOnClients();
+            return CloudClient.CreateUser(username);
         }
 
         public ICollection<DatabaseInfo> ListDatabases()
         {
-            Client.conn = this;
-            return ((DelveCloudClient) Client).ListDatabases();
+            SetConnectionOnClients();
+            return CloudClient.ListDatabases();
         }
 
         public void RemoveDefaultCompute(string dbname)
         {
-            Client.conn = this;
-            ((DelveCloudClient) Client).RemoveDefaultCompute(dbname);
+            SetConnectionOnClients();
+            CloudClient.RemoveDefaultCompute(dbname);
         }
 
     }
