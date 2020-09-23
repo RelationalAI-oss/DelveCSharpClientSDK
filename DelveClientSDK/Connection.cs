@@ -404,7 +404,7 @@ namespace Com.RelationalAI
                 this.Creds = _read_creds(Config.DotRaiConfigPath());
             }
 
-            new DelveClient(this); //to register the connection with a client
+            new DelveCloudClient(this); //to register the connection with a client
         }
 
         public static RAICredentials _read_creds(string configPath, string profile="default")
