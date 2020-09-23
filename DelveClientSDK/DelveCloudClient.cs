@@ -28,6 +28,7 @@ namespace Com.RelationalAI
 
             RAIRequest raiReq = new RAIRequest(request, conn);
             raiReq.Sign();
+            DelveClient.AddExtraHeaders(request);
         }
     }
 
