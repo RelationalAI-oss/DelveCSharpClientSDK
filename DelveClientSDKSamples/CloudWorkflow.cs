@@ -18,7 +18,7 @@ namespace DelveClientSDKSamples
         int MaxAttempts;
         int SleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
+        public CloudWorkflow(string computeName = "csharpcompute-2020-09-23", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
         {
             // Loads data from ~/.rai/config (rai cloud configuration)
             IniData ini = Config.LoadDotRaiConfig();
@@ -70,7 +70,9 @@ namespace DelveClientSDKSamples
             }, ... ]}
               */
             var computes = this.MngtConn.ListComputes();
-            Console.WriteLine("=> Computes: " + JObject.FromObject(computes));
+            Console.WriteLine("==> Computes:");
+            foreach( var compute in computes)
+                Console.WriteLine(JObject.FromObject(compute));
 
             // list databases for the current account
             /* Expected output: {
@@ -91,7 +93,9 @@ namespace DelveClientSDKSamples
                 }, ... ]}
             */
             var databases = this.MngtConn.ListDatabases();
-            Console.WriteLine("=> Databases: " + JObject.FromObject(databases).ToString());
+            Console.WriteLine("==> Databases:");
+            foreach(var database in databases)
+                Console.WriteLine(JObject.FromObject(database).ToString());
 
             // list users for the current account
             /* Expected output: {
@@ -108,15 +112,23 @@ namespace DelveClientSDKSamples
                 ]}
             */
             var users = this.MngtConn.ListUsers();
-            Console.WriteLine("=> Users: " + JObject.FromObject(users).ToString());
+            Console.WriteLine("==> Users:");
+            foreach(var user in users)
+                Console.WriteLine(JObject.FromObject(user).ToString());
 
             // create compute
-            //var createComputeResponse = this.MngtConn.CreateCompute(computeName: ComputeName, size: RAIComputeSize.XS);
-            //Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
+            if (GetComputeByName(this.MngtConn, this.ComputeName) == null)
+            {
+                //var createComputeResponse = this.MngtConn.CreateCompute(computeName: ComputeName, size: RAIComputeSize.XS);
+                //Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
+            } else
+            {
+                Console.WriteLine($"==> Compute {this.ComputeName} is used.");
+            }
 
             // wait for compute to be provisioned
             // a compute is a single tenant VM used for the current account (provisioning time ~ 5 mins)
-            if(!WaitForCompute(this.ComputeName))
+            if(!WaitForCompute(this.MngtConn, this.ComputeName))
                 return;
 
             // create database with the name as specificied in the MngtConnection
@@ -169,11 +181,17 @@ namespace DelveClientSDKSamples
 
             Console.WriteLine("=> Jaccard Similarity query result: " + JObject.FromObject(queryResult).ToString());
 
-            // remove default compute (disassociate database from compute)
-            this.MngtConn.RemoveDefaultCompute(dbname: this.MngtConn.DbName);
+            Console.WriteLine($"Press 'Y' to destroy {this.ComputeName}");
+            ConsoleKeyInfo cki = Console.ReadKey();
 
-            // delete compute => stop charging for the compute
-            this.MngtConn.DeleteCompute(computeName: ComputeName);
+            if (cki.Key.ToString() == "Y")
+            {
+                // remove default compute (disassociate database from compute)
+                this.MngtConn.RemoveDefaultCompute(dbname: this.ComputeName);
+
+                // delete compute => stop charging for the compute
+                this.MngtConn.DeleteCompute(computeName: ComputeName);
+            }else { Console.WriteLine("Nothing to do."); }
         }
 
         /*
@@ -181,39 +199,26 @@ namespace DelveClientSDKSamples
          *
          */
 
-        private bool WaitForCompute(string computeName)
+        private bool WaitForCompute(ManagementConnection connection, string computeName)
         {
-            for (int i=0; i<this.MaxAttempts; i++)
+            for (var i=0; i<this.MaxAttempts; i++)
             {
-                var compute = GetByComputeName(computeName);
-                string computeState = (string)compute["computeState"];
-                if ("PROVISIONED".Equals(computeState))
+                var compute = GetComputeByName(connection, computeName);
+                Console.WriteLine($"==> Compute {computeName} state: {compute.ComputeState}");
+                if ("PROVISIONED".Equals(compute.ComputeState))
                     return true;
-                Console.WriteLine(String.Format("Current state: {0}. Waiting for {1} to be provisioned. (Attempt {2}).", computeState ,computeName, i+1));
                 Thread.Sleep(this.SleepTime);
             }
             return false;
         }
 
-        private JToken GetByComputeId(string computeId)
+        private ComputeData GetComputeByName(ManagementConnection connection, string computeName)
         {
-            return GetByField("computeId", computeId);
-        }
-
-        private JToken GetByComputeName(string computeName)
-        {
-            return GetByField("computeName", computeName);
-        }
-
-        private JToken GetByField(string field, string value)
-        {
-            var computes = this.MngtConn.ListComputes();
-
-            foreach (var compute in JObject.FromObject(computes)["compute_requests_list"])
-            {
-                string currentComputeField = (string)compute[field];
-                if (value.Equals(currentComputeField))
+            var computes = connection.ListComputes();
+            foreach(var compute in computes) {
+                if (computeName.Equals(compute.ComputeName)) {
                     return compute;
+                } 
             }
             return null;
         }
