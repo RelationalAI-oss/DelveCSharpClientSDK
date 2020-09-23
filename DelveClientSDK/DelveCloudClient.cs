@@ -28,6 +28,8 @@ namespace Com.RelationalAI
 
             RAIRequest raiReq = new RAIRequest(request, conn);
             raiReq.Sign();
+            // host & content-type header for signature verification, more headers here
+            request.Headers.UserAgent.TryParseAdd("csharp-delve-sdk");
         }
     }
 
