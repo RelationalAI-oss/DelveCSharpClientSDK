@@ -23,8 +23,10 @@ namespace Com.RelationalAI
         }
         public static string DotRaiDir()
         {
+            var homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
             var envHome = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "HOMEPATH" : "HOME";
             var home = Environment.GetEnvironmentVariable(envHome);
+            home = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? homeDrive + home : home;
             return Path.Combine(home, ".rai");
         }
 

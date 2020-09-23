@@ -119,8 +119,8 @@ namespace DelveClientSDKSamples
             // create compute
             if (GetComputeByName(this.MngtConn, this.ComputeName) == null)
             {
-                //var createComputeResponse = this.MngtConn.CreateCompute(computeName: ComputeName, size: RAIComputeSize.XS);
-                //Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
+                var createComputeResponse = this.MngtConn.CreateCompute(computeName: ComputeName, size: RAIComputeSize.XS);
+                Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
             } else
             {
                 Console.WriteLine($"==> Compute {this.ComputeName} is used.");
