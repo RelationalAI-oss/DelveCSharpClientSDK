@@ -55,6 +55,7 @@ namespace Com.RelationalAI
             request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
+            request.Headers.UserAgent.TryParseAdd("csharp-delve-sdk");
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
