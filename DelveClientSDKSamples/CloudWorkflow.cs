@@ -18,7 +18,7 @@ namespace DelveClientSDKSamples
         int MaxAttempts;
         int SleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute-2020-09-23", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
+        public CloudWorkflow(string computeName = "csharpcompute-2020-09-24", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
         {
             // Loads data from ~/.rai/config (rai cloud configuration)
             IniData ini = Config.LoadDotRaiConfig();
@@ -72,7 +72,9 @@ namespace DelveClientSDKSamples
             var computes = this.MngtConn.ListComputes();
             Console.WriteLine("==> Computes:");
             foreach( var compute in computes)
+            {
                 Console.WriteLine(JObject.FromObject(compute));
+            }
 
             // list databases for the current account
             /* Expected output: {
@@ -95,7 +97,9 @@ namespace DelveClientSDKSamples
             var databases = this.MngtConn.ListDatabases();
             Console.WriteLine("==> Databases:");
             foreach(var database in databases)
+            {
                 Console.WriteLine(JObject.FromObject(database).ToString());
+            }
 
             // list users for the current account
             /* Expected output: {
@@ -114,7 +118,9 @@ namespace DelveClientSDKSamples
             var users = this.MngtConn.ListUsers();
             Console.WriteLine("==> Users:");
             foreach(var user in users)
+            {
                 Console.WriteLine(JObject.FromObject(user).ToString());
+            }
 
             // create compute
             if (GetComputeByName(this.MngtConn, this.ComputeName) == null)

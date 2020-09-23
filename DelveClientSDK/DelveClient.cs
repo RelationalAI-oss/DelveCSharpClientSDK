@@ -21,6 +21,7 @@ namespace Com.RelationalAI
 
         public const string JSON_CONTENT_TYPE = "application/json";
         public const string CSV_CONTENT_TYPE = "text/csv";
+        public const string USER_AGENT_HEADER = "DelveClient/chsarp";
 
         public int DebugLevel = Connection.DEFAULT_DEBUG_LEVEL;
 
@@ -59,8 +60,7 @@ namespace Com.RelationalAI
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
             raiRequest.Sign(debugLevel: DebugLevel);
-            // host & content-type header for signature verification, more headers here
-            request.Headers.UserAgent.TryParseAdd("csharp-delve-sdk");
+            DelveClient.AddExtraHeaders(request);
         }
 
         private string BoolStr(bool val) {
@@ -248,6 +248,11 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
+        public static void AddExtraHeaders(HttpRequestMessage request)
+        {
+            // host & content-type header for signature verification, more headers here
+            request.Headers.UserAgent.TryParseAdd(USER_AGENT_HEADER);
+        }
         public static HttpClient CreateHttpClient(bool verifySSL) {
             if( verifySSL ) {
                 return new HttpClient();
