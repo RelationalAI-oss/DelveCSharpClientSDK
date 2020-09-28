@@ -1894,11 +1894,11 @@ namespace Com.RelationalAI
         [System.Runtime.Serialization.EnumMember(Value = @"OPEN_OR_CREATE")]
         OPEN_OR_CREATE = 3,
     
-        [System.Runtime.Serialization.EnumMember(Value = @"BRANCH")]
-        BRANCH = 4,
+        [System.Runtime.Serialization.EnumMember(Value = @"CLONE")]
+        CLONE = 4,
     
-        [System.Runtime.Serialization.EnumMember(Value = @"BRANCH_OVERWRITE")]
-        BRANCH_OVERWRITE = 5,
+        [System.Runtime.Serialization.EnumMember(Value = @"CLONE_OVERWRITE")]
+        CLONE_OVERWRITE = 5,
     
     }
     

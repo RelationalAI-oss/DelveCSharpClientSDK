@@ -370,7 +370,7 @@ namespace Com.RelationalAI
         public bool BranchDatabase(string sourceDbname)
         {
             var xact = new Transaction();
-            xact.Mode = TransactionMode.BRANCH;
+            xact.Mode = TransactionMode.CLONE;
             xact.Dbname = conn.DbName;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Source_dbname = sourceDbname;
