@@ -25,10 +25,10 @@ namespace Com.RelationalAI
         {
             var envHome = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "HOMEPATH" : "HOME";
             var home = Environment.GetEnvironmentVariable(envHome);
-            if RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
-                home = homeDrive + home
+                home = homeDrive + home;
             }
             return Path.Combine(home, ".rai");
         }
