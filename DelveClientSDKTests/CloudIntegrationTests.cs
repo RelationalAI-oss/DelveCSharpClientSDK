@@ -32,7 +32,7 @@ namespace Com.RelationalAI
                 var computes = mgmtConn.ListComputes();
 
                 foreach(var comp in computes) {
-                    if( "PROVISIONED".Equals(comp.AdditionalProperties["computeState"]) )
+                    if( "PROVISIONED".Equals(comp.ComputeState) )
                     {
                         var databases = mgmtConn.ListDatabases();
                         foreach(var db in databases) {
@@ -44,7 +44,7 @@ namespace Com.RelationalAI
 
                         provisionedCompute = comp;
                         break;
-                    } else if( "REQUESTED".Equals(comp.AdditionalProperties["computeState"]) || "PROVISIONING".Equals(comp.AdditionalProperties["computeState"]) ) {
+                    } else if( "REQUESTED".Equals(comp.ComputeState) || "PROVISIONING".Equals(comp.ComputeState) ) {
                         requestedOrProvisioning = true;
                     }
                 }
