@@ -1,4 +1,4 @@
-# This workflow will build a package using Nuget and then publish it to Nuget.org when a release is created
+# This workflow will build a package using Nuget and then publish it to Github and Nuget.org when a release is created
 
 name: Nuget Package
 
@@ -33,17 +33,25 @@ jobs:
         tag_name="${GITHUB_REF##*/}"
         hub release edit $(find ./DelveClientSDK/bin/Release -type f -name "DelveClientSDK.*.nupkg" -printf "-a %p ") -m "" "$tag_name"
 
+    - name: Publish Nuget Package to Github
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        dotnet nuget add source https://nuget.pkg.github.com/RelationalAI-oss/index.json -n github -u RelationalAI-oss -p GH_TOKEN [--store-password-in-clear-text]
+        dotnet pack --configuration Release --no-restore --include-symbols
+        dotnet nuget push $(find ./DelveClientSDK/bin/Release -type f -name "DelveClientSDK.*.nupkg" -printf "-a %p ") --source "github"
+
     # Publish
-    - name: Publish Nuget Package
+    - name: Publish Nuget Package to Nuget.org
       id: publish_nuget
       uses: rohith/publish-nuget@v2
       with:
         # Filepath of the project to be packaged, relative to root of repository
         PROJECT_FILE_PATH: DelveClientSDK/DelveClientSDK.csproj
-        
+
         # NuGet package id, used for version detection & defaults to project name
         # PACKAGE_NAME: DelveClientSDK
-        
+
         # Filepath with version info, relative to root of repository & defaults to PROJECT_FILE_PATH
         # VERSION_FILE_PATH: DelveClientSDK/DelveClientSDK.csproj
 
