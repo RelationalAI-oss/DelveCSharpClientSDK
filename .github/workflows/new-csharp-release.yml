@@ -1,0 +1,49 @@
+# This workflow will create a release on any version update
+
+name: New C# SDK Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  doConditionalRelease:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Fetch Current Version
+      id: fetch_current_version
+      run: grep "<Version>.*</Version>" ./DelveClientSDK/DelveClientSDK.csproj | awk -F '[<>]' '/Version/{print "::set-output name=current_version::v"$3}'
+
+    - name: Show Current Version
+      run: "echo current version: ${{ steps.fetch_current_version.outputs.current_version }}"
+
+    - name: Fetch All Releases
+      uses: octokit/request-action@v2.x
+      id: fetch_all_releases
+      with:
+        route: GET /repos/:repository/releases
+        repository: ${{ github.repository }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Show All Releases
+      run: "echo all releases: ${{ steps.fetch_all_releases.outputs.data.map(r => r.tag_name) }}"
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      if: ${{ !steps.fetch_all_releases.outputs.data.map(r => r.tag_name).includes(steps.fetch_current_version.outputs.current_version) }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.fetch_current_version.outputs.current_version }}
+        release_name: Release ${{ steps.fetch_current_version.outputs.current_version }}
+        body: Delve C# Client SDK ${{ steps.fetch_current_version.outputs.current_version }}.
+        draft: false
+        prerelease: false
