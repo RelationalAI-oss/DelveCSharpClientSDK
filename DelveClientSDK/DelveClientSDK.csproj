@@ -2,11 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>1.0.3</Version>
     <PackageId>DelveClientSDK</PackageId>
     <Authors>Mohammad Dashti and Helmi Nour</Authors>
     <Company>RelationalAI</Company>
-    <Version>1.0.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <RepositoryUrl>https://github.com/RelationalAI-oss/DelveClientSDK</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/RelationalAI-oss/DelveClientSDK</PackageProjectUrl>
     <Description>
         This is the Delve C# client SDK and you can use it to connect to the RelationalAI infrastructure.
     </Description>
