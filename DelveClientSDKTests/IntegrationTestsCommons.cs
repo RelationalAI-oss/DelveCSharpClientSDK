@@ -149,7 +149,7 @@ namespace Com.RelationalAI
             if(!(conn2 is CloudConnection))
             {
                 //Not supported by CloudConnection, yet
-                conn2.BranchDatabase(conn.DbName);
+                conn2.CloneDatabase(conn.DbName);
                 queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
                 testInstallSource(conn, "name", "def x = {(1,); (2,); (3,); (4,)}");

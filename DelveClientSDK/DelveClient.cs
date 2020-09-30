@@ -367,7 +367,7 @@ namespace Com.RelationalAI
             return !response.Aborted && response.Problems.Count == 0;
         }
 
-        public bool BranchDatabase(string sourceDbname)
+        public bool CloneDatabase(string sourceDbname)
         {
             var xact = new Transaction();
             xact.Mode = TransactionMode.CLONE;

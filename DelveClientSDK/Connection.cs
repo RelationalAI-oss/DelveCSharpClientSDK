@@ -99,10 +99,10 @@ namespace Com.RelationalAI
         public override int Port { get; }
         public override bool VerifySSL => DEFAULT_VERIFY_SSL;
 
-        public bool BranchDatabase(string sourceDbname)
+        public bool CloneDatabase(string sourceDbname)
         {
             SetConnectionOnClients();
-            return Client.BranchDatabase(sourceDbname);
+            return Client.CloneDatabase(sourceDbname);
         }
 
         public bool CreateDatabase(bool overwrite = false)
