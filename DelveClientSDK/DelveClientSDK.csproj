@@ -11,8 +11,8 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <RepositoryUrl>https://github.com/RelationalAI-oss/DelveClientSDK</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/RelationalAI-oss/DelveClientSDK</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RelationalAI-oss/DelveCSharpClientSDK</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/RelationalAI-oss/DelveCSharpClientSDK</PackageProjectUrl>
     <Description>
         This is the Delve C# client SDK and you can use it to connect to the RelationalAI infrastructure.
     </Description>

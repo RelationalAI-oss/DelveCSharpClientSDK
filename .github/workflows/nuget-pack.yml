@@ -33,9 +33,6 @@ jobs:
         tag_name="${GITHUB_REF##*/}"
         hub release edit $(find ./DelveClientSDK/bin/Release -type f -name "DelveClientSDK.*.nupkg" -printf "-a %p ") -m "" "$tag_name"
 
-    - name: Add private GitHub registry to NuGet
-      run: dotnet nuget add source https://nuget.pkg.github.com/RelationalAI-oss/index.json -n GPR -u RelationalAI-oss -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
-
     - name: Install gpr tool
       run: dotnet tool install gpr -g
 
