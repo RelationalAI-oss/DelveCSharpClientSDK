@@ -24,21 +24,21 @@ jobs:
       run: "echo current version: ${{ steps.fetch_current_version.outputs.current_version }}"
 
     - name: Fetch All Releases
-      uses: octokit/request-action@v2.x
       id: fetch_all_releases
-      with:
-        route: GET /repos/:repository/releases
-        repository: ${{ github.repository }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        RELEASES="$(curl -s https://api.github.com/repos/${{ github.repository }}/releases)"
+        RELEASES="${RELEASES//'%'/'%25'}" # to escape the string and make it ready for `set-output`
+        RELEASES="${RELEASES//$'\n'/'%0A'}"
+        RELEASES="${RELEASES//$'\r'/'%0D'}"
+        echo "::set-output name=all_releases::$RELEASES"
 
     - name: Show All Releases
-      run: "echo all releases: ${{ join(steps.fetch_all_releases.outputs.data.*.tag_name, ', ') }}"
+      run: "echo all releases: ${{ join(fromJson(steps.fetch_all_releases.outputs.all_releases).*.tag_name, ', ') }}"
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-      if: ${{ !contains(steps.fetch_all_releases.outputs.data.*.tag_name, steps.fetch_current_version.outputs.current_version) }}
+      if: ${{ !contains(fromJson(steps.fetch_all_releases.outputs.all_releases).*.tag_name, steps.fetch_current_version.outputs.current_version) }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -47,3 +47,71 @@ jobs:
         body: Delve C# Client SDK ${{ steps.fetch_current_version.outputs.current_version }}.
         draft: false
         prerelease: false
+
+    # As we are using `GITHUB_TOKEN` for auth, this workflow does not trigger the `nuget-pack` workflow, so we need to inline it below
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal
+
+    - name: Pack
+      run: dotnet pack --configuration Release --no-restore --include-symbols
+
+    - name: Upload Release Assets
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        tag_name="${{ steps.fetch_current_version.outputs.current_version }}"
+        hub release edit $(find ./DelveClientSDK/bin/Release -type f -name "DelveClientSDK.*.nupkg" -printf "-a %p ") -m "" "$tag_name"
+
+    - name: Install gpr tool
+      run: dotnet tool install gpr -g
+
+    - name: Push generated package to GitHub registry
+      run: |
+        for f in DelveClientSDK/bin/Release/*.nupkg
+        do
+          gpr push $f -k ${{ secrets.GITHUB_TOKEN }}
+        done
+      shell: bash
+
+    # Publish
+    - name: Publish Nuget Package to Nuget.org
+      id: publish_nuget
+      uses: rohith/publish-nuget@v2
+      with:
+        # Filepath of the project to be packaged, relative to root of repository
+        PROJECT_FILE_PATH: DelveClientSDK/DelveClientSDK.csproj
+
+        # NuGet package id, used for version detection & defaults to project name
+        # PACKAGE_NAME: DelveClientSDK
+
+        # Filepath with version info, relative to root of repository & defaults to PROJECT_FILE_PATH
+        # VERSION_FILE_PATH: DelveClientSDK/DelveClientSDK.csproj
+
+        # Regex pattern to extract version info in a capturing group
+        # VERSION_REGEX: ^\s*<Version>(.*)<\/Version>\s*$
+
+        # Flag to toggle git tagging, enabled by default
+        TAG_COMMIT: false
+
+        # Format of the git tag, [*] gets replaced with actual version
+        # TAG_FORMAT: v*
+
+        # API key to authenticate with NuGet server
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+        # NuGet server uri hosting the packages, defaults to https://api.nuget.org
+        # NUGET_SOURCE: https://api.nuget.org
+
+        # Flag to toggle pushing symbols along with nuget package to the server, disabled by default
+        INCLUDE_SYMBOLS: true
