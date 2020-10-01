@@ -33,12 +33,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Show All Releases
-      run: "echo all releases: ${{ steps.fetch_all_releases.outputs.data.map(r => r.tag_name) }}"
+      run: "echo all releases: ${{ join(steps.fetch_all_releases.outputs.data.*.tag_name, ', ') }}"
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-      if: ${{ !steps.fetch_all_releases.outputs.data.map(r => r.tag_name).includes(steps.fetch_current_version.outputs.current_version) }}
+      if: ${{ !contains(steps.fetch_all_releases.outputs.data.*.tag_name, steps.fetch_current_version.outputs.current_version) }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
