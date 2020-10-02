@@ -32,7 +32,6 @@ using Com.RelationalAI.Model;
 
 ```
 
-
 ## Packaging
 
 You can build the `.csproj` directly:
