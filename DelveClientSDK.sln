@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DelveClientSDKTests", "Delv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DelveClientSDK", "DelveClientSDK\DelveClientSDK.csproj", "{C7ED6857-CAA7-4EAD-B5AD-D8423AB07F22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DelveClientSDKSamples", "DelveClientSDKSamples\DelveClientSDKSamples.csproj", "{4BA20540-A18F-4844-B639-592187267FE3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
