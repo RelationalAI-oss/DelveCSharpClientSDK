@@ -37,6 +37,8 @@ namespace Com.RelationalAI
 
         public virtual string ComputeName => throw new InvalidOperationException();
 
+        public virtual int Version { get { throw new InvalidOperationException(); } set { throw new InvalidOperationException(); } }
+
         public Uri BaseUrl {
             get { return new UriBuilder(this.Scheme, this.Host, this.Port).Uri; }
         }
@@ -99,10 +101,17 @@ namespace Com.RelationalAI
         public override int Port { get; }
         public override bool VerifySSL => DEFAULT_VERIFY_SSL;
 
-        public bool CloneDatabase(string sourceDbname)
+        public override int Version { get; set; }
+
+        public bool CloneDatabase(string sourceDbname, bool overwrite=false)
         {
             SetConnectionOnClients();
-            return Client.CloneDatabase(sourceDbname);
+            return Client.CloneDatabase(sourceDbname, overwrite);
+        }
+
+        public bool CloneDatabase(LocalConnection conn, bool overwrite=false)
+        {
+            return CloneDatabase(conn.DbName, overwrite);
         }
 
         public bool CreateDatabase(bool overwrite = false)

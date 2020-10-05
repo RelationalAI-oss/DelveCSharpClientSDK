@@ -355,6 +355,7 @@ namespace Com.RelationalAI
             xact.Actions = new List<LabeledAction>();
             xact.Actions.Add(labeledAction);
             xact.Readonly = isReadOnly;
+            xact.Version = this.conn.Version;
 
             TransactionResult response = RunTransaction(xact);
 
@@ -367,34 +368,47 @@ namespace Com.RelationalAI
                     return res;
                 }
             }
+
+            lock(this.conn) {
+                int currentVersion = conn.Version;
+                int responseVersion = response.Version.GetValueOrDefault(0);
+                if(responseVersion > currentVersion) {
+                    conn.Version = responseVersion;
+                }
+            }
+
             return null;
         }
         private bool IsSuccess(TransactionResult response) {
             return !response.Aborted && response.Problems.Count == 0;
         }
 
-        public bool CloneDatabase(string sourceDbname)
+        public bool CloneDatabase(string sourceDbname, bool overwrite = false)
         {
             var xact = new Transaction();
-            xact.Mode = TransactionMode.CLONE;
+            xact.Mode = overwrite ? TransactionMode.CLONE_OVERWRITE : TransactionMode.CLONE;
             xact.Dbname = conn.DbName;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Source_dbname = sourceDbname;
             xact.Readonly = false;
+            xact.Version = this.conn.Version;
             TransactionResult response = RunTransaction(xact);
+
+            if(response.Problems.Count > 0) {
+                throw new Exception(response.Problems.ToString());
+            }
 
             return IsSuccess(response);
         }
 
         public bool CreateDatabase(bool overwrite = false)
         {
-            this.conn = conn;
-
             var xact = new Transaction();
             xact.Mode = overwrite ? TransactionMode.CREATE_OVERWRITE : TransactionMode.CREATE;
             xact.Dbname = conn.DbName;
             xact.Actions = new LinkedList<LabeledAction>();
             xact.Readonly = false;
+            xact.Version = this.conn.Version;
 
             TransactionResult response = RunTransaction(xact);
 
