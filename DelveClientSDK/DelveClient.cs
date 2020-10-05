@@ -36,12 +36,13 @@ namespace Com.RelationalAI
         {
             var uriBuilder = new UriBuilder(request.RequestUri);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            if(conn is LocalConnection || conn is CloudConnection) {
+            if(conn is LocalConnection) {
                 query["dbname"] = conn.DbName;
+                if(!_isEmpty(body.Source_dbname)) {
+                    query["source_dbname"] = body.Source_dbname;
+                }
             }
             query["open_mode"] = body.Mode.ToString();
-            query["readonly"] = BoolStr(body.Readonly);
-            query["empty"] = BoolStr(body.Actions == null || body.Actions.Count == 0);
             if(conn is ManagementConnection || conn is CloudConnection) {
                 query["region"] = EnumString.GetDescription(conn.Region);
             }
@@ -65,6 +66,11 @@ namespace Com.RelationalAI
 
         private string BoolStr(bool val) {
             return val ? "true" : "false";
+        }
+
+        private bool _isEmpty(string str)
+        {
+            return str == null || str.Length == 0;
         }
     }
 
