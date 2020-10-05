@@ -135,31 +135,61 @@ namespace Com.RelationalAI
                 output: "p"
             ), new AnyValue[][] { new AnyValue[] { 1L, 2L, 3L }, new AnyValue[] { 5L, 7L, 9L } });
 
-            // branch_database
+            // clone_database
             // =============================================================================
-
             conn = connFunc();
             var conn2 = connFunc();
+            var conn3 = connFunc();
 
-            conn.CreateDatabase(overwrite: true);
+            conn.CreateDatabase();
             testInstallSource(conn, "name", "def x = {(1,); (2,); (3,)}");
             queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
-            // Branch from conn to conn2
-            if(!(conn2 is CloudConnection))
-            {
-                //Not supported by CloudConnection, yet
-                conn2.CloneDatabase(conn.DbName);
-                queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
+            // Clone from conn to conn2
+            conn2.CloneDatabase(conn);
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
-                testInstallSource(conn, "name", "def x = {(1,); (2,); (3,); (4,)}");
-                queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
-                queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
+            testInstallSource(conn, "name", "def x = {(1,); (2,); (3,); (4,)}");
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L ));
 
-                testInstallSource(conn2, "name", "def x = {(1,); (2,); (3,); (4,); (5,)}");
-                queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L, 5L ));
-                queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
-            }
+            testInstallSource(conn2, "name", "def x = {(1,); (2,); (3,); (5,)}");
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 5L ));
+
+            // DBConnection overload, cloning from conn to conn3
+            conn3.CloneDatabase(conn);
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 5L ));
+            queryResEquals(conn3.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+
+            // Try to clone from conn to conn2, without passing overwrite=true
+            Assert.Throws<Exception>(() => conn2.CloneDatabase(conn));
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 5L ));
+            queryResEquals(conn3.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+
+            // Clone from conn2 to conn3, overwriting conn3 in the process
+            conn3.CloneDatabase(conn2, overwrite: true);
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 5L ));
+            queryResEquals(conn3.Query(output: "x"), ToRelData( 1L, 2L, 3L, 5L ));
+
+            // clone_database
+            // =============================================================================
+            conn = connFunc();
+            conn2 = connFunc();
+
+            conn.CreateDatabase();
+            conn2.CreateDatabase();
+
+            testInstallSource(conn, "name", "def x = {(1,)}");
+            testInstallSource(conn2, "name", "def x = {(2,)}");
+
+            conn2.CloneDatabase(conn, overwrite: true);
+
+            queryResEquals(conn.Query(output: "x"), ToRelData( 1L ));
+            queryResEquals(conn2.Query(output: "x"), ToRelData( 1L ));
 
             // update_edb
             // =============================================================================
