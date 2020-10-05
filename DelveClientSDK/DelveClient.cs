@@ -21,7 +21,7 @@ namespace Com.RelationalAI
 
         public const string JSON_CONTENT_TYPE = "application/json";
         public const string CSV_CONTENT_TYPE = "text/csv";
-        public const string USER_AGENT_HEADER = "DelveClient/1.0.6/csharp";
+        public const string USER_AGENT_HEADER = "DelveClient/1.0.7/csharp";
 
         public int DebugLevel = Connection.DEFAULT_DEBUG_LEVEL;
 
