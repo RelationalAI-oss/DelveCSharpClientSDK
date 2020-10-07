@@ -80,7 +80,7 @@ namespace Com.RelationalAI
             string host = DEFAULT_HOST,
             int port = DEFAULT_PORT,
             int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT
-            )
+        )
         {
             this.DbName = dbname;
             this.DefaultOpenMode = defaultOpenMode;
