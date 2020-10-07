@@ -28,7 +28,7 @@ namespace Com.RelationalAI
         public GeneratedDelveClient(Connection conn)
         {
             this.conn = conn;
-            _httpClient = DelveClient.GetHttpClient(conn.BaseUrl, conn.VerifySSL);
+            _httpClient = DelveClient.GetHttpClient(conn.BaseUrl, conn.VerifySSL, conn.ConnectionTimeout);
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings);
         }
 
@@ -259,9 +259,12 @@ namespace Com.RelationalAI
             // host & content-type header for signature verification, more headers here
             request.Headers.UserAgent.TryParseAdd(USER_AGENT_HEADER);
         }
-        public static HttpClient CreateHttpClient(bool verifySSL) {
+        // timeout in seconds
+        public static HttpClient CreateHttpClient(bool verifySSL, int timeout) {
             if( verifySSL ) {
-                return new HttpClient();
+                HttpClient httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(timeout);
+                return httpClient;
             } else {
                 // If we don't want to verify SSL certificate (from the Server), we need to
                 // specifically attach a `HttpClientHandler` to `HttpClient` for accepting
@@ -272,7 +275,9 @@ namespace Com.RelationalAI
                     SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
                     ServerCertificateCustomValidationCallback = AcceptAllServerCertificate
                 };
-                return new HttpClient(handler);
+                HttpClient httpClient = new HttpClient(handler);
+                httpClient.Timeout = TimeSpan.FromSeconds(timeout);
+                return httpClient;
             }
         }
         public static bool AcceptAllServerCertificate(
@@ -291,11 +296,11 @@ namespace Com.RelationalAI
             }
         }
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
-        private static HttpClient httpClient = CreateHttpClient(httpClientVerifySSL);
+        private static HttpClient httpClient = CreateHttpClient(httpClientVerifySSL, Connection.CONNECTION_TIMEOUT);
 
         public string DbName { get { return conn.DbName; } }
 
-        public static HttpClient GetHttpClient(Uri url, bool verifySSL)
+        public static HttpClient GetHttpClient(Uri url, bool verifySSL, int connectionTimeout)
         {
             if( "https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL) {
                 // we keep a single static HttpClient instance and keep reusing it instead
@@ -305,13 +310,13 @@ namespace Com.RelationalAI
                 // used in the previous requests), then this section disposes the existing
                 // HttpClient instance and creates a new one.
                 httpClient.Dispose();
-                httpClient = CreateHttpClient(verifySSL);
+                httpClient = CreateHttpClient(verifySSL, connectionTimeout);
                 httpClientVerifySSL = verifySSL;
             }
             return httpClient;
         }
 
-        public DelveClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
+        public DelveClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL, conn.ConnectionTimeout))
         {
             this.conn = conn;
             conn.Client = this;

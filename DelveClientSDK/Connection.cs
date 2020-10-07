@@ -16,6 +16,7 @@ namespace Com.RelationalAI
         public const RAIRegion DEFAULT_REGION = RAIRegion.US_EAST;
         public const bool DEFAULT_VERIFY_SSL = true;
         public const int DEFAULT_DEBUG_LEVEL = 0;
+        public const int CONNECTION_TIMEOUT = 3600; // seconds
 
         public virtual string DbName => throw new InvalidOperationException();
 
@@ -42,6 +43,8 @@ namespace Com.RelationalAI
         public Uri BaseUrl {
             get { return new UriBuilder(this.Scheme, this.Host, this.Port).Uri; }
         }
+
+        public int ConnectionTimeout { get; set; }
 
         public DelveClient Client { get; set; }
         public DelveCloudClient CloudClient { get; set; }
@@ -75,13 +78,16 @@ namespace Com.RelationalAI
             TransactionMode defaultOpenMode = DEFAULT_OPEN_MODE,
             string scheme = DEFAULT_SCHEME,
             string host = DEFAULT_HOST,
-            int port = DEFAULT_PORT)
+            int port = DEFAULT_PORT,
+            int connectionTimeout = CONNECTION_TIMEOUT
+            )
         {
             this.DbName = dbname;
             this.DefaultOpenMode = defaultOpenMode;
             this.Scheme = scheme;
             this.Host = host;
             this.Port = port;
+            this.ConnectionTimeout = connectionTimeout;
 
             if(this.GetType() == typeof(LocalConnection))
             {
@@ -386,8 +392,9 @@ namespace Com.RelationalAI
             int port = Connection.DEFAULT_PORT,
             RAIInfra infra = Connection.DEFAULT_INFRA,
             RAIRegion region = Connection.DEFAULT_REGION,
-            bool verifySSL = Connection.DEFAULT_VERIFY_SSL
-        ) : this(scheme, host, port, infra, region, _read_creds(configPath, profile), verifySSL)
+            bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
+            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+        ) : this(scheme, host, port, infra, region, _read_creds(configPath, profile), verifySSL, connectionTimeout)
         {
         }
 
@@ -398,7 +405,8 @@ namespace Com.RelationalAI
             RAIInfra infra = Connection.DEFAULT_INFRA,
             RAIRegion region = Connection.DEFAULT_REGION,
             RAICredentials creds = null,
-            bool verifySSL = Connection.DEFAULT_VERIFY_SSL
+            bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
+            int connectionTimeout = Connection.CONNECTION_TIMEOUT
         )
         {
             Scheme = scheme;
@@ -408,6 +416,7 @@ namespace Com.RelationalAI
             Region = region;
             Creds = creds;
             VerifySSL = verifySSL;
+            ConnectionTimeout = connectionTimeout;
 
             if(creds == null) {
                 this.Creds = _read_creds(Config.DotRaiConfigPath());
@@ -511,8 +520,9 @@ namespace Com.RelationalAI
             RAIRegion region = Connection.DEFAULT_REGION,
             RAICredentials creds = null,
             bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
-            string computeName = null
-        ) : this(conn.DbName, conn.DefaultOpenMode, conn.Scheme, conn.Host, conn.Port, infra, region, creds, verifySSL, computeName)
+            string computeName = null,
+            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+        ) : this(conn.DbName, conn.DefaultOpenMode, conn.Scheme, conn.Host, conn.Port, infra, region, creds, verifySSL, computeName, connectionTimeout)
         {
         }
 
@@ -539,10 +549,11 @@ namespace Com.RelationalAI
             RAIRegion region = Connection.DEFAULT_REGION,
             RAICredentials creds = null,
             bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
-            string computeName = null
-        ) : base(dbname, defaultOpenMode, scheme, host, port)
+            string computeName = null,
+            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+        ) : base(dbname, defaultOpenMode, scheme, host, port, connectionTimeout)
         {
-            this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL);
+            this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL, connectionTimeout);
             this.ComputeName = computeName;
 
             new DelveClient(this); //to register the connection with a client
@@ -559,8 +570,9 @@ namespace Com.RelationalAI
             string dbname,
             ManagementConnection managementConn,
             TransactionMode defaultOpenMode = Connection.DEFAULT_OPEN_MODE,
-            string computeName = null
-        ) : base(dbname, defaultOpenMode, managementConn.Scheme, managementConn.Host, managementConn.Port)
+            string computeName = null,
+            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+        ) : base(dbname, defaultOpenMode, managementConn.Scheme, managementConn.Host, managementConn.Port, connectionTimeout)
         {
             this.managementConn = managementConn;
             this.ComputeName = computeName;

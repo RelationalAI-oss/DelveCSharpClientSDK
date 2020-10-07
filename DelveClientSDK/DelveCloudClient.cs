@@ -41,7 +41,7 @@ namespace Com.RelationalAI
             throw new InvalidOperationException();
         }
 
-        public DelveCloudClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL))
+        public DelveCloudClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL, conn.ConnectionTimeout))
         {
             this.conn = conn;
             this.conn.CloudClient = this;
