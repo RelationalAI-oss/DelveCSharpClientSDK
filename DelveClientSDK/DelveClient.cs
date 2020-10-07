@@ -296,7 +296,7 @@ namespace Com.RelationalAI
             }
         }
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
-        private static HttpClient httpClient = CreateHttpClient(httpClientVerifySSL, Connection.CONNECTION_TIMEOUT);
+        private static HttpClient httpClient = CreateHttpClient(httpClientVerifySSL, Connection.DEFAULT_CONNECTION_TIMEOUT);
 
         public string DbName { get { return conn.DbName; } }
 

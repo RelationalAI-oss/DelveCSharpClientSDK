@@ -16,7 +16,7 @@ namespace Com.RelationalAI
         public const RAIRegion DEFAULT_REGION = RAIRegion.US_EAST;
         public const bool DEFAULT_VERIFY_SSL = true;
         public const int DEFAULT_DEBUG_LEVEL = 0;
-        public const int CONNECTION_TIMEOUT = 3600; // seconds
+        public const int DEFAULT_CONNECTION_TIMEOUT = 3600; // seconds
 
         public virtual string DbName => throw new InvalidOperationException();
 
@@ -79,7 +79,7 @@ namespace Com.RelationalAI
             string scheme = DEFAULT_SCHEME,
             string host = DEFAULT_HOST,
             int port = DEFAULT_PORT,
-            int connectionTimeout = CONNECTION_TIMEOUT
+            int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT
             )
         {
             this.DbName = dbname;
@@ -393,7 +393,7 @@ namespace Com.RelationalAI
             RAIInfra infra = Connection.DEFAULT_INFRA,
             RAIRegion region = Connection.DEFAULT_REGION,
             bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
-            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+            int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT
         ) : this(scheme, host, port, infra, region, _read_creds(configPath, profile), verifySSL, connectionTimeout)
         {
         }
@@ -406,7 +406,7 @@ namespace Com.RelationalAI
             RAIRegion region = Connection.DEFAULT_REGION,
             RAICredentials creds = null,
             bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
-            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+            int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT
         )
         {
             Scheme = scheme;
@@ -521,7 +521,7 @@ namespace Com.RelationalAI
             RAICredentials creds = null,
             bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
             string computeName = null,
-            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+            int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT
         ) : this(conn.DbName, conn.DefaultOpenMode, conn.Scheme, conn.Host, conn.Port, infra, region, creds, verifySSL, computeName, connectionTimeout)
         {
         }
@@ -550,7 +550,7 @@ namespace Com.RelationalAI
             RAICredentials creds = null,
             bool verifySSL = Connection.DEFAULT_VERIFY_SSL,
             string computeName = null,
-            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+            int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT
         ) : base(dbname, defaultOpenMode, scheme, host, port, connectionTimeout)
         {
             this.managementConn = new ManagementConnection(scheme, host, port, infra, region, creds, verifySSL, connectionTimeout);
@@ -571,7 +571,7 @@ namespace Com.RelationalAI
             ManagementConnection managementConn,
             TransactionMode defaultOpenMode = Connection.DEFAULT_OPEN_MODE,
             string computeName = null,
-            int connectionTimeout = Connection.CONNECTION_TIMEOUT
+            int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT
         ) : base(dbname, defaultOpenMode, managementConn.Scheme, managementConn.Host, managementConn.Port, connectionTimeout)
         {
             this.managementConn = managementConn;
