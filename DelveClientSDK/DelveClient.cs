@@ -567,7 +567,7 @@ namespace Com.RelationalAI
                 mode.GetValueOrDefault(conn.DefaultOpenMode)
             );
 
-            return actionRes == null ? null : _convertToDictionary(actionRes.Output);
+            return actionRes == null ? new Dictionary<RelKey, Relation>() : _convertToDictionary(actionRes.Output);
         }
 
         private IDictionary<RelKey, Relation> _convertToDictionary(ICollection<Relation> output)
