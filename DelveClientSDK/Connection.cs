@@ -16,7 +16,7 @@ namespace Com.RelationalAI
         public const RAIRegion DEFAULT_REGION = RAIRegion.US_EAST;
         public const bool DEFAULT_VERIFY_SSL = true;
         public const int DEFAULT_DEBUG_LEVEL = 0;
-        public const int DEFAULT_CONNECTION_TIMEOUT = 3600; // seconds
+        public const int DEFAULT_CONNECTION_TIMEOUT = 300; // seconds
 
         public virtual string DbName => throw new InvalidOperationException();
 
