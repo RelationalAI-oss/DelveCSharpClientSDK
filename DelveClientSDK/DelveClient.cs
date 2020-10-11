@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
@@ -62,6 +63,10 @@ namespace Com.RelationalAI
             var raiRequest = new RAIRequest(request, conn);
             raiRequest.Sign(debugLevel: DebugLevel);
             DelveClient.AddExtraHeaders(request);
+
+            // set tcp keep alive
+            var sp = ServicePointManager.FindServicePoint(request.RequestUri);
+            sp.SetTcpKeepAlive(true, this.conn.ConnectionTimeout, 60);
         }
 
         private string BoolStr(bool val) {
