@@ -66,7 +66,7 @@ namespace Com.RelationalAI
 
             // set tcp keep alive
             var sp = ServicePointManager.FindServicePoint(request.RequestUri);
-            sp.SetTcpKeepAlive(true, this.conn.ConnectionTimeout, 60);
+            sp.SetTcpKeepAlive(true, 60000, 60000);
         }
 
         private string BoolStr(bool val) {
