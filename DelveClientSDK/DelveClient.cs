@@ -359,6 +359,9 @@ namespace Com.RelationalAI
 
             try
             {
+                var sp = ServicePointManager.FindServicePoint(uriBuilder.Uri);
+                sp.SetTcpKeepAlive(true, 3600000, 15000);
+
 
                 await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
                 return new NetworkStream(socket, ownsSocket: true);
