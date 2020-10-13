@@ -35,6 +35,9 @@ namespace Com.RelationalAI
 
         partial void PrepareRequest(Transaction body, HttpClient client, HttpRequestMessage request, string url)
         {
+
+            client.DefaultRequestHeaders.Connection.Add("Keep-Alive");
+            client.DefaultRequestHeaders.Add("Keep-Alive", "30");
             var uriBuilder = new UriBuilder(request.RequestUri);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             if(conn is LocalConnection) {
