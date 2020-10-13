@@ -89,6 +89,7 @@ namespace Com.RelationalAI
                 "\n",
                 from header in allHeaders
                 orderby header.Key.ToLower()
+                where includeHeaders.Contains(header.Key.ToLower())
                 select string.Format(
                     "{0}:{1}",
                     header.Key.ToLower(),
