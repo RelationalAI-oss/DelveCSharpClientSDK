@@ -64,7 +64,7 @@ namespace Com.RelationalAI
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
-            raiRequest.Sign(debugLevel: DebugLevel, includeHeaders: new string[]{"host", "content-type"});
+            raiRequest.Sign(debugLevel: DebugLevel);
             DelveClient.AddExtraHeaders(request);
 
             // set tcp keep alive
