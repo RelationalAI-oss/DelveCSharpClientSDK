@@ -66,10 +66,6 @@ namespace Com.RelationalAI
             var raiRequest = new RAIRequest(request, conn);
             raiRequest.Sign(debugLevel: DebugLevel);
             DelveClient.AddExtraHeaders(request);
-
-            // set tcp keep alive
-            var sp = ServicePointManager.FindServicePoint(request.RequestUri);
-            sp.SetTcpKeepAlive(true, 60000, 60000);
         }
 
         private string BoolStr(bool val) {
@@ -260,6 +256,26 @@ namespace Com.RelationalAI
         }
     }
 
+    // see the tcp_keepalive struct at the following page for documentation of the buffer layout
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd877220(v=vs.85).aspx
+    // note: a u_long in C is 4 bytes so the C# equivalent is uint
+
+    internal struct KeepAliveValues
+    {
+        public uint OnOff { get; set; }
+        public uint KeepAliveTime { get; set; }
+        public uint KeepAliveInterval { get; set; }
+
+        public byte[] ToBytes()
+        {
+            var bytes = new byte[12];
+            Array.Copy(BitConverter.GetBytes(OnOff), 0, bytes, 0, 4);
+            Array.Copy(BitConverter.GetBytes(KeepAliveTime), 0, bytes, 4, 4);
+            Array.Copy(BitConverter.GetBytes(KeepAliveInterval), 0, bytes, 8, 4);
+            return bytes;
+        }
+    }
+
     public class DelveClient : GeneratedDelveClient
     {
         public static void AddExtraHeaders(HttpRequestMessage request)
@@ -268,15 +284,84 @@ namespace Com.RelationalAI
             request.Headers.UserAgent.TryParseAdd(USER_AGENT_HEADER);
         }
 
+        private static Socket CreateSocket(EndPoint endPoint)
+        {
+            var addressFamily = endPoint.AddressFamily;
+            Socket socket = null;
+            if (addressFamily == AddressFamily.Unspecified || addressFamily == AddressFamily.Unknown)
+            {
+                socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            } else {
+                socket = new Socket(addressFamily, SocketType.Stream, ProtocolType.Tcp);
+            }
+
+            // not all platforms support IOControl
+            try
+            {
+                var keepAliveValues = new KeepAliveValues
+                {
+                    OnOff = 1,
+                    KeepAliveTime = 3600000, // 3600 seconds in milliseconds
+                    KeepAliveInterval = 10000 // 10 seconds in milliseconds
+                };
+                socket.IOControl(IOControlCode.KeepAliveValues, keepAliveValues.ToBytes(), null);
+            }
+            catch (PlatformNotSupportedException)
+            {
+                // most platforms should support this call to SetSocketOption, but just in case call it in a try/catch also
+                try
+                {
+                    socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    // ignore PlatformNotSupportedException
+                }
+            }
+
+            return socket;
+        }
+
         private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
         {
-            Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            socket.SetSocketOption( SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true );
+            var uriBuilder = new UriBuilder();
+            uriBuilder.Host = context.DnsEndPoint.Host;
+            uriBuilder.Port = context.DnsEndPoint.Port;
+            // Get DNS host information.
+            IPAddress[] hostAdresses = await Dns.GetHostAddressesAsync(uriBuilder.Uri.DnsSafeHost);
+            // try IPv4 and IPv6 address
+            IPAddress addressV4 = null;
+            IPAddress addressV6 = null;
+            foreach (IPAddress address in hostAdresses)
+            {
+                if (address.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    if (addressV6 == null)
+                    {
+                        addressV6 = address;
+                    }
+                }
+                if (address.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    if (addressV4 == null)
+                    {
+                        addressV4 = address;
+                    }
+                }
+                if ((addressV4 != null) && (addressV6 != null))
+                {
+                    break;
+                }
+            }
+            IPAddress ipAddress = addressV4 == null ? addressV6 : addressV4;
+            var ipEndPoint = new IPEndPoint(ipAddress, context.DnsEndPoint.Port);
+            Socket socket = CreateSocket(ipEndPoint);
             socket.NoDelay = true;
 
             try
             {
-                await socket.ConnectAsync(context.DnsEndPoint, cancellationToken).ConfigureAwait(false);
+
+                await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
                 return new NetworkStream(socket, ownsSocket: true);
             }
             catch
