@@ -59,14 +59,12 @@ namespace Com.RelationalAI
             request.RequestUri = uriBuilder.Uri;
 
             // populate headers
-            request.Headers.Clear();
-            request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
 
             // sign request here
             var raiRequest = new RAIRequest(request, conn);
-            raiRequest.Sign(debugLevel: DebugLevel);
+            raiRequest.Sign(debugLevel: DebugLevel, includeHeaders: new string[]{"host", "content-type"});
             DelveClient.AddExtraHeaders(request);
 
             // set tcp keep alive
@@ -298,7 +296,7 @@ namespace Com.RelationalAI
                     ConnectCallback = s_defaultConnectCallback,
                     KeepAlivePingDelay = TimeSpan.FromSeconds(30)
                 };
-                HttpClient httpClient = new HttpClient();
+                HttpClient httpClient = new HttpClient(handler);
                 httpClient.Timeout = TimeSpan.FromSeconds(timeout);
                 return httpClient;
             } else {
