@@ -8,8 +8,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
+using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -267,9 +269,35 @@ namespace Com.RelationalAI
             // host & content-type header for signature verification, more headers here
             request.Headers.UserAgent.TryParseAdd(USER_AGENT_HEADER);
         }
+
+        private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+        {
+            Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            socket.SetSocketOption( SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true );
+            socket.NoDelay = true;
+
+            try
+            {
+                await socket.ConnectAsync(context.DnsEndPoint, cancellationToken).ConfigureAwait(false);
+                return new NetworkStream(socket, ownsSocket: true);
+            }
+            catch
+            {
+                socket.Dispose();
+                throw;
+            }
+        }
+
+        private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
+
         // timeout in seconds
         public static HttpClient CreateHttpClient(bool verifySSL, int timeout) {
             if( verifySSL ) {
+                var handler = new SocketsHttpHandler()
+                {
+                    ConnectCallback = s_defaultConnectCallback,
+                    KeepAlivePingDelay = TimeSpan.FromSeconds(30)
+                };
                 HttpClient httpClient = new HttpClient();
                 httpClient.Timeout = TimeSpan.FromSeconds(timeout);
                 return httpClient;
@@ -278,10 +306,16 @@ namespace Com.RelationalAI
                 // specifically attach a `HttpClientHandler` to `HttpClient` for accepting
                 // any certificate from the server. This is useful for testing purposes, but
                 // should not be used in production.
-                var handler = new HttpClientHandler()
+                var sslOptions = new SslClientAuthenticationOptions
                 {
-                    SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
-                    ServerCertificateCustomValidationCallback = AcceptAllServerCertificate
+                    // Leave certs unvalidated for debugging
+                    RemoteCertificateValidationCallback = delegate { return true; },
+                };
+                var handler = new SocketsHttpHandler()
+                {
+                    ConnectCallback = s_defaultConnectCallback,
+                    KeepAlivePingDelay = TimeSpan.FromSeconds(30),
+                    SslOptions = sslOptions
                 };
                 HttpClient httpClient = new HttpClient(handler);
                 httpClient.Timeout = TimeSpan.FromSeconds(timeout);
