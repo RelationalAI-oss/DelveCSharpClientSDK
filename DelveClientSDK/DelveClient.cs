@@ -37,9 +37,6 @@ namespace Com.RelationalAI
 
         partial void PrepareRequest(Transaction body, HttpClient client, HttpRequestMessage request, string url)
         {
-
-            client.DefaultRequestHeaders.Connection.Add("Keep-Alive");
-            client.DefaultRequestHeaders.Add("Keep-Alive", "30");
             var uriBuilder = new UriBuilder(request.RequestUri);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             if(conn is LocalConnection) {
@@ -59,6 +56,8 @@ namespace Com.RelationalAI
             request.RequestUri = uriBuilder.Uri;
 
             // populate headers
+            request.Headers.Connection.Add("Keep-Alive");
+            request.Headers.Add("Keep-Alive", "12"); // 12 seconds
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
 
