@@ -56,8 +56,6 @@ namespace Com.RelationalAI
             request.RequestUri = uriBuilder.Uri;
 
             // populate headers
-            request.Headers.Connection.Add("Keep-Alive");
-            request.Headers.Add("Keep-Alive", "12"); // 12 seconds
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
 
@@ -300,7 +298,7 @@ namespace Com.RelationalAI
                 var keepAliveValues = new KeepAliveValues
                 {
                     OnOff = 1,
-                    KeepAliveTime = 3600000, // 3600 seconds in milliseconds
+                    KeepAliveTime = 36000, // 36 seconds in milliseconds
                     KeepAliveInterval = 10000 // 10 seconds in milliseconds
                 };
                 socket.IOControl(IOControlCode.KeepAliveValues, keepAliveValues.ToBytes(), null);
@@ -311,6 +309,9 @@ namespace Com.RelationalAI
                 try
                 {
                     socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                    socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 10);
+                    socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 36);
+                    socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 16);
                 }
                 catch (PlatformNotSupportedException)
                 {
@@ -318,16 +319,41 @@ namespace Com.RelationalAI
                 }
             }
 
+
             return socket;
         }
 
         private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
         {
+            // `Socket.SetSocketOption` function fails if a `DnsEndPoint` is passed, as it
+            // cannot set the option for multiple target URLs and keep track of all of them
+            // That's why we need to get the IP address here first.
+            // Note: this is necessary for the keep-alive option
+            // Risk: if the DNS data changes, we'll be in trouble. Then, we should not reuse
+            // this socket (or we'll risk using a possibly out-dated DNS entry)
+            IPEndPoint ipEndPoint = await getIPEndPoint(context.DnsEndPoint).ConfigureAwait(false);
+            Socket socket = CreateSocket(ipEndPoint);
+            socket.NoDelay = true;
+
+            try
+            {
+                await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
+                return new NetworkStream(socket, ownsSocket: true);
+            }
+            catch
+            {
+                socket.Dispose();
+                throw;
+            }
+        }
+
+        private async static ValueTask<IPEndPoint> getIPEndPoint(DnsEndPoint dnsEndPoint)
+        {
             var uriBuilder = new UriBuilder();
-            uriBuilder.Host = context.DnsEndPoint.Host;
-            uriBuilder.Port = context.DnsEndPoint.Port;
+            uriBuilder.Host = dnsEndPoint.Host;
+            uriBuilder.Port = dnsEndPoint.Port;
             // Get DNS host information.
-            IPAddress[] hostAdresses = await Dns.GetHostAddressesAsync(uriBuilder.Uri.DnsSafeHost);
+            IPAddress[] hostAdresses = await Dns.GetHostAddressesAsync(uriBuilder.Uri.DnsSafeHost).ConfigureAwait(false);
             // try IPv4 and IPv6 address
             IPAddress addressV4 = null;
             IPAddress addressV6 = null;
@@ -353,24 +379,7 @@ namespace Com.RelationalAI
                 }
             }
             IPAddress ipAddress = addressV4 == null ? addressV6 : addressV4;
-            var ipEndPoint = new IPEndPoint(ipAddress, context.DnsEndPoint.Port);
-            Socket socket = CreateSocket(ipEndPoint);
-            socket.NoDelay = true;
-
-            try
-            {
-                var sp = ServicePointManager.FindServicePoint(uriBuilder.Uri);
-                sp.SetTcpKeepAlive(true, 3600000, 15000);
-
-
-                await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
-                return new NetworkStream(socket, ownsSocket: true);
-            }
-            catch
-            {
-                socket.Dispose();
-                throw;
-            }
+            return new IPEndPoint(ipAddress, dnsEndPoint.Port);
         }
 
         private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
@@ -381,7 +390,6 @@ namespace Com.RelationalAI
                 var handler = new SocketsHttpHandler()
                 {
                     ConnectCallback = s_defaultConnectCallback,
-                    KeepAlivePingDelay = TimeSpan.FromSeconds(30)
                 };
                 HttpClient httpClient = new HttpClient(handler);
                 httpClient.Timeout = TimeSpan.FromSeconds(timeout);
@@ -399,7 +407,6 @@ namespace Com.RelationalAI
                 var handler = new SocketsHttpHandler()
                 {
                     ConnectCallback = s_defaultConnectCallback,
-                    KeepAlivePingDelay = TimeSpan.FromSeconds(30),
                     SslOptions = sslOptions
                 };
                 HttpClient httpClient = new HttpClient(handler);
