@@ -37,7 +37,13 @@ jobs:
 
     # As we are using `GITHUB_TOKEN` for auth, this workflow does not trigger the `nuget-pack` workflow, so we need to inline it below
 
-    - name: Setup .NET Core
+    - name: Setup .NET Core  # required by the `gpr` tool
+      if: ${{ !contains(fromJson(steps.fetch_all_releases.outputs.all_releases).*.tag_name, steps.fetch_current_version.outputs.current_version) }}
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+
+    - name: Setup .NET Core # required by ClientSDK
       if: ${{ !contains(fromJson(steps.fetch_all_releases.outputs.all_releases).*.tag_name, steps.fetch_current_version.outputs.current_version) }}
       uses: actions/setup-dotnet@v1
       with:
