@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -41,7 +40,7 @@ namespace Com.RelationalAI
             throw new InvalidOperationException();
         }
 
-        public DelveCloudClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL, conn.ConnectionTimeout))
+        public DelveCloudClient(Connection conn) : base(DelveClient.GetHttpClient(conn.BaseUrl, conn.VerifySSL, conn.ConnectionTimeout))
         {
             this.conn = conn;
             this.conn.CloudClient = this;
