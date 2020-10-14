@@ -7,9 +7,26 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal class HttpClientFactory
+sealed class HttpClientFactory
 {
-    // timeout in seconds
+    // The number of seconds a TCP connection will remain alive/idle before keepalive
+    // probes are sent to the remote.
+    public static int KEEP_ALIVE_TIME = 3 * 60; // 3 minutes
+
+    // The number of seconds a TCP connection will wait for a keepalive response before
+    // sending another keepalive probe.
+    public static int KEEP_ALIVE_INTERVAL = 3 * 60; // 3 minutes
+
+    // The number of TCP keep alive probes that will be sent before the connection is
+    // terminated.
+    public static int KEEP_ALIVE_RETRIES = 16;
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="verifySSL">is false, SSL-verification is disabled</param>
+    /// <param name="timeout">timeout in seconds</param>
+    /// <returns>a new `HttpClient` instance</returns>
     public static HttpClient CreateHttpClient(bool verifySSL, int timeout) {
         if( verifySSL ) {
             var handler = new SocketsHttpHandler()
@@ -77,8 +94,8 @@ internal class HttpClientFactory
             var keepAliveValues = new KeepAliveValues
             {
                 OnOff = 1,
-                KeepAliveTime = 36000, // 36 seconds in milliseconds
-                KeepAliveInterval = 10000 // 10 seconds in milliseconds
+                KeepAliveTime = (uint) KEEP_ALIVE_TIME * 1000, // KEEP_ALIVE_TIME seconds in milliseconds
+                KeepAliveInterval = (uint) KEEP_ALIVE_INTERVAL * 1000 // KEEP_ALIVE_INTERVAL seconds in milliseconds
             };
             socket.IOControl(IOControlCode.KeepAliveValues, keepAliveValues.ToBytes(), null);
         }
@@ -88,9 +105,9 @@ internal class HttpClientFactory
             try
             {
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 10);
-                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 36);
-                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 16);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, KEEP_ALIVE_TIME);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, KEEP_ALIVE_INTERVAL);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, KEEP_ALIVE_RETRIES);
             }
             catch (PlatformNotSupportedException)
             {
