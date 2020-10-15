@@ -6,9 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Security;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -53,8 +50,6 @@ namespace Com.RelationalAI
             request.RequestUri = uriBuilder.Uri;
 
             // populate headers
-            request.Headers.Clear();
-            request.Content.Headers.Clear();
             request.Headers.Host = request.RequestUri.Host;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
 
@@ -291,44 +286,9 @@ namespace Com.RelationalAI
             // host & content-type header for signature verification, more headers here
             request.Headers.UserAgent.TryParseAdd(USER_AGENT_HEADER);
         }
-        // timeout in seconds
-        public static HttpClient CreateHttpClient(bool verifySSL, int timeout) {
-            if( verifySSL ) {
-                HttpClient httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(timeout);
-                return httpClient;
-            } else {
-                // If we don't want to verify SSL certificate (from the Server), we need to
-                // specifically attach a `HttpClientHandler` to `HttpClient` for accepting
-                // any certificate from the server. This is useful for testing purposes, but
-                // should not be used in production.
-                var handler = new HttpClientHandler()
-                {
-                    SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
-                    ServerCertificateCustomValidationCallback = AcceptAllServerCertificate
-                };
-                HttpClient httpClient = new HttpClient(handler);
-                httpClient.Timeout = TimeSpan.FromSeconds(timeout);
-                return httpClient;
-            }
-        }
-        public static bool AcceptAllServerCertificate(
-            object sender,
-            X509Certificate certificate,
-            X509Chain chain,
-            SslPolicyErrors sslPolicyErrors
-        )
-        {
-            if (sslPolicyErrors == SslPolicyErrors.None)
-                return true;
-            else
-            {
-                Console.WriteLine("The server certificate is not valid.");
-                return true;
-            }
-        }
+
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
-        private static HttpClient httpClient = CreateHttpClient(httpClientVerifySSL, Connection.DEFAULT_CONNECTION_TIMEOUT);
+        private static HttpClient httpClient = HttpClientFactory.CreateHttpClient(httpClientVerifySSL, Connection.DEFAULT_CONNECTION_TIMEOUT);
 
         public string DbName { get { return conn.DbName; } }
 
@@ -342,13 +302,13 @@ namespace Com.RelationalAI
                 // used in the previous requests), then this section disposes the existing
                 // HttpClient instance and creates a new one.
                 httpClient.Dispose();
-                httpClient = CreateHttpClient(verifySSL, connectionTimeout);
+                httpClient = HttpClientFactory.CreateHttpClient(verifySSL, connectionTimeout);
                 httpClientVerifySSL = verifySSL;
             }
             return httpClient;
         }
 
-        public DelveClient(Connection conn) : base(DelveClient.CreateHttpClient(conn.VerifySSL, conn.ConnectionTimeout))
+        public DelveClient(Connection conn) : base(DelveClient.GetHttpClient(conn.BaseUrl, conn.VerifySSL, conn.ConnectionTimeout))
         {
             this.conn = conn;
             conn.Client = this;

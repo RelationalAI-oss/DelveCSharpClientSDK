@@ -55,11 +55,14 @@ namespace Com.RelationalAI
             this.Service = service;
         }
 
-        public void Sign(int debugLevel=1) {
-            Sign(DateTime.UtcNow, debugLevel);
+        public void Sign(string[] includeHeaders = null, int debugLevel=1) {
+            Sign(DateTime.UtcNow, includeHeaders, debugLevel);
         }
 
-        public void Sign(DateTime t, int debugLevel=1) {
+        public void Sign(DateTime t, string[] includeHeaders = null, int debugLevel=1) {
+            if(includeHeaders == null) {
+                includeHeaders = new string[]{"host", "content-type"};
+            }
             if(this.Creds == null) return;
 
             // ISO8601 date/time strings for time of request
@@ -86,6 +89,7 @@ namespace Com.RelationalAI
                 "\n",
                 from header in allHeaders
                 orderby header.Key.ToLower()
+                where includeHeaders.Contains(header.Key.ToLower())
                 select string.Format(
                     "{0}:{1}",
                     header.Key.ToLower(),
@@ -96,6 +100,7 @@ namespace Com.RelationalAI
                 ";",
                 from header in allHeaders
                 orderby header.Key.ToLower()
+                where includeHeaders.Contains(header.Key.ToLower())
                 select header.Key.ToLower()
             );
 
