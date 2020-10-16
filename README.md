@@ -11,7 +11,7 @@ This is a Client SDK for Delve API
 
 ## Dependencies
 
-- ini-parser (>= 2.5.2)
+- ini-parser-netstandard (>= 2.5.2)
 - Newtonsoft.Json (>= 12.0.3)
 - NSec.Cryptography (>= 20.2.0)
 
