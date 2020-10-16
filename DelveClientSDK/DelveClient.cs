@@ -232,6 +232,38 @@ namespace Com.RelationalAI
         }
     }
 
+    public partial class AzureIntegration : Integration
+    {
+        public AzureIntegration(
+                        string tenant_id = null,
+                        string name = null,
+                        ICollection<string> storage_allowed_locations = null,
+                        ICollection<string> storage_blocked_locations = null,
+                        ICollection<Tuple<string, string>> credentials = null
+        )
+        {
+
+            this.Tenant_id = tenant_id;
+            this.Name = name;
+            this.Storage_allowed_locations = storage_allowed_locations;
+            this.Storage_blocked_locations = storage_blocked_locations;
+
+            var pairs = new List<Pair_Symbol_String_>();
+
+            if (credentials == null) credentials = new List<Tuple<string, string>>();
+
+            foreach (var tuple in credentials)
+            {
+                var pair = new Pair_Symbol_String_();
+                pair.First = tuple.Item1;
+                pair.Second = tuple.Item2;
+                pairs.Add(pair);
+            }
+
+            this.Credentials = pairs;
+        }
+    }
+
     public partial class ApiException<TResult> : ApiException
     {
         public override string Message { get {
@@ -661,7 +693,8 @@ namespace Com.RelationalAI
             string filePath,
             AnyValue key = null,
             FileSyntax syntax = null,
-            FileSchema schema = null
+            FileSchema schema = null,
+            Integration integration = null
         )
         {
             var loadData = new LoadData();
@@ -670,6 +703,7 @@ namespace Com.RelationalAI
             loadData.Key = key;
             loadData.File_syntax = syntax;
             loadData.File_schema = schema;
+            loadData.Integration = integration;
 
             return loadData;
         }
@@ -681,7 +715,8 @@ namespace Com.RelationalAI
             string path = null,
             AnyValue key = null,
             FileSyntax syntax = null,
-            FileSchema schema = null
+            FileSchema schema = null,
+            Integration integration = null
         )
         {
             if(key == null) key = new int[] {};
@@ -693,6 +728,7 @@ namespace Com.RelationalAI
             loadData.Key = key;
             loadData.File_syntax = syntax;
             loadData.File_schema = schema;
+            loadData.Integration = integration;
 
             return LoadEdb(rel, loadData);
         }
@@ -758,10 +794,11 @@ namespace Com.RelationalAI
             string path = null,
             AnyValue[] key = null,
             FileSyntax syntax = null,
-            FileSchema schema = null
+            FileSchema schema = null,
+            Integration integration = null
         )
         {
-            return LoadEdb(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema);
+            return LoadEdb(rel, CSV_CONTENT_TYPE, data, path, key, syntax, schema, integration);
         }
 
         public bool LoadJSON(

@@ -321,11 +321,12 @@ namespace Com.RelationalAI
             string path = null,
             AnyValue[] key = null,
             FileSyntax syntax = null,
-            FileSchema schema = null
+            FileSchema schema = null,
+            Integration integration = null
         )
         {
             SetConnectionOnClients();
-            return Client.LoadCSV(rel, data, path, key, syntax, schema);
+            return Client.LoadCSV(rel, data, path, key, syntax, schema, integration);
         }
 
         public bool LoadJSON(

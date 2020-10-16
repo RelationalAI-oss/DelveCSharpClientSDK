@@ -246,6 +246,28 @@ namespace Com.RelationalAI
                 output: "result"
             ), ToRelData( 4L ));
 
+            Assert.True(conn.LoadCSV("baz",
+                syntax: new CSVFileSyntax(delim: "|"),
+                schema: new CSVFileSchema("Int64", "Int64", "Int64"),
+							  integration: new AzureIntegration(tenant_id: "<tenant_id>",
+                                                  name: "my_integration",
+                                                  storage_allowed_locations: new List<string>(){"azure://myaccount.blob.core.windows.net/mycontainer1/mypath1/"},
+                                                  storage_blocked_locations: new List<string>(){"azure://myaccount.blob.core.windows.net/mycontainer1/mypath1/sensitive/"},
+                                                  credentials: new List<Tuple<string, string>>(){Tuple.Create("azure_sas_token", "SAS_TOKEN")}
+                ),
+                data: @"
+                    D|E|F
+                    1|2|3
+                    1|2|3
+                    1|2|3
+                    1|2|3
+                "
+            ));
+            queryResEquals(conn.Query(
+                srcStr: "def result = count[pos: baz[pos, :D]]",
+                output: "result"
+            ), ToRelData( 4L ));
+
             // load_json
             // =============================================================================
             conn = connFunc();
