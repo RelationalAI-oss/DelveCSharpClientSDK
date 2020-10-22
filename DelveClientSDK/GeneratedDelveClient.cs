@@ -60,7 +60,7 @@ namespace Com.RelationalAI
         public void KeepClientBusy(System.Net.Http.HttpClient client_)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/health");
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/transaction");
             while (true)
             {
                 System.Threading.Thread.Sleep(15000);
