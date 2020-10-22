@@ -25,6 +25,10 @@ namespace Com.RelationalAI
 
         public int DebugLevel = Connection.DEFAULT_DEBUG_LEVEL;
 
+        ThreadLocal<CancellationTokenSource> ThreadLocalKeepAliveCancellationTokenSource =
+            new ThreadLocal<CancellationTokenSource>(false);
+
+
         public GeneratedDelveClient(Connection conn)
         {
             this.conn = conn;
@@ -63,6 +67,19 @@ namespace Com.RelationalAI
 
             // use HTTP 2.0 (to handle keep-alive)
             request.Version =  System.Net.HttpVersion.Version20;
+
+            // have a separate keep-alive task (per thread)
+            var tokenSource = new CancellationTokenSource();
+            ThreadLocalKeepAliveCancellationTokenSource.Value = tokenSource;
+            CancellationToken ct = tokenSource.Token;
+            var keep_alive_task = this.KeepClientBusy(client, ct).ConfigureAwait(false);
+        }
+
+        partial void ProcessResponse(HttpClient client, HttpResponseMessage response)
+        {
+            Debug.Assert(ThreadLocalKeepAliveCancellationTokenSource.IsValueCreated);
+            var tokenSource = ThreadLocalKeepAliveCancellationTokenSource.Value;
+            tokenSource.Cancel();
         }
 
         private string BoolStr(bool val) {
@@ -85,7 +102,7 @@ namespace Com.RelationalAI
                 System.Threading.Thread.Sleep(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
                 var request = new HttpRequestMessage(HttpMethod.Head, urlBuilder_.ToString());
                 request.Version = System.Net.HttpVersion.Version20;
-                await client_.SendAsync(request);
+                await client_.SendAsync(request).ConfigureAwait(false);
             }
         }
     }

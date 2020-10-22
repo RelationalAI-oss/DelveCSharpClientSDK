@@ -56,7 +56,7 @@ namespace Com.RelationalAI
         {
             return TransactionAsync(body, System.Threading.CancellationToken.None);
         }
-
+    
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>Issues a transaction to be executed</summary>
         /// <param name="body">Optional description in *Markdown*</param>
@@ -80,18 +80,13 @@ namespace Com.RelationalAI
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
-                    request_.Version =  System.Net.HttpVersion.Version20;
-
+    
                     PrepareRequest(body, client_, request_, urlBuilder_);
                     var url_ = urlBuilder_.ToString();
                     request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
                     PrepareRequest(body, client_, request_, url_);
-
-                    var tokenSource = new System.Threading.CancellationTokenSource();
-                    System.Threading.CancellationToken ct = tokenSource.Token;
-                    var t = this.KeepClientBusy(client_, ct);
+    
                     var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                    tokenSource.Cancel();
                     try
                     {
                         var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
