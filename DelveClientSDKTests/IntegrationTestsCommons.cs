@@ -63,6 +63,10 @@ namespace Com.RelationalAI
         {
             var conn = connFunc();
 
+            // status
+            // =============================================================================
+            Assert.IsTrue(conn.Status());
+
             // create_database
             // =============================================================================
             Assert.IsTrue(conn.CreateDatabase(overwrite: true));

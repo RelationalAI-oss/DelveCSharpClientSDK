@@ -906,5 +906,11 @@ namespace Com.RelationalAI
             action.Abort_on_error = abortOnError;
             return RunAction(action, isReadOnly: false) != null;
         }
+
+        public bool Status()
+        {
+            var action = new StatusAction();
+            return RunAction(action, isReadOnly: true) != null;
+        }
     }
 }

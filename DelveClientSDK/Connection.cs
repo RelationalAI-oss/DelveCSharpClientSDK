@@ -381,6 +381,12 @@ namespace Com.RelationalAI
             SetConnectionOnClients();
             return Client.Configure(debug, debugTrace, broken, silent, abortOnError);
         }
+
+        public bool Status()
+        {
+            SetConnectionOnClients();
+            return Client.Status();
+        }
     }
 
     public class ManagementConnection : Connection
