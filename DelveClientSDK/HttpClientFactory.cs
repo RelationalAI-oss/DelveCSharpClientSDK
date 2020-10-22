@@ -31,6 +31,7 @@ public sealed class HttpClientFactory
         if( verifySSL ) {
             var handler = new SocketsHttpHandler()
             {
+                // uncomment this to enable keep-alive after moving to netcore5
                 // ConnectCallback = s_defaultConnectCallback,
             };
             HttpClient httpClient = new HttpClient(handler);
@@ -48,6 +49,7 @@ public sealed class HttpClientFactory
             };
             var handler = new SocketsHttpHandler()
             {
+                // uncomment this to enable keep-alive after moving to netcore5
                 // ConnectCallback = s_defaultConnectCallback,
                 SslOptions = sslOptions
             };
@@ -119,29 +121,32 @@ public sealed class HttpClientFactory
         return socket;
     }
 
-    // private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
-    // {
-    //     // `Socket.SetSocketOption` function fails if a `DnsEndPoint` is passed, as it
-    //     // cannot set the option for multiple target URLs and keep track of all of them
-    //     // That's why we need to get the IP address here first.
-    //     // Note: this is necessary for the keep-alive option
-    //     // Risk: if the DNS data changes, we'll be in trouble. Then, we should not reuse
-    //     // this socket (or we'll risk using a possibly out-dated DNS entry)
-    //     IPEndPoint ipEndPoint = await getIPEndPoint(context.DnsEndPoint).ConfigureAwait(false);
-    //     Socket socket = CreateSocket(ipEndPoint);
-    //     socket.NoDelay = true;
-
-    //     try
-    //     {
-    //         await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
-    //         return new NetworkStream(socket, ownsSocket: true);
-    //     }
-    //     catch
-    //     {
-    //         socket.Dispose();
-    //         throw;
-    //     }
-    // }
+    /*
+    // uncomment this block to enable keep-alive after moving to netcore5
+    private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+    {
+        // `Socket.SetSocketOption` function fails if a `DnsEndPoint` is passed, as it
+        // cannot set the option for multiple target URLs and keep track of all of them
+        // That's why we need to get the IP address here first.
+        // Note: this is necessary for the keep-alive option
+        // Risk: if the DNS data changes, we'll be in trouble. Then, we should not reuse
+        // this socket (or we'll risk using a possibly out-dated DNS entry)
+        IPEndPoint ipEndPoint = await getIPEndPoint(context.DnsEndPoint).ConfigureAwait(false);
+        Socket socket = CreateSocket(ipEndPoint);
+        socket.NoDelay = true;
+        try
+        {
+            await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
+            return new NetworkStream(socket, ownsSocket: true);
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
+    }
+    private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
+    */
 
     private async static ValueTask<IPEndPoint> getIPEndPoint(DnsEndPoint dnsEndPoint)
     {
@@ -177,6 +182,4 @@ public sealed class HttpClientFactory
         IPAddress ipAddress = addressV4 == null ? addressV6 : addressV4;
         return new IPEndPoint(ipAddress, dnsEndPoint.Port);
     }
-
-    // private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
 }
