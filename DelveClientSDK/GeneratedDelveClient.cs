@@ -63,7 +63,7 @@ namespace Com.RelationalAI
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/health");
             while (true)
             {
-                System.Threading.Thread.Sleep(10000);
+                System.Threading.Thread.Sleep(15000);
                 var request = new System.Net.Http.HttpRequestMessage(new System.Net.Http.HttpMethod("GET"), urlBuilder_.ToString());
                 request.Version = System.Net.HttpVersion.Version20;
                 var task = client_.SendAsync(request);
@@ -103,7 +103,7 @@ namespace Com.RelationalAI
                     var t = new System.Threading.Thread(() => this.KeepClientBusy(client_));
                     t.Start();
                     var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                    t.Abort();
+                    // t.Abort();
                     try
                     {
                         var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
