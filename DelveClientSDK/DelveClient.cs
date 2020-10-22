@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -288,23 +289,27 @@ namespace Com.RelationalAI
         }
 
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
-        private static HttpClient httpClient = HttpClientFactory.CreateHttpClient(httpClientVerifySSL, Connection.DEFAULT_CONNECTION_TIMEOUT);
+        private static HttpClient httpClient = null;
 
         public string DbName { get { return conn.DbName; } }
 
-        public static HttpClient GetHttpClient(Uri url, bool verifySSL, int connectionTimeout)
+        public static HttpClient GetHttpClient(Uri url, bool verifySSL, int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT)
         {
-            if( "https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL) {
+            if( httpClient == null || ("https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL)) {
                 // we keep a single static HttpClient instance and keep reusing it instead
                 // of creating an instance for each request. This is a proven best practice.
                 // However, if we are going to handle a `https` request and suddenly
                 // decide a value for `verifySSL` other than its default value (or the value
                 // used in the previous requests), then this section disposes the existing
                 // HttpClient instance and creates a new one.
-                httpClient.Dispose();
+                if(httpClient != null) httpClient.Dispose();
                 httpClient = HttpClientFactory.CreateHttpClient(verifySSL, connectionTimeout);
                 httpClientVerifySSL = verifySSL;
+
+                var sp = ServicePointManager.FindServicePoint(url);
+                sp.SetTcpKeepAlive(true, HttpClientFactory.KEEP_ALIVE_TIME*1000, HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
             }
+
             return httpClient;
         }
 

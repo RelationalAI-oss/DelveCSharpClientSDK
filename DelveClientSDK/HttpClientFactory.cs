@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-sealed class HttpClientFactory
+public sealed class HttpClientFactory
 {
     // The number of seconds a TCP connection will remain alive/idle before keepalive
     // probes are sent to the remote.
@@ -31,7 +31,7 @@ sealed class HttpClientFactory
         if( verifySSL ) {
             var handler = new SocketsHttpHandler()
             {
-                ConnectCallback = s_defaultConnectCallback,
+                // ConnectCallback = s_defaultConnectCallback,
             };
             HttpClient httpClient = new HttpClient(handler);
             httpClient.Timeout = TimeSpan.FromSeconds(timeout);
@@ -48,7 +48,7 @@ sealed class HttpClientFactory
             };
             var handler = new SocketsHttpHandler()
             {
-                ConnectCallback = s_defaultConnectCallback,
+                // ConnectCallback = s_defaultConnectCallback,
                 SslOptions = sslOptions
             };
             HttpClient httpClient = new HttpClient(handler);
@@ -119,29 +119,29 @@ sealed class HttpClientFactory
         return socket;
     }
 
-    private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
-    {
-        // `Socket.SetSocketOption` function fails if a `DnsEndPoint` is passed, as it
-        // cannot set the option for multiple target URLs and keep track of all of them
-        // That's why we need to get the IP address here first.
-        // Note: this is necessary for the keep-alive option
-        // Risk: if the DNS data changes, we'll be in trouble. Then, we should not reuse
-        // this socket (or we'll risk using a possibly out-dated DNS entry)
-        IPEndPoint ipEndPoint = await getIPEndPoint(context.DnsEndPoint).ConfigureAwait(false);
-        Socket socket = CreateSocket(ipEndPoint);
-        socket.NoDelay = true;
+    // private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+    // {
+    //     // `Socket.SetSocketOption` function fails if a `DnsEndPoint` is passed, as it
+    //     // cannot set the option for multiple target URLs and keep track of all of them
+    //     // That's why we need to get the IP address here first.
+    //     // Note: this is necessary for the keep-alive option
+    //     // Risk: if the DNS data changes, we'll be in trouble. Then, we should not reuse
+    //     // this socket (or we'll risk using a possibly out-dated DNS entry)
+    //     IPEndPoint ipEndPoint = await getIPEndPoint(context.DnsEndPoint).ConfigureAwait(false);
+    //     Socket socket = CreateSocket(ipEndPoint);
+    //     socket.NoDelay = true;
 
-        try
-        {
-            await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
-            return new NetworkStream(socket, ownsSocket: true);
-        }
-        catch
-        {
-            socket.Dispose();
-            throw;
-        }
-    }
+    //     try
+    //     {
+    //         await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
+    //         return new NetworkStream(socket, ownsSocket: true);
+    //     }
+    //     catch
+    //     {
+    //         socket.Dispose();
+    //         throw;
+    //     }
+    // }
 
     private async static ValueTask<IPEndPoint> getIPEndPoint(DnsEndPoint dnsEndPoint)
     {
@@ -178,5 +178,5 @@ sealed class HttpClientFactory
         return new IPEndPoint(ipAddress, dnsEndPoint.Port);
     }
 
-    private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
+    // private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
 }
