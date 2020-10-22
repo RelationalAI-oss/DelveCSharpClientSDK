@@ -46,8 +46,8 @@ namespace Com.RelationalAI
         partial void UpdateJsonSerializerSettings(Newtonsoft.Json.JsonSerializerSettings settings);
         partial void PrepareRequest(Transaction body, System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, string url);
         partial void PrepareRequest(Transaction body, System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder);
-        partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
     
+        partial void ProcessResponse(Transaction body, System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
         /// <summary>Issues a transaction to be executed</summary>
         /// <param name="body">Optional description in *Markdown*</param>
         /// <returns>A successful result is wrapped inside a TransactionResult</returns>
@@ -96,8 +96,8 @@ namespace Com.RelationalAI
                                 headers_[item_.Key] = item_.Value;
                         }
     
-                        ProcessResponse(client_, response_);
     
+                        ProcessResponse(body, client_, response_);
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {

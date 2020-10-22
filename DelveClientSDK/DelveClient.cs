@@ -69,16 +69,25 @@ namespace Com.RelationalAI
             request.Version =  System.Net.HttpVersion.Version20;
 
             // have a separate keep-alive task (per thread)
-            var tokenSource = new CancellationTokenSource();
-            AsyncLocalKeepAliveCancellationTokenSource.Value = tokenSource;
-            CancellationToken ct = tokenSource.Token;
-            var keep_alive_task = this.KeepClientBusy(client, ct).ConfigureAwait(false);
+            if(!isStatusRequest(body)) {
+                var tokenSource = new CancellationTokenSource();
+                AsyncLocalKeepAliveCancellationTokenSource.Value = tokenSource;
+                CancellationToken ct = tokenSource.Token;
+                var keep_alive_task = this.KeepClientAlive(client, url, ct).ConfigureAwait(false);
+            }
         }
 
-        partial void ProcessResponse(HttpClient client, HttpResponseMessage response)
+        private bool isStatusRequest(Transaction txn)
         {
-            var tokenSource = AsyncLocalKeepAliveCancellationTokenSource.Value;
-            tokenSource.Cancel();
+            return txn.Actions.Count == 1 && txn.Actions.First().Action is StatusAction;
+        }
+
+        partial void ProcessResponse(Transaction body, HttpClient client, HttpResponseMessage response)
+        {
+            if(!isStatusRequest(body)) {
+                var tokenSource = AsyncLocalKeepAliveCancellationTokenSource.Value;
+                tokenSource.Cancel();
+            }
         }
 
         private string BoolStr(bool val) {
@@ -90,19 +99,9 @@ namespace Com.RelationalAI
             return str == null || str.Length == 0;
         }
 
-        public async Task KeepClientBusy(HttpClient client_, CancellationToken ct)
+        public virtual Task KeepClientAlive(HttpClient client_, String url, CancellationToken ct)
         {
-            var urlBuilder_ = new StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/transaction");
-            while (true)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                await Task.Delay(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
-                var request = new HttpRequestMessage(HttpMethod.Head, urlBuilder_.ToString());
-                request.Version = System.Net.HttpVersion.Version20;
-                await client_.SendAsync(request).ConfigureAwait(false);
-            }
+            throw new NotImplementedException();
         }
     }
 
@@ -318,6 +317,17 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
+        public override async Task KeepClientAlive(HttpClient client_, String url, CancellationToken ct)
+        {
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
+                ct.ThrowIfCancellationRequested();
+                await Task.Run(() => this.Status());
+            }
+        }
+
         public static void AddExtraHeaders(HttpRequestMessage request)
         {
             // host & content-type header for signature verification, more headers here
