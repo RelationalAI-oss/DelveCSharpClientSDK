@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>1.1.0</Version>
-    <TargetFramework>netcoreapp5.0.0-rc.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageId>DelveClientSDK</PackageId>
     <Authors>Mohammad Dashti and Helmi Nour</Authors>
     <Company>RelationalAI</Company>
