@@ -339,7 +339,11 @@ namespace Com.RelationalAI
 
         public string DbName { get { return conn.DbName; } }
 
-        public static HttpClient GetHttpClient(Uri url, bool verifySSL, int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT)
+        protected internal static HttpClient GetHttpClient(
+            Uri url,
+            bool verifySSL,
+            int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT
+        )
         {
             if( httpClient == null || ("https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL)) {
                 // we keep a single static HttpClient instance and keep reusing it instead
