@@ -302,6 +302,7 @@ namespace Com.RelationalAI
     [JsonInheritanceAttribute("ParseAction", typeof(ParseAction))]
     [JsonInheritanceAttribute("QueryAction", typeof(QueryAction))]
     [JsonInheritanceAttribute("SetOptionsAction", typeof(SetOptionsAction))]
+    [JsonInheritanceAttribute("StatusAction", typeof(StatusAction))]
     [JsonInheritanceAttribute("UpdateAction", typeof(UpdateAction))]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class Action 
@@ -917,6 +918,21 @@ namespace Com.RelationalAI
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class StatusAction : Action
+    {
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class Pair_AnyValue_AnyValue_ 
     {
         [Newtonsoft.Json.JsonProperty("first", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -979,6 +995,7 @@ namespace Com.RelationalAI
     [JsonInheritanceAttribute("ParseActionResult", typeof(ParseActionResult))]
     [JsonInheritanceAttribute("QueryActionResult", typeof(QueryActionResult))]
     [JsonInheritanceAttribute("SetOptionsActionResult", typeof(SetOptionsActionResult))]
+    [JsonInheritanceAttribute("StatusActionResult", typeof(StatusActionResult))]
     [JsonInheritanceAttribute("UpdateActionResult", typeof(UpdateActionResult))]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class ActionResult 
@@ -1766,6 +1783,21 @@ namespace Com.RelationalAI
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class SetOptionsActionResult : ActionResult
+    {
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class StatusActionResult : ActionResult
     {
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
