@@ -7,6 +7,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -58,6 +60,9 @@ namespace Com.RelationalAI
             var raiRequest = new RAIRequest(request, conn);
             raiRequest.Sign(debugLevel: DebugLevel);
             DelveClient.AddExtraHeaders(request);
+
+            // use HTTP 2.0 (to handle keep-alive)
+            request.Version =  System.Net.HttpVersion.Version20;
         }
 
         private string BoolStr(bool val) {
@@ -67,6 +72,21 @@ namespace Com.RelationalAI
         private bool _isEmpty(string str)
         {
             return str == null || str.Length == 0;
+        }
+
+        public async Task KeepClientBusy(HttpClient client_, CancellationToken ct)
+        {
+            var urlBuilder_ = new StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/transaction");
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                System.Threading.Thread.Sleep(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
+                var request = new HttpRequestMessage(HttpMethod.Head, urlBuilder_.ToString());
+                request.Version = System.Net.HttpVersion.Version20;
+                await client_.SendAsync(request);
+            }
         }
     }
 
@@ -381,6 +401,7 @@ namespace Com.RelationalAI
 
             return null;
         }
+
         private bool IsSuccess(TransactionResult response) {
             return !response.Aborted && response.Problems.Count == 0;
         }

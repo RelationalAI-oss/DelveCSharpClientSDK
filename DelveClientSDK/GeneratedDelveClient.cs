@@ -57,20 +57,6 @@ namespace Com.RelationalAI
             return TransactionAsync(body, System.Threading.CancellationToken.None);
         }
 
-        public void KeepClientBusy(System.Net.Http.HttpClient client_)
-        {
-            var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/transaction");
-            while (true)
-            {
-                System.Threading.Thread.Sleep(15000);
-                var request = new System.Net.Http.HttpRequestMessage(new System.Net.Http.HttpMethod("GET"), urlBuilder_.ToString());
-                request.Version = System.Net.HttpVersion.Version20;
-                var task = client_.SendAsync(request);
-                var result = task.Result;
-            }
-        }
-
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>Issues a transaction to be executed</summary>
         /// <param name="body">Optional description in *Markdown*</param>
@@ -101,10 +87,11 @@ namespace Com.RelationalAI
                     request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
                     PrepareRequest(body, client_, request_, url_);
 
-                    var t = new System.Threading.Thread(() => this.KeepClientBusy(client_));
-                    t.Start();
+                    var tokenSource = new System.Threading.CancellationTokenSource();
+                    System.Threading.CancellationToken ct = tokenSource.Token;
+                    var t = this.KeepClientBusy(client_, ct);
                     var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                    // t.Abort();
+                    tokenSource.Cancel();
                     try
                     {
                         var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
