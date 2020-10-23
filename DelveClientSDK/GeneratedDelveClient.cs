@@ -46,8 +46,9 @@ namespace Com.RelationalAI
         partial void UpdateJsonSerializerSettings(Newtonsoft.Json.JsonSerializerSettings settings);
         partial void PrepareRequest(Transaction body, System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, string url);
         partial void PrepareRequest(Transaction body, System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder);
-        partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
-    
+        partial void ProcessResponse(Transaction body, System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
+        partial void ProcessCleanup(Transaction body, System.Net.Http.HttpClient client);
+        
         /// <summary>Issues a transaction to be executed</summary>
         /// <param name="body">Optional description in *Markdown*</param>
         /// <returns>A successful result is wrapped inside a TransactionResult</returns>
@@ -96,8 +97,8 @@ namespace Com.RelationalAI
                                 headers_[item_.Key] = item_.Value;
                         }
     
-                        ProcessResponse(client_, response_);
     
+                        ProcessResponse(body, client_, response_);
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
@@ -147,6 +148,7 @@ namespace Com.RelationalAI
             }
             finally
             {
+                ProcessCleanup(body, client_);
             }
         }
     
@@ -302,6 +304,7 @@ namespace Com.RelationalAI
     [JsonInheritanceAttribute("ParseAction", typeof(ParseAction))]
     [JsonInheritanceAttribute("QueryAction", typeof(QueryAction))]
     [JsonInheritanceAttribute("SetOptionsAction", typeof(SetOptionsAction))]
+    [JsonInheritanceAttribute("StatusAction", typeof(StatusAction))]
     [JsonInheritanceAttribute("UpdateAction", typeof(UpdateAction))]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class Action 
@@ -917,6 +920,21 @@ namespace Com.RelationalAI
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class StatusAction : Action
+    {
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class Pair_AnyValue_AnyValue_ 
     {
         [Newtonsoft.Json.JsonProperty("first", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -979,6 +997,7 @@ namespace Com.RelationalAI
     [JsonInheritanceAttribute("ParseActionResult", typeof(ParseActionResult))]
     [JsonInheritanceAttribute("QueryActionResult", typeof(QueryActionResult))]
     [JsonInheritanceAttribute("SetOptionsActionResult", typeof(SetOptionsActionResult))]
+    [JsonInheritanceAttribute("StatusActionResult", typeof(StatusActionResult))]
     [JsonInheritanceAttribute("UpdateActionResult", typeof(UpdateActionResult))]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class ActionResult 
@@ -1766,6 +1785,21 @@ namespace Com.RelationalAI
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class SetOptionsActionResult : ActionResult
+    {
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class StatusActionResult : ActionResult
     {
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     

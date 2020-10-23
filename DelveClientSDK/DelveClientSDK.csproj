@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp5.0.0-rc.2</TargetFramework>
     <Version>1.0.11</Version>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageId>DelveClientSDK</PackageId>
     <Authors>Mohammad Dashti and Helmi Nour</Authors>
     <Company>RelationalAI</Company>

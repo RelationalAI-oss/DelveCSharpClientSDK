@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-sealed class HttpClientFactory
+public sealed class HttpClientFactory
 {
     // The number of seconds a TCP connection will remain alive/idle before keepalive
     // probes are sent to the remote.
@@ -31,7 +31,8 @@ sealed class HttpClientFactory
         if( verifySSL ) {
             var handler = new SocketsHttpHandler()
             {
-                ConnectCallback = s_defaultConnectCallback,
+                // uncomment this to enable keep-alive after moving to netcore5
+                // ConnectCallback = s_defaultConnectCallback,
             };
             HttpClient httpClient = new HttpClient(handler);
             httpClient.Timeout = TimeSpan.FromSeconds(timeout);
@@ -48,7 +49,8 @@ sealed class HttpClientFactory
             };
             var handler = new SocketsHttpHandler()
             {
-                ConnectCallback = s_defaultConnectCallback,
+                // uncomment this to enable keep-alive after moving to netcore5
+                // ConnectCallback = s_defaultConnectCallback,
                 SslOptions = sslOptions
             };
             HttpClient httpClient = new HttpClient(handler);
@@ -119,6 +121,8 @@ sealed class HttpClientFactory
         return socket;
     }
 
+    /*
+    // uncomment this block to enable keep-alive after moving to netcore5
     private static async ValueTask<Stream> DefaultConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
     {
         // `Socket.SetSocketOption` function fails if a `DnsEndPoint` is passed, as it
@@ -130,7 +134,6 @@ sealed class HttpClientFactory
         IPEndPoint ipEndPoint = await getIPEndPoint(context.DnsEndPoint).ConfigureAwait(false);
         Socket socket = CreateSocket(ipEndPoint);
         socket.NoDelay = true;
-
         try
         {
             await socket.ConnectAsync(ipEndPoint, cancellationToken).ConfigureAwait(false);
@@ -142,6 +145,8 @@ sealed class HttpClientFactory
             throw;
         }
     }
+    private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
+    */
 
     private async static ValueTask<IPEndPoint> getIPEndPoint(DnsEndPoint dnsEndPoint)
     {
@@ -177,6 +182,4 @@ sealed class HttpClientFactory
         IPAddress ipAddress = addressV4 == null ? addressV6 : addressV4;
         return new IPEndPoint(ipAddress, dnsEndPoint.Port);
     }
-
-    private static readonly Func<SocketsHttpConnectionContext, CancellationToken, ValueTask<Stream>> s_defaultConnectCallback = DefaultConnectAsync;
 }

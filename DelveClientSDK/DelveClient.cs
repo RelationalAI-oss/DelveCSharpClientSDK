@@ -4,8 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -21,6 +24,10 @@ namespace Com.RelationalAI
         public const string USER_AGENT_HEADER = "DelveClient/1.0.11/csharp";
 
         public int DebugLevel = Connection.DEFAULT_DEBUG_LEVEL;
+
+        AsyncLocal<CancellationTokenSource> AsyncLocalKeepAliveCancellationTokenSource =
+            new AsyncLocal<CancellationTokenSource>();
+
 
         public GeneratedDelveClient(Connection conn)
         {
@@ -57,6 +64,37 @@ namespace Com.RelationalAI
             var raiRequest = new RAIRequest(request, conn);
             raiRequest.Sign(debugLevel: DebugLevel);
             DelveClient.AddExtraHeaders(request);
+
+            // use HTTP 2.0 (to handle keep-alive)
+            request.Version =  System.Net.HttpVersion.Version20;
+
+            // have a separate keep-alive task (per thread)
+            if(!isStatusRequest(body)) {
+                var tokenSource = new CancellationTokenSource();
+                AsyncLocalKeepAliveCancellationTokenSource.Value = tokenSource;
+                CancellationToken ct = tokenSource.Token;
+                var keep_alive_task = this.KeepClientAlive(client, url, ct).ConfigureAwait(false);
+            }
+        }
+
+        private bool isStatusRequest(Transaction txn)
+        {
+            return txn.Actions.Count == 1 && txn.Actions.First().Action is StatusAction;
+        }
+
+        partial void ProcessResponse(Transaction body, HttpClient client, HttpResponseMessage response)
+        {
+            ProcessCleanup(body, client);
+        }
+
+        partial void ProcessCleanup(Transaction body, HttpClient client)
+        {
+            if(!isStatusRequest(body)) {
+                var tokenSource = AsyncLocalKeepAliveCancellationTokenSource.Value;
+                if(tokenSource != null && !tokenSource.IsCancellationRequested) {
+                    tokenSource.Cancel();
+                }
+            }
         }
 
         private string BoolStr(bool val) {
@@ -66,6 +104,11 @@ namespace Com.RelationalAI
         private bool _isEmpty(string str)
         {
             return str == null || str.Length == 0;
+        }
+
+        public virtual Task KeepClientAlive(HttpClient client_, String url, CancellationToken ct)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -281,6 +324,21 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
+        public override async Task KeepClientAlive(HttpClient client_, String url, CancellationToken ct)
+        {
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
+                ct.ThrowIfCancellationRequested();
+                try {
+                    await Task.Run(() => this.Status());
+                } catch {
+                    //ignore the error
+                }
+            }
+        }
+
         public static void AddExtraHeaders(HttpRequestMessage request)
         {
             // host & content-type header for signature verification, more headers here
@@ -288,23 +346,31 @@ namespace Com.RelationalAI
         }
 
         private static bool httpClientVerifySSL = Connection.DEFAULT_VERIFY_SSL;
-        private static HttpClient httpClient = HttpClientFactory.CreateHttpClient(httpClientVerifySSL, Connection.DEFAULT_CONNECTION_TIMEOUT);
+        private static HttpClient httpClient = null;
 
         public string DbName { get { return conn.DbName; } }
 
-        public static HttpClient GetHttpClient(Uri url, bool verifySSL, int connectionTimeout)
+        protected internal static HttpClient GetHttpClient(
+            Uri url,
+            bool verifySSL,
+            int connectionTimeout = Connection.DEFAULT_CONNECTION_TIMEOUT
+        )
         {
-            if( "https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL) {
+            if( httpClient == null || ("https".Equals(url.Scheme) && httpClientVerifySSL != verifySSL)) {
                 // we keep a single static HttpClient instance and keep reusing it instead
                 // of creating an instance for each request. This is a proven best practice.
                 // However, if we are going to handle a `https` request and suddenly
                 // decide a value for `verifySSL` other than its default value (or the value
                 // used in the previous requests), then this section disposes the existing
                 // HttpClient instance and creates a new one.
-                httpClient.Dispose();
+                if(httpClient != null) httpClient.Dispose();
                 httpClient = HttpClientFactory.CreateHttpClient(verifySSL, connectionTimeout);
                 httpClientVerifySSL = verifySSL;
+
+                var sp = ServicePointManager.FindServicePoint(url);
+                sp.SetTcpKeepAlive(true, HttpClientFactory.KEEP_ALIVE_TIME*1000, HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
             }
+
             return httpClient;
         }
 
@@ -376,6 +442,7 @@ namespace Com.RelationalAI
 
             return null;
         }
+
         private bool IsSuccess(TransactionResult response) {
             return !response.Aborted && response.Problems.Count == 0;
         }
@@ -805,10 +872,11 @@ namespace Com.RelationalAI
             string rel,
             string data = null,
             string path = null,
-            AnyValue[] key = null
+            AnyValue[] key = null,
+            Integration integration = null
         )
         {
-            return LoadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
+            return LoadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema(), integration);
         }
 
         public ICollection<RelKey> ListEdb(string relName = null)
@@ -863,6 +931,12 @@ namespace Com.RelationalAI
             action.Silent = silent;
             action.Abort_on_error = abortOnError;
             return RunAction(action, isReadOnly: false) != null;
+        }
+
+        public bool Status()
+        {
+            var action = new StatusAction();
+            return RunAction(action, isReadOnly: true) != null;
         }
     }
 }

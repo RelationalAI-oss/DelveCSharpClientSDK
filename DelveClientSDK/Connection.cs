@@ -333,11 +333,12 @@ namespace Com.RelationalAI
             string rel,
             string data = null,
             string path = null,
-            AnyValue[] key = null
+            AnyValue[] key = null,
+            Integration integration = null
         )
         {
             SetConnectionOnClients();
-            return Client.LoadJSON(rel, data, path, key);
+            return Client.LoadJSON(rel, data, path, key, integration);
         }
 
         public ICollection<RelKey> ListEdb(string relName = null)
@@ -380,6 +381,12 @@ namespace Com.RelationalAI
         {
             SetConnectionOnClients();
             return Client.Configure(debug, debugTrace, broken, silent, abortOnError);
+        }
+
+        public bool Status()
+        {
+            SetConnectionOnClients();
+            return Client.Status();
         }
     }
 
