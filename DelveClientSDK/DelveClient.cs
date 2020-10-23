@@ -84,9 +84,16 @@ namespace Com.RelationalAI
 
         partial void ProcessResponse(Transaction body, HttpClient client, HttpResponseMessage response)
         {
+            ProcessCleanup(body, client);
+        }
+
+        partial void ProcessCleanup(Transaction body, HttpClient client)
+        {
             if(!isStatusRequest(body)) {
                 var tokenSource = AsyncLocalKeepAliveCancellationTokenSource.Value;
-                tokenSource.Cancel();
+                if(tokenSource != null && !tokenSource.IsCancellationRequested) {
+                    tokenSource.Cancel();
+                }
             }
         }
 
@@ -324,7 +331,11 @@ namespace Com.RelationalAI
                 ct.ThrowIfCancellationRequested();
                 await Task.Delay(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
                 ct.ThrowIfCancellationRequested();
-                await Task.Run(() => this.Status());
+                try {
+                    await Task.Run(() => this.Status());
+                } catch {
+                    //ignore the error
+                }
             }
         }
 
