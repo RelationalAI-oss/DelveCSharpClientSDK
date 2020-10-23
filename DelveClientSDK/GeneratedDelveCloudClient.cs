@@ -168,7 +168,7 @@ namespace Com.RelationalAI
                         ProcessResponse(client_, response_);
     
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 201)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<CreateComputeResponseProtocol>(response_, headers_).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
@@ -536,7 +536,7 @@ namespace Com.RelationalAI
                         ProcessResponse(client_, response_);
     
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 201)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<CreateUserResponseProtocol>(response_, headers_).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
