@@ -872,10 +872,11 @@ namespace Com.RelationalAI
             string rel,
             string data = null,
             string path = null,
-            AnyValue[] key = null
+            AnyValue[] key = null,
+            Integration integration = null
         )
         {
-            return LoadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema());
+            return LoadEdb(rel, JSON_CONTENT_TYPE, data, path, key, new JSONFileSyntax(), new JSONFileSchema(), integration);
         }
 
         public ICollection<RelKey> ListEdb(string relName = null)
