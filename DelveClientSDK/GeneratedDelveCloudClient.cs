@@ -50,19 +50,36 @@ namespace Com.RelationalAI
         /// <summary>List computes</summary>
         /// <returns>Computes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<ListComputesResponseProtocol> ComputeGetAsync()
+        public System.Threading.Tasks.Task<ListComputesResponseProtocol> ComputeGetAsync(System.Collections.Generic.IEnumerable<string> id, System.Collections.Generic.IEnumerable<string> name, System.Collections.Generic.IEnumerable<string> size, System.Collections.Generic.IEnumerable<string> state)
         {
-            return ComputeGetAsync(System.Threading.CancellationToken.None);
+            return ComputeGetAsync(id, name, size, state, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>List computes</summary>
         /// <returns>Computes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<ListComputesResponseProtocol> ComputeGetAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<ListComputesResponseProtocol> ComputeGetAsync(System.Collections.Generic.IEnumerable<string> id, System.Collections.Generic.IEnumerable<string> name, System.Collections.Generic.IEnumerable<string> size, System.Collections.Generic.IEnumerable<string> state, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/compute");
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/compute?");
+            if (id != null)
+            {
+                foreach (var item_ in id) { urlBuilder_.Append(System.Uri.EscapeDataString("id") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
+            }
+            if (name != null)
+            {
+                foreach (var item_ in name) { urlBuilder_.Append(System.Uri.EscapeDataString("name") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
+            }
+            if (size != null)
+            {
+                foreach (var item_ in size) { urlBuilder_.Append(System.Uri.EscapeDataString("size") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
+            }
+            if (state != null)
+            {
+                foreach (var item_ in state) { urlBuilder_.Append(System.Uri.EscapeDataString("state") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
+            }
+            urlBuilder_.Length--;
     
             var client_ = _httpClient;
             try

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -220,13 +221,9 @@ namespace DelveClientSDKSamples
 
         private ComputeData GetComputeByName(ManagementConnection connection, string computeName)
         {
-            var computes = connection.ListComputes();
-            foreach(var compute in computes) {
-                if (computeName.Equals(compute.ComputeName)) {
-                    return compute;
-                } 
-            }
-            return null;
+            var filters = new RAIComputeFilters(null, name: new List<string> {computeName, "random"}, null, null);
+            var computes = connection.ListComputes(filters);
+            return computes.FirstOrDefault();
         }
     }
 }
