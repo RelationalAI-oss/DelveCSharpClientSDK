@@ -66,11 +66,12 @@ namespace Com.RelationalAI
             if(this.Creds == null) return;
 
             // ISO8601 date/time strings for time of request
-            string date = String.Format("{0:yyyyMMdd}", t);
+            string signatureDate = String.Format("{0:yyyyMMddTHHmmssZ}", t);
+            string scopeDate = String.Format("{0:yyyyMMdd}", t);
 
             // Authentication scope
             string scope = string.Join("/", new string[]{
-                date, EnumString.GetDescription(this.Region), this.Service, "rai01_request"
+                scopeDate, EnumString.GetDescription(this.Region), this.Service, "rai01_request"
             });
 
             // SHA256 hash of content
@@ -143,7 +144,7 @@ namespace Com.RelationalAI
 
             // Create and sign "String to Sign"
             string stringToSign = string.Format(
-                "RAI01-ED25519-SHA256\n{0}\n{1}", scope, canonicalHash
+                "RAI01-ED25519-SHA256\n{0}\n{1}\n{2}", signatureDate, scope, canonicalHash
             );
 
             byte[] seed = Convert.FromBase64String(Creds.PrivateKey);
@@ -177,6 +178,7 @@ namespace Com.RelationalAI
             );
 
             InnerReq.Headers.TryAddWithoutValidation("Authorization", authHeader);
+            InnerReq.Headers.TryAddWithoutValidation("x-rai-date", signatureDate);
         }
     }
 }
