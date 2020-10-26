@@ -1,11 +1,15 @@
-{ pkgs ? import <nixpkgs>{}}:
+{
+  pkgs ? import <nixpkgs> {},
+  delveBinary ? "",
+  doCheck ? true
+}:
 with pkgs;
 let
   deps = import ./deps.nix {inherit fetchurl;};
 in
 stdenv.mkDerivation rec {
   name = "clientSDK-${version}";
-  version = "1.0.0";
+  version = "1.1.0";
   buildInputs = [
     dotnet-sdk_3
     dotnetPackages.Nuget
@@ -15,6 +19,7 @@ stdenv.mkDerivation rec {
 
   buildPhase = ''
     mkdir home
+    export HOME=$PWD/home
 
     # disable default-source so nuget does not try to download from online-repo
     nuget sources Disable -Name "nuget.org"
@@ -28,10 +33,16 @@ stdenv.mkDerivation rec {
   '';
 
   installPhase = ''
-    cd DelveClientSDK
-    dotnet pack
+    dotnet pack DelveClientSDK/DelveClientSDK.csproj
 
     mkdir -p $out/{bin,lib}
-    mv bin/Debug/DelveClientSDK.1.0.0.nupkg $out/lib
+    mv DelveClientSDK/bin/Debug/DelveClientSDK.${version}.nupkg $out/lib
   '';
+
+  checkPhase = ''
+    # running delve server
+    dotnet test --no-restore
+  '';
+
+  doCheck = false;
 }
