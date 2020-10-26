@@ -63,19 +63,19 @@ namespace Com.RelationalAI
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/compute?");
-            if (id != null)
+            if (id != null) 
             {
                 foreach (var item_ in id) { urlBuilder_.Append(System.Uri.EscapeDataString("id") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
             }
-            if (name != null)
+            if (name != null) 
             {
                 foreach (var item_ in name) { urlBuilder_.Append(System.Uri.EscapeDataString("name") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
             }
-            if (size != null)
+            if (size != null) 
             {
                 foreach (var item_ in size) { urlBuilder_.Append(System.Uri.EscapeDataString("size") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
             }
-            if (state != null)
+            if (state != null) 
             {
                 foreach (var item_ in state) { urlBuilder_.Append(System.Uri.EscapeDataString("state") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
             }
