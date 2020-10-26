@@ -7,11 +7,6 @@ fetchNuget = {name, version, sha256}:
     url = "https://www.nuget.org/api/v2/package/${name}/${version}";
   };
 in [
-#(fetchNuget {
-#  name = "DelveClientSDK";
-#  version = "1.1.0";
-#  sha256 = "";
-#	})
 (fetchNuget {
   name = "ini-parser";
   version = "2.5.2";

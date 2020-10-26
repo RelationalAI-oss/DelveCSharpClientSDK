@@ -40,9 +40,12 @@ stdenv.mkDerivation rec {
   '';
 
   checkPhase = ''
-    # running delve server
-    dotnet test --no-restore
+    ${delveBinary}/bin/delve server &
+    PID=$!
+    sleep 15s
+    dotnet test --no-restore || kill -9 $PID && exit -1
+    kill -9 $PID
   '';
 
-  doCheck = false;
+  doCheck = true;
 }
