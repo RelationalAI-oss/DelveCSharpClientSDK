@@ -21,7 +21,7 @@ namespace Com.RelationalAI
                 verifySSL: false
             );
 
-            ComputeData provisionedCompute = null;
+            ComputeInfoProtocol provisionedCompute = null;
             bool requestedOrProvisioning = true;
 
             string dbname = "";
@@ -32,19 +32,19 @@ namespace Com.RelationalAI
                 var computes = mgmtConn.ListComputes();
 
                 foreach(var comp in computes) {
-                    if( "PROVISIONED".Equals(comp.ComputeState) )
+                    if( "PROVISIONED".Equals(comp.State) )
                     {
                         var databases = mgmtConn.ListDatabases();
                         foreach(var db in databases) {
-                            if( comp.ComputeName.Equals(db.Default_compute_name) )
+                            if( comp.Name.Equals(db.Default_compute_name) )
                             {
-                                return CreateCloudConnection(db.Name, comp.ComputeName, mgmtConn);
+                                return CreateCloudConnection(db.Name, comp.Name, mgmtConn);
                             }
                         }
 
                         provisionedCompute = comp;
                         break;
-                    } else if( "REQUESTED".Equals(comp.ComputeState) || "PROVISIONING".Equals(comp.ComputeState) ) {
+                    } else if( "REQUESTED".Equals(comp.State) || "PROVISIONING".Equals(comp.State) ) {
                         requestedOrProvisioning = true;
                     }
                 }
@@ -66,7 +66,7 @@ namespace Com.RelationalAI
                     Thread.Sleep(10000);
                 }
             }
-            return CreateCloudConnection(dbname, provisionedCompute.ComputeName, mgmtConn);
+            return CreateCloudConnection(dbname, provisionedCompute.Name, mgmtConn);
         }
 
         public static CloudConnection CreateCloudConnection(string dbname, string computeName, ManagementConnection mgmtConn) {
