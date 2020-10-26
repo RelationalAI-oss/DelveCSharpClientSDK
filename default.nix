@@ -8,7 +8,7 @@ let
   deps = import ./deps.nix {inherit fetchurl;};
 in
 stdenv.mkDerivation rec {
-  name = "clientSDK-${version}";
+  name = "delve-csharp-client-sdk-${version}";
   version = "1.1.0";
   buildInputs = [
     dotnet-sdk_3
@@ -43,7 +43,7 @@ stdenv.mkDerivation rec {
     ${delveBinary}/bin/delve server &
     PID=$!
     sleep 15s
-    dotnet test --no-restore || kill -9 $PID && exit -1
+    dotnet test --no-restore --filter LocalIntegrationTests || kill -9 $PID && exit -1
     kill -9 $PID
   '';
 
