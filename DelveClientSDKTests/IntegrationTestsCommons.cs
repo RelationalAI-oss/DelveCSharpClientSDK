@@ -127,7 +127,7 @@ namespace Com.RelationalAI
             queryResEquals(conn.Query(
                 srcStr: "def p = {(1.1,); (2.2,); (3.4,)}",
                 output: "p"
-            ), ToRelData( 1.1D, 2.2D ));
+            ), ToRelData( 1.1D, 2.2D, 3.4D ));
 
             queryResEquals(conn.Query(
                 srcStr: "def p = {(parse_decimal[64, 2, \"1.1\"],); (parse_decimal[64, 2, \"2.2\"],); (parse_decimal[64, 2, \"3.4\"],)}",
