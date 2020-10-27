@@ -11,6 +11,7 @@ stdenv.mkDerivation rec {
   name = "delve-csharp-client-sdk-${version}";
   version = "1.1.0";
   buildInputs = [
+    delveBinary
     dotnet-sdk_3
     dotnetPackages.Nuget
   ];
@@ -36,16 +37,17 @@ stdenv.mkDerivation rec {
     dotnet pack DelveClientSDK/DelveClientSDK.csproj
 
     mkdir -p $out/{bin,lib}
-    mv DelveClientSDK/bin/Debug/DelveClientSDK.${version}.nupkg $out/lib
+    cp -v DelveClientSDK/bin/Debug/DelveClientSDK.${version}.nupkg $out/lib
   '';
 
   checkPhase = ''
-    ${delveBinary}/bin/delve server &
+    delve server &
     PID=$!
     sleep 15s
-    dotnet test --no-restore --filter LocalIntegrationTests || kill -9 $PID && exit -1
+    dotnet test --no-restore --filter LocalIntegrationTests || (kill -9 $PID && exit 1)
+    echo "Shutting down delve server. Pid: $PID"
     kill -9 $PID
   '';
 
-  doCheck = true;
+  inherit doCheck;
 }
