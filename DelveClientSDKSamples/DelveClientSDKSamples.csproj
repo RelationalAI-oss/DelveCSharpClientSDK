@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-     <PackageReference Include="DelveClientSDK" Version="1.0.13" />
+    <ProjectReference Include="..\DelveClientSDK\DelveClientSDK.csproj" />
   </ItemGroup>
-
 </Project>

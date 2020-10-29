@@ -112,7 +112,7 @@ namespace Com.RelationalAI
             string query = string.Join(
                 "&",
                 from qparam in parsedQueryDict
-                orderby qparam.key
+                orderby qparam.key, qparam.value
                 select string.Format(
                     "{0}={1}",
                     HttpUtility.UrlEncode(qparam.key),

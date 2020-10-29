@@ -4,7 +4,7 @@
 
 ## Getting started
 
-First we need to install `Dotnet core 1.3` [dotnet-core-1.3](https://dotnet.microsoft.com/download/dotnet-core/3.1) available for Windows, Linux and OSX.
+First we need to install `Dotnet core 3.1` [dotnet-core-3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1) available for Windows, Linux and OSX.
 
 ## Usage
 ### Dependencies

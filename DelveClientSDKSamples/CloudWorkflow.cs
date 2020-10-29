@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace DelveClientSDKSamples
         int MaxAttempts;
         int SleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute-2020-09-24", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
+        public CloudWorkflow(string computeName = "csharpcompute-2020-10-26-1", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
         {
             // Loads data from ~/.rai/config (rai cloud configuration)
             IniData ini = Config.LoadDotRaiConfig();
@@ -210,23 +211,19 @@ namespace DelveClientSDKSamples
             for (var i=0; i<this.MaxAttempts; i++)
             {
                 var compute = GetComputeByName(connection, computeName);
-                Console.WriteLine($"==> Compute {computeName} state: {compute.ComputeState}");
-                if ("PROVISIONED".Equals(compute.ComputeState))
+                Console.WriteLine($"==> Compute {computeName} state: {compute.State}");
+                if ("PROVISIONED".Equals(compute.State))
                     return true;
                 Thread.Sleep(this.SleepTime);
             }
             return false;
         }
 
-        private ComputeData GetComputeByName(ManagementConnection connection, string computeName)
+        private ComputeInfoProtocol GetComputeByName(ManagementConnection connection, string computeName)
         {
-            var computes = connection.ListComputes();
-            foreach(var compute in computes) {
-                if (computeName.Equals(compute.ComputeName)) {
-                    return compute;
-                } 
-            }
-            return null;
+            var filters = new RAIComputeFilters(null, name: new List<string> {computeName, "random"}, null, null);
+            var computes = connection.ListComputes(filters);
+            return computes.FirstOrDefault();
         }
     }
 }
