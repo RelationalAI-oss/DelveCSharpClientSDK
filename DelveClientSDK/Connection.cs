@@ -453,10 +453,10 @@ namespace Com.RelationalAI
         public override RAICredentials Creds { get; }
         public override bool VerifySSL { get; }
 
-        public ICollection<ComputeData> ListComputes()
+        public ICollection<ComputeData> ListComputes(RAIComputeFilters filters = null)
         {
             SetConnectionOnClients();
-            return CloudClient.ListComputes();
+            return CloudClient.ListComputes(filters);
         }
 
         public ComputeData CreateCompute(string computeName, RAIComputeSize size = RAIComputeSize.XS, string region = null)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
@@ -9,6 +10,27 @@ namespace Com.RelationalAI
     public enum RAIComputeSize
     {
         XS, S, M, L, XL
+    }
+
+    public class RAIComputeFilters
+    {
+        public List<string> Id {get;}
+        public List<string> Name {get;}
+        public List<RAIComputeSize> Size {get;}
+        public List<string> State {get;}
+
+        public RAIComputeFilters(
+            List<string> id = null,
+            List<string> name = null,
+            List<RAIComputeSize> size = null,
+            List<string> state = null
+        )
+        {
+            this.Id = id;
+            this.Name = name;
+            this.Size = size;
+            this.State = state;
+        }
     }
 
     public partial class GeneratedDelveCloudClient
@@ -47,9 +69,23 @@ namespace Com.RelationalAI
             this.BaseUrl = conn.BaseUrl.ToString();
         }
 
-        public ICollection<ComputeData> ListComputes()
+        public ICollection<ComputeData> ListComputes(RAIComputeFilters filters = null)
         {
-            var res = this.ComputeGetAsync().Result;
+            ListComputesResponseProtocol res;
+            if (filters == null)
+            {
+                res = this.ComputeGetAsync(null, null, null, null).Result;
+            }
+            else
+            {
+                IEnumerable<string> sizeFilters = null;
+                if (filters.Size != null)
+                {
+                    sizeFilters = filters.Size.Select(s => s.GetDescription());
+                }
+
+                res = this.ComputeGetAsync(filters.Id, filters.Name, sizeFilters, filters.State).Result;
+            }
             if ( res == null ) return null;
 
             return res.Compute_requests_list;
