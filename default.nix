@@ -9,7 +9,7 @@ let
 in
 stdenv.mkDerivation rec {
   name = "delve-csharp-client-sdk-${version}";
-  version = "1.0.13";
+  version = "1.1.1";
   buildInputs = [
     delveBinary
     dotnet-sdk_3

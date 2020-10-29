@@ -2,7 +2,7 @@
 
 This is a Client SDK for Delve API
 
-- API version: 1.0.13
+- API version: 1.1.1
 
 ## Frameworks supported
 
