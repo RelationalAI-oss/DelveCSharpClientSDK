@@ -69,7 +69,7 @@ namespace Com.RelationalAI
             this.BaseUrl = conn.BaseUrl.ToString();
         }
 
-        public ICollection<ComputeData> ListComputes(RAIComputeFilters filters = null)
+        public ICollection<ComputeInfoProtocol> ListComputes(RAIComputeFilters filters = null)
         {
             ListComputesResponseProtocol res;
             if (filters == null)
@@ -88,27 +88,27 @@ namespace Com.RelationalAI
             }
             if ( res == null ) return null;
 
-            return res.Compute_requests_list;
+            return res.Computes;
         }
 
-        public ComputeData CreateCompute(string displayName, RAIComputeSize size = RAIComputeSize.XS, string region = null, bool dryRun = false)
+        public ComputeInfoProtocol CreateCompute(string name, RAIComputeSize size = RAIComputeSize.XS, string region = null, bool dryRun = false)
         {
             if(region == null) region = EnumString.GetDescription(this.conn.Region);
 
             CreateComputeRequestProtocol request = new CreateComputeRequestProtocol();
             request.Region = region;
-            request.Display_name = displayName;
+            request.Name = name;
             request.Size = EnumString.GetDescription(size);
             request.Dryrun = dryRun;
-            return this.ComputePutAsync(request).Result.Compute_data;
+            return this.ComputePutAsync(request).Result.Compute;
         }
 
         public DeleteComputeStatus DeleteCompute(string computeName, bool dryRun = false)
         {
             DeleteComputeRequestProtocol request = new DeleteComputeRequestProtocol();
-            request.Compute_name = computeName;
+            request.Name = computeName;
             request.Dryrun = dryRun;
-            return this.ComputeDeleteAsync(request).Result.Delete_status;
+            return this.ComputeDeleteAsync(request).Result.Status;
         }
 
         public ICollection<DatabaseInfo> ListDatabases() {
