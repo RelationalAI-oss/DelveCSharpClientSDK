@@ -1,4 +1,3 @@
-
 { fetchurl }:
 let
 fetchNuget = {name, version, sha256}:
@@ -8,9 +7,9 @@ fetchNuget = {name, version, sha256}:
   };
 in [
 (fetchNuget {
-  name = "ini-parser";
+  name = "ini-parser-netstandard";
   version = "2.5.2";
-  sha256 = "0xi72isss3jahf55w7rwvlxzpadsvvvvqrf9ll8bzf0147d0yr90";
+  sha256 = "14alsxh7ik07xl9xab8bdi108f4xhz8vcchxvxy1k5w3zf3gdml9";
 })
 (fetchNuget {
   name = "libsodium";
