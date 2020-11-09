@@ -76,6 +76,7 @@ namespace Com.RelationalAI
         public static IniData LoadDotRaiConfig(string path=null)
         {
             if( path == null ) path = DotRaiConfigPath();
+            if (! File.Exists(path)) throw new FileNotFoundException(path + " does not exist");
             return parser.ReadFile(path);
         }
 

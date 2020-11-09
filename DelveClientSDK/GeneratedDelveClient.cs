@@ -1041,9 +1041,9 @@ namespace Com.RelationalAI
     [JsonInheritanceAttribute("UndefinedError", typeof(UndefinedError))]
     [JsonInheritanceAttribute("IntegrityConstraintProblem", typeof(IntegrityConstraintProblem))]
     [JsonInheritanceAttribute("IntegrityConstraintViolation", typeof(IntegrityConstraintViolation))]
-    [JsonInheritanceAttribute("LoadDataProblem", typeof(LoadDataProblem))]
     [JsonInheritanceAttribute("OutputProblem", typeof(OutputProblem))]
     [JsonInheritanceAttribute("PersistProblem", typeof(PersistProblem))]
+    [JsonInheritanceAttribute("StorageProblem", typeof(StorageProblem))]
     [JsonInheritanceAttribute("SyntaxError", typeof(SyntaxError))]
     [JsonInheritanceAttribute("WorkspaceLoadProblem", typeof(WorkspaceLoadProblem))]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
@@ -1363,25 +1363,6 @@ namespace Com.RelationalAI
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class LoadDataProblem : AbstractProblem
-    {
-        [Newtonsoft.Json.JsonProperty("exception", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Exception { get; set; } = "";
-    
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
-    
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties; }
-            set { _additionalProperties = value; }
-        }
-    
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class OutputProblem : AbstractProblem
     {
         [Newtonsoft.Json.JsonProperty("exception", Required = Newtonsoft.Json.Required.Always)]
@@ -1416,6 +1397,25 @@ namespace Com.RelationalAI
     
         [Newtonsoft.Json.JsonProperty("exception_stacktrace", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Exception_stacktrace { get; set; }
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class StorageProblem : AbstractProblem
+    {
+        [Newtonsoft.Json.JsonProperty("exception", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Exception { get; set; } = "";
     
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
