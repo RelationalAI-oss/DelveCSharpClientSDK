@@ -61,7 +61,7 @@ namespace Com.RelationalAI
 
         public void Sign(DateTime t, string[] includeHeaders = null, int debugLevel=1) {
             if(includeHeaders == null) {
-                includeHeaders = new string[]{"host", "content-type"};
+                includeHeaders = new string[]{"host", "content-type", "x-rai-date"};
             }
             if(this.Creds == null) return;
 
@@ -82,6 +82,11 @@ namespace Com.RelationalAI
 
             // HTTP headers
             InnerReq.Headers.Authorization = null;
+            // Include "x-rai-date" in signed headers
+            if (!InnerReq.Headers.Contains("x-rai-date"))
+            {
+                InnerReq.Headers.TryAddWithoutValidation("x-rai-date", signatureDate);
+            }
 
             var allHeaders = InnerReq.Headers.Union(InnerReq.Content.Headers);
 
@@ -178,7 +183,6 @@ namespace Com.RelationalAI
             );
 
             InnerReq.Headers.TryAddWithoutValidation("Authorization", authHeader);
-            InnerReq.Headers.TryAddWithoutValidation("x-rai-date", signatureDate);
         }
     }
 }
