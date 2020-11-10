@@ -484,10 +484,10 @@ namespace Com.RelationalAI
             return CloudClient.CreateUser(username);
         }
 
-        public ICollection<DatabaseInfo> ListDatabases()
+        public ICollection<DatabaseInfo> ListDatabases(RAIDatabaseFilters filters = null)
         {
             SetConnectionOnClients();
-            return CloudClient.ListDatabases();
+            return CloudClient.ListDatabases(filters);
         }
 
         public void RemoveDefaultCompute(string dbname)
