@@ -33,6 +33,25 @@ namespace Com.RelationalAI
         }
     }
 
+    public class RAIDatabaseFilters
+    {
+        public List<string> Id {get;}
+        public List<string> Name {get;}
+        public List<string> State {get;}
+
+        public RAIDatabaseFilters(
+            List<string> id = null,
+            List<string> name = null,
+            List<string> state = null
+        )
+        {
+            this.Id = id;
+            this.Name = name;
+            this.State = state;
+        }
+    }
+
+
     public partial class GeneratedDelveCloudClient
     {
         public Connection conn {get; set;}
@@ -111,8 +130,16 @@ namespace Com.RelationalAI
             return this.ComputeDeleteAsync(request).Result.Status;
         }
 
-        public ICollection<DatabaseInfo> ListDatabases() {
-            var res = this.DatabaseGetAsync().Result;
+        public ICollection<DatabaseInfo> ListDatabases(RAIDatabaseFilters filters = null) {
+            ListDatabasesResponseProtocol res;
+            if (filters == null)
+            {
+                res = this.DatabaseGetAsync(null, null, null).Result;
+            }
+            else
+            {
+                res = this.DatabaseGetAsync(filters.Id, filters.Name, filters.State).Result;
+            }
             if ( res == null ) return null;
 
             return res.Databases;
@@ -123,10 +150,10 @@ namespace Com.RelationalAI
             this.UpdateDatabase(dbname, null, removeDefaultCompute: true, dryRun: false);
         }
 
-        public void UpdateDatabase(string displayName, string defaultComputeName, bool removeDefaultCompute, bool dryRun = false)
+        public void UpdateDatabase(string name, string defaultComputeName, bool removeDefaultCompute, bool dryRun = false)
         {
             UpdateDatabaseRequestProtocol request = new UpdateDatabaseRequestProtocol();
-            request.Display_name = displayName;
+            request.Name = name;
             request.Default_compute_name = defaultComputeName;
             request.Remove_default_compute = removeDefaultCompute;
             request.Dryrun = dryRun;

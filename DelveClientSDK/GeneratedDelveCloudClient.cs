@@ -293,19 +293,32 @@ namespace Com.RelationalAI
         /// <summary>List databases</summary>
         /// <returns>Databases</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<ListDatabasesResponseProtocol> DatabaseGetAsync()
+        public System.Threading.Tasks.Task<ListDatabasesResponseProtocol> DatabaseGetAsync(System.Collections.Generic.IEnumerable<string> id, System.Collections.Generic.IEnumerable<string> name, System.Collections.Generic.IEnumerable<string> state)
         {
-            return DatabaseGetAsync(System.Threading.CancellationToken.None);
+            return DatabaseGetAsync(id, name, state, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>List databases</summary>
         /// <returns>Databases</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<ListDatabasesResponseProtocol> DatabaseGetAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<ListDatabasesResponseProtocol> DatabaseGetAsync(System.Collections.Generic.IEnumerable<string> id, System.Collections.Generic.IEnumerable<string> name, System.Collections.Generic.IEnumerable<string> state, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/database");
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/database?");
+            if (id != null) 
+            {
+                foreach (var item_ in id) { urlBuilder_.Append(System.Uri.EscapeDataString("id") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
+            }
+            if (name != null) 
+            {
+                foreach (var item_ in name) { urlBuilder_.Append(System.Uri.EscapeDataString("name") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
+            }
+            if (state != null) 
+            {
+                foreach (var item_ in state) { urlBuilder_.Append(System.Uri.EscapeDataString("state") + "=").Append((item_ == null) ? "" : System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append("&"); }
+            }
+            urlBuilder_.Length--;
     
             var client_ = _httpClient;
             try
@@ -871,8 +884,11 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonProperty("region", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Region { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("database_id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string Database_id { get; set; }
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Id { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("created_by", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Created_by { get; set; }
     
         [Newtonsoft.Json.JsonProperty("default_compute_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Default_compute_name { get; set; }
@@ -913,8 +929,8 @@ namespace Com.RelationalAI
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class UpdateDatabaseRequestProtocol 
     {
-        [Newtonsoft.Json.JsonProperty("display_name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string Display_name { get; set; }
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
     
         [Newtonsoft.Json.JsonProperty("default_compute_name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Default_compute_name { get; set; }
@@ -969,6 +985,9 @@ namespace Com.RelationalAI
     
         [Newtonsoft.Json.JsonProperty("access_key1", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Access_key1 { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("created_by", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Created_by { get; set; }
     
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     

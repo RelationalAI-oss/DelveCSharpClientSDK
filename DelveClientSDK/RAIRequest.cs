@@ -61,16 +61,17 @@ namespace Com.RelationalAI
 
         public void Sign(DateTime t, string[] includeHeaders = null, int debugLevel=1) {
             if(includeHeaders == null) {
-                includeHeaders = new string[]{"host", "content-type"};
+                includeHeaders = new string[]{"host", "content-type", "x-rai-date"};
             }
             if(this.Creds == null) return;
 
             // ISO8601 date/time strings for time of request
-            string date = String.Format("{0:yyyyMMdd}", t);
+            string signatureDate = String.Format("{0:yyyyMMddTHHmmssZ}", t);
+            string scopeDate = String.Format("{0:yyyyMMdd}", t);
 
             // Authentication scope
             string scope = string.Join("/", new string[]{
-                date, EnumString.GetDescription(this.Region), this.Service, "rai01_request"
+                scopeDate, EnumString.GetDescription(this.Region), this.Service, "rai01_request"
             });
 
             // SHA256 hash of content
@@ -81,6 +82,11 @@ namespace Com.RelationalAI
 
             // HTTP headers
             InnerReq.Headers.Authorization = null;
+            // Include "x-rai-date" in signed headers
+            if (!InnerReq.Headers.Contains("x-rai-date"))
+            {
+                InnerReq.Headers.TryAddWithoutValidation("x-rai-date", signatureDate);
+            }
 
             var allHeaders = InnerReq.Headers.Union(InnerReq.Content.Headers);
 
@@ -143,7 +149,7 @@ namespace Com.RelationalAI
 
             // Create and sign "String to Sign"
             string stringToSign = string.Format(
-                "RAI01-ED25519-SHA256\n{0}\n{1}", scope, canonicalHash
+                "RAI01-ED25519-SHA256\n{0}\n{1}\n{2}", signatureDate, scope, canonicalHash
             );
 
             byte[] seed = Convert.FromBase64String(Creds.PrivateKey);
