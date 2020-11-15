@@ -4,10 +4,10 @@ namespace DelveClientSDK.Helpers
 {
     public interface ILogger
     {
-        void LogInformation(string msg);
+        void Info(string msg);
 
-        void LogWarning(string msg);
+        void Warning(string msg);
 
-        void LogError(string msg, Exception exception = null);
+        void Error(string msg, Exception exception = null);
     }
 }

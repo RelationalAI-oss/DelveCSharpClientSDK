@@ -394,16 +394,16 @@ namespace Com.RelationalAI
         public TransactionResult RunTransaction(Transaction xact)
         {
             if(this.DebugLevel > 0) {
-                Logger.LogInformation($"Transaction: {JObject.FromObject(xact)}");
+                Logger.Info($"Transaction: {JObject.FromObject(xact)}");
             }
             Task<TransactionResult> responseTask = this.TransactionAsync(xact);
             TransactionResult response = responseTask.Result;
 
             if(this.DebugLevel > 0) {
                 var logMessage = $"TransactionOutput: {JObject.FromObject(response)}";
-                if (response.Aborted) Logger.LogError(logMessage);
-                else if (response.Problems.Any()) Logger.LogWarning(logMessage);
-                else Logger.LogInformation(logMessage);
+                if (response.Aborted) Logger.Error(logMessage);
+                else if (response.Problems.Any()) Logger.Warning(logMessage);
+                else Logger.Info(logMessage);
             }
             return response;
         }
