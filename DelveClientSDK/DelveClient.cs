@@ -325,7 +325,7 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
-        public static ILogger DefaultLogger => new ConsoleLogger();
+        public static ILogger DefaultLogger = new ConsoleLogger();
 
         public ILogger Logger
         {
