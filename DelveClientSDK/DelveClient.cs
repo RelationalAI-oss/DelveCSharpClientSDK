@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using DelveClientSDK.Helpers;
 
 namespace Com.RelationalAI
 {
@@ -324,6 +325,15 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
+        public static ILogger DefaultLogger => new ConsoleLogger();
+
+        public ILogger Logger
+        {
+            get => _logger ?? DefaultLogger;
+            set => _logger = value;
+        }
+        private ILogger _logger;
+
         public override async Task KeepClientAlive(HttpClient client_, String url, CancellationToken ct)
         {
             while (true)
@@ -384,13 +394,13 @@ namespace Com.RelationalAI
         public TransactionResult RunTransaction(Transaction xact)
         {
             if(this.DebugLevel > 0) {
-                Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
+                Logger.LogInformation("Transaction: " + JObject.FromObject(xact).ToString());
             }
             Task<TransactionResult> responseTask = this.TransactionAsync(xact);
             TransactionResult response = responseTask.Result;
 
             if(this.DebugLevel > 0) {
-                Console.WriteLine("TransactionOutput: " + JObject.FromObject(response).ToString());
+                Logger.LogInformation("TransactionOutput: " + JObject.FromObject(response).ToString());
             }
             return response;
         }
