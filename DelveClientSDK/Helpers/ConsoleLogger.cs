@@ -11,12 +11,12 @@ namespace DelveClientSDK.Helpers
 
         public void Warning(string msg)
         {
-            Console.WriteLine($"[WARN] {msg}");
+            Console.Error.WriteLine($"[WARN] {msg}");
         }
 
         public void Error(string msg, Exception exception = null)
         {
-            Console.WriteLine($"[ERROR] {msg}\n{exception?.Message}\n{exception?.StackTrace}");
+            Console.Error.WriteLine($"[ERROR] {msg}\n{exception?.Message}\n{exception?.StackTrace}");
         }
     }
 }

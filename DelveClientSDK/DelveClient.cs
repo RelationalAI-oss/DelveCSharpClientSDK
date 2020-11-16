@@ -393,6 +393,7 @@ namespace Com.RelationalAI
 
         public TransactionResult RunTransaction(Transaction xact)
         {
+            //TODO: move DebugLevel to ILogger
             if(this.DebugLevel > 0) {
                 Logger.Info($"Transaction: {JObject.FromObject(xact)}");
             }
