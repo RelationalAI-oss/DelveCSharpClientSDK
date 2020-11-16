@@ -100,6 +100,7 @@ namespace DelveClientSDKSamples
             foreach(var database in databases)
             {
                 Console.WriteLine(JObject.FromObject(database).ToString());
+                Console.WriteLine(database.State);
             }
 
             // list users for the current account

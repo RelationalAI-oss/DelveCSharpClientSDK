@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using DelveClientSDK.Helpers;
 
 namespace Com.RelationalAI
 {
@@ -324,6 +325,15 @@ namespace Com.RelationalAI
 
     public class DelveClient : GeneratedDelveClient
     {
+        public static ILogger DefaultLogger = new ConsoleLogger();
+
+        public ILogger Logger
+        {
+            get => _logger ?? DefaultLogger;
+            set => _logger = value;
+        }
+        private ILogger _logger;
+
         public override async Task KeepClientAlive(HttpClient client_, String url, CancellationToken ct)
         {
             while (true)
@@ -332,11 +342,26 @@ namespace Com.RelationalAI
                 await Task.Delay(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
                 ct.ThrowIfCancellationRequested();
                 try {
-                    await Task.Run(() => this.Status());
+                    await Task.Run(() => this.KeepAliveProbe(client_, ct));
                 } catch {
                     //ignore the error
                 }
             }
+        }
+
+        private async void KeepAliveProbe(HttpClient client_, CancellationToken ct)
+        {
+            // Send "HEAD / HTTP/2" request.
+            var request = new System.Net.Http.HttpRequestMessage();
+            request.Method = new System.Net.Http.HttpMethod("HEAD");
+            request.RequestUri = new System.Uri(this.BaseUrl, System.UriKind.RelativeOrAbsolute);
+            request.Version =  System.Net.HttpVersion.Version20;
+
+            try {
+                await client_.SendAsync(request, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+            } catch {
+                //ignore the error
+           }
         }
 
         public static void AddExtraHeaders(HttpRequestMessage request)
@@ -383,14 +408,18 @@ namespace Com.RelationalAI
 
         public TransactionResult RunTransaction(Transaction xact)
         {
+            //TODO: move DebugLevel to ILogger
             if(this.DebugLevel > 0) {
-                Console.WriteLine("Transaction: " + JObject.FromObject(xact).ToString());
+                Logger.Info($"Transaction: {JObject.FromObject(xact)}");
             }
             Task<TransactionResult> responseTask = this.TransactionAsync(xact);
             TransactionResult response = responseTask.Result;
 
             if(this.DebugLevel > 0) {
-                Console.WriteLine("TransactionOutput: " + JObject.FromObject(response).ToString());
+                var logMessage = $"TransactionOutput: {JObject.FromObject(response)}";
+                if (response.Aborted) Logger.Error(logMessage);
+                else if (response.Problems.Any()) Logger.Warning(logMessage);
+                else Logger.Info(logMessage);
             }
             return response;
         }
