@@ -252,7 +252,7 @@ namespace Com.RelationalAI
     {
         public CSVFileSyntax(
             ICollection<string> header = null,
-            int headerRow = -1,
+            int headerRow = 1,
             bool normalizeNames = false,
             int dataRow = -1,
             ICollection<string> missingStrings = null,
