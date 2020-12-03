@@ -110,6 +110,16 @@ namespace Com.RelationalAI
                             return objectResponse_.Object;
                         }
                         else
+                        if (status_ == 422)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<TransactionResult>(response_, headers_).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<TransactionResult>("The transaction was aborted. The result is wrapped inside a TransactionResult", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
                         if (status_ == 403)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<InfraError>(response_, headers_).ConfigureAwait(false);
