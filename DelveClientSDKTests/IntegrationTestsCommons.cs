@@ -70,7 +70,8 @@ namespace Com.RelationalAI
             // create_database
             // =============================================================================
             Assert.IsTrue(conn.CreateDatabase(overwrite: true));
-            Assert.Throws<Exception>(() => conn.CreateDatabase());
+            var ex1 = Assert.Throws<AggregateException>(() => conn.CreateDatabase());
+            Assert.AreEqual(typeof(ApiException<TransactionResult>), ex1.InnerException.GetType());
 
             // install_source
             // =============================================================================
@@ -168,7 +169,9 @@ namespace Com.RelationalAI
             queryResEquals(conn3.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
 
             // Try to clone from conn to conn2, without passing overwrite=true
-            Assert.Throws<Exception>(() => conn2.CloneDatabase(conn));
+            var ex2 = Assert.Throws<AggregateException>(() => conn2.CloneDatabase(conn));
+            Assert.AreEqual(typeof(ApiException<TransactionResult>), ex2.InnerException.GetType());
+						
             queryResEquals(conn.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
             queryResEquals(conn2.Query(output: "x"), ToRelData( 1L, 2L, 3L, 5L ));
             queryResEquals(conn3.Query(output: "x"), ToRelData( 1L, 2L, 3L, 4L ));
