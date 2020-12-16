@@ -1048,6 +1048,7 @@ namespace Com.RelationalAI
     [JsonInheritanceAttribute("FrontProblem", typeof(FrontProblem))]
     [JsonInheritanceAttribute("ArityMismatchError", typeof(ArityMismatchError))]
     [JsonInheritanceAttribute("ComparisonChainError", typeof(ComparisonChainError))]
+    [JsonInheritanceAttribute("InlineInconsistent", typeof(InlineInconsistent))]
     [JsonInheritanceAttribute("UndefinedError", typeof(UndefinedError))]
     [JsonInheritanceAttribute("IntegrityConstraintProblem", typeof(IntegrityConstraintProblem))]
     [JsonInheritanceAttribute("IntegrityConstraintViolation", typeof(IntegrityConstraintViolation))]
@@ -1267,6 +1268,29 @@ namespace Com.RelationalAI
     
         [Newtonsoft.Json.JsonProperty("node", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AnyValue Node { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Range Range { get; set; } = new Range();
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class InlineInconsistent : FrontProblem
+    {
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; } = "";
     
         [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
