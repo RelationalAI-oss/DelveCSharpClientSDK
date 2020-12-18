@@ -614,7 +614,7 @@ namespace Com.RelationalAI
             {
                 return new ObjectResponseResult<T>(default(T), string.Empty);
             }
-
+        
             if (ReadResponseAsString)
             {
                 var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
