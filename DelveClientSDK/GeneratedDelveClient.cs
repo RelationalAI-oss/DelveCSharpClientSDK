@@ -1049,6 +1049,7 @@ namespace Com.RelationalAI
     [JsonInheritanceAttribute("ArityMismatchError", typeof(ArityMismatchError))]
     [JsonInheritanceAttribute("ComparisonChainError", typeof(ComparisonChainError))]
     [JsonInheritanceAttribute("InlineInconsistent", typeof(InlineInconsistent))]
+    [JsonInheritanceAttribute("ShadowError", typeof(ShadowError))]
     [JsonInheritanceAttribute("UndefinedError", typeof(UndefinedError))]
     [JsonInheritanceAttribute("IntegrityConstraintProblem", typeof(IntegrityConstraintProblem))]
     [JsonInheritanceAttribute("IntegrityConstraintViolation", typeof(IntegrityConstraintViolation))]
@@ -1295,6 +1296,35 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public Range Range { get; set; } = new Range();
+    
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+    
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class ShadowError : FrontProblem
+    {
+        [Newtonsoft.Json.JsonProperty("range", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Range Range { get; set; } = new Range();
+    
+        [Newtonsoft.Json.JsonProperty("shadowed", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AnyValue Shadowed { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("shadower", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AnyValue Shadower { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("var", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Var { get; set; } = "";
     
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
