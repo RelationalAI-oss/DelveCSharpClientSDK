@@ -905,9 +905,6 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonProperty("abort_on_error", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Abort_on_error { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("broken", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool? Broken { get; set; }
-    
         [Newtonsoft.Json.JsonProperty("debug", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Debug { get; set; }
     

@@ -374,13 +374,12 @@ namespace Com.RelationalAI
         public bool Configure(
             bool? debug = null,
             bool? debugTrace = null,
-            bool? broken = null,
             bool? silent = null,
             bool? abortOnError = null
         )
         {
             SetConnectionOnClients();
-            return Client.Configure(debug, debugTrace, broken, silent, abortOnError);
+            return Client.Configure(debug, debugTrace, silent, abortOnError);
         }
 
         public bool Status()
