@@ -625,7 +625,7 @@ namespace Com.RelationalAI
                 }
                 catch (Newtonsoft.Json.JsonException exception)
                 {
-                    var message = "Could not deserialize the response body string as " + typeof(T).FullName + ", response content: " + responseText + ".";
+                    var message = "Could not deserialize the response body string as " + typeof(T).FullName + "\n response content: " + responseText + ".";
                     throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
                 }
             }
@@ -641,7 +641,7 @@ namespace Com.RelationalAI
                 }
                 catch (Newtonsoft.Json.JsonException exception)
                 {
-                    var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ", response content: " + streamText  + ".";
+                    var message = "Could not deserialize the response body stream as " + typeof(T).FullName + "\n response content: " + streamText  + ".";
                     throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
                 }
             }
