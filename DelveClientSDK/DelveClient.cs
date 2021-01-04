@@ -948,7 +948,6 @@ namespace Com.RelationalAI
         public bool Configure(
             bool? debug = null,
             bool? debugTrace = null,
-            bool? broken = null,
             bool? silent = null,
             bool? abortOnError = null
         )
@@ -956,7 +955,6 @@ namespace Com.RelationalAI
             var action = new SetOptionsAction();
             action.Debug = debug;
             action.Debug_trace = debugTrace;
-            action.Broken = broken;
             action.Silent = silent;
             action.Abort_on_error = abortOnError;
             return RunAction(action, isReadOnly: false) != null;
