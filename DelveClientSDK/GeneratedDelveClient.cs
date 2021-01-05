@@ -194,26 +194,23 @@ namespace Com.RelationalAI
                 }
                 catch (Newtonsoft.Json.JsonException exception)
                 {
-                    var message = "Could not deserialize the response body string as " + typeof(T).FullName + ".";
+                    var message = "Could not deserialize the response body string as " + typeof(T).FullName + "\n response content: " + responseText + ".";
                     throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
                 }
             }
             else
             {
+                var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                var streamReader = new System.IO.StreamReader(responseStream);
+                var streamText = streamReader.ReadToEnd();
                 try
                 {
-                    using (var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
-                    using (var streamReader = new System.IO.StreamReader(responseStream))
-                    using (var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader))
-                    {
-                        var serializer = Newtonsoft.Json.JsonSerializer.Create(JsonSerializerSettings);
-                        var typedBody = serializer.Deserialize<T>(jsonTextReader);
-                        return new ObjectResponseResult<T>(typedBody, string.Empty);
-                    }
+                    var typedBody = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(streamText, JsonSerializerSettings);
+                    return new ObjectResponseResult<T>(typedBody, string.Empty);
                 }
                 catch (Newtonsoft.Json.JsonException exception)
                 {
-                    var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ".";
+                    var message = "Could not deserialize the response body stream as " + typeof(T).FullName + "\n response content: " + streamText  + ".";
                     throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
                 }
             }
