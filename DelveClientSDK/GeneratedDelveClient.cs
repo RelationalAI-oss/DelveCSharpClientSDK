@@ -591,8 +591,8 @@ namespace Com.RelationalAI
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class CSVFileSyntax : FileSyntax
     {
-        [Newtonsoft.Json.JsonProperty("datarow", Required = Newtonsoft.Json.Required.Always)]
-        public int Datarow { get; set; } = 0;
+        [Newtonsoft.Json.JsonProperty("data_row", Required = Newtonsoft.Json.Required.Always)]
+        public int Data_row { get; set; } = 0;
     
         [Newtonsoft.Json.JsonProperty("delim", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]

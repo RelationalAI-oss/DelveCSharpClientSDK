@@ -267,7 +267,7 @@ namespace Com.RelationalAI
             this.Header = header;
             this.Header_row = headerRow;
             this.Normalizenames = normalizeNames;
-            this.Datarow = dataRow;
+            this.Data_row = dataRow;
             this.Missingstrings = missingStrings;
             this.Delim = delim;
             this.Ignorerepeated = ignoreRepeated;
