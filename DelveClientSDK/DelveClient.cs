@@ -451,6 +451,14 @@ namespace Com.RelationalAI
 
             TransactionResult response = RunTransaction(xact);
 
+            lock(this.conn) {
+                int currentVersion = conn.Version;
+                int responseVersion = response.Version.GetValueOrDefault(0);
+                if(responseVersion > currentVersion) {
+                    conn.Version = responseVersion;
+                }
+            }
+
             success = IsSuccess(response);
             foreach (LabeledActionResult act in response.Actions)
             {
@@ -458,14 +466,6 @@ namespace Com.RelationalAI
                 {
                     ActionResult res = (ActionResult)act.Result;
                     return res;
-                }
-            }
-
-            lock(this.conn) {
-                int currentVersion = conn.Version;
-                int responseVersion = response.Version.GetValueOrDefault(0);
-                if(responseVersion > currentVersion) {
-                    conn.Version = responseVersion;
                 }
             }
 
