@@ -451,6 +451,11 @@ namespace Com.RelationalAI
 
             TransactionResult response = RunTransaction(xact);
 
+            // Sync the reported database version to our local
+            // connection version. Important, as we want to ensure
+            // that in subsequent transactions this will be the
+            // minimum required version of the database. Note that
+            // only write transactions bump the version.
             lock(this.conn) {
                 int currentVersion = conn.Version;
                 int responseVersion = response.Version.GetValueOrDefault(0);
