@@ -20,7 +20,7 @@ namespace DelveClientSDKSamples
         int MaxAttempts;
         int SleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute-2021-02-17-1232", string profile = "ma", int maxAttempts = 20, int sleepTime = 60000)
+        public CloudWorkflow(string computeName = "csharpcompute-2021-02-17-1", string profile = "profile", int maxAttempts = 20, int sleepTime = 60000)
         {
             // Loads data from ~/.rai/config (rai cloud configuration)
             IniData ini = Config.LoadDotRaiConfig();
