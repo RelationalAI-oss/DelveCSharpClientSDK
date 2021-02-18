@@ -1223,7 +1223,7 @@ namespace Com.RelationalAI
         public string Event { get; set; }
     
         [Newtonsoft.Json.JsonProperty("time", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string Time { get; set; }
+        public System.DateTimeOffset Time { get; set; }
     
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
     
@@ -1241,10 +1241,10 @@ namespace Com.RelationalAI
     public partial class GetAccountCreditsResponse 
     {
         [Newtonsoft.Json.JsonProperty("start_period", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object Start_period { get; set; }
+        public System.DateTimeOffset Start_period { get; set; }
     
         [Newtonsoft.Json.JsonProperty("end_period", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object End_period { get; set; }
+        public System.DateTimeOffset End_period { get; set; }
     
         [Newtonsoft.Json.JsonProperty("compute", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ComputeCreditsInfo Compute { get; set; }
