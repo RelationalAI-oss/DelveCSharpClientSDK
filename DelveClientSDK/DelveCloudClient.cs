@@ -178,7 +178,7 @@ namespace Com.RelationalAI
             return this.ListComputeEventsAsync(computeId).Result.Events;
         }
 
-        public GetAccountCreditsResponse GetAccountCredits(Period period=Period.Current_month)
+        public GetAccountCreditsResponse GetAccountCreditUsage(Period period=Period.Current_month)
         {
             return this.AccountCreditsGetAsync(period).Result;
         }

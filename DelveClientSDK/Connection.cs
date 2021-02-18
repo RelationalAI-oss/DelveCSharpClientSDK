@@ -501,10 +501,10 @@ namespace Com.RelationalAI
             return CloudClient.ListComputeEvents(computeId);
         }
 
-        public GetAccountCreditsResponse GetAccountCredits(Period period=Period.Current_month)
+        public GetAccountCreditsResponse GetAccountCreditUsage(Period period=Period.Current_month)
         {
             SetConnectionOnClients();
-            return CloudClient.GetAccountCredits(period);
+            return CloudClient.GetAccountCreditUsage(period);
         }
     }
 
