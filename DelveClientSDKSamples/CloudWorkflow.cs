@@ -15,11 +15,12 @@ namespace DelveClientSDKSamples
         ManagementConnection MngtConn;
         CloudConnection CloudConn;
         string ComputeName;
+        string ComputeId;
 
         int MaxAttempts;
         int SleepTime;
 
-        public CloudWorkflow(string computeName = "csharpcompute-2020-10-26-1", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
+        public CloudWorkflow(string computeName = "csharpcompute-2021-02-17-1", string profile = "default", int maxAttempts = 20, int sleepTime = 60000)
         {
             // Loads data from ~/.rai/config (rai cloud configuration)
             IniData ini = Config.LoadDotRaiConfig();
@@ -72,9 +73,9 @@ namespace DelveClientSDKSamples
               */
             var computes = this.MngtConn.ListComputes();
             Console.WriteLine("==> Computes:");
-            foreach( var compute in computes)
+            foreach( var c in computes)
             {
-                Console.WriteLine(JObject.FromObject(compute));
+                Console.WriteLine(JObject.FromObject(c));
             }
 
             // list databases for the current account
@@ -125,12 +126,15 @@ namespace DelveClientSDKSamples
             }
 
             // create compute
-            if (GetComputeByName(this.MngtConn, this.ComputeName) == null)
+            var compute = GetComputeByName(this.MngtConn, this.ComputeName);
+            if (compute == null)
             {
                 var createComputeResponse = this.MngtConn.CreateCompute(computeName: ComputeName, size: RAIComputeSize.XS);
+                this.ComputeId = createComputeResponse.Id;
                 Console.WriteLine("=> Create compute response: " + JObject.FromObject(createComputeResponse).ToString());
             } else
             {
+                this.ComputeId = compute.Id;
                 Console.WriteLine($"==> Compute {this.ComputeName} is used.");
             }
 
@@ -188,6 +192,15 @@ namespace DelveClientSDKSamples
             );
 
             Console.WriteLine("=> Jaccard Similarity query result: " + JObject.FromObject(queryResult).ToString());
+
+            var events = this.MngtConn.ListComputeEvents(this.ComputeId);
+            foreach(var e in events) {
+                Console.WriteLine("=> Compute event: " + JObject.FromObject(e).ToString());
+            }
+
+            var usage = this.MngtConn.GetAccountCreditUsage();
+            Console.WriteLine("=> Account Credit Usage: " + JObject.FromObject(usage).ToString());
+
 
             Console.WriteLine($"Press 'Y' to destroy {this.ComputeName}");
             ConsoleKeyInfo cki = Console.ReadKey();

@@ -495,6 +495,17 @@ namespace Com.RelationalAI
             CloudClient.RemoveDefaultCompute(dbname);
         }
 
+        public ICollection<ComputeEventInfo> ListComputeEvents(string computeId)
+        {
+            SetConnectionOnClients();
+            return CloudClient.ListComputeEvents(computeId);
+        }
+
+        public GetAccountCreditsResponse GetAccountCreditUsage(Period period=Period.Current_month)
+        {
+            SetConnectionOnClients();
+            return CloudClient.GetAccountCreditUsage(period);
+        }
     }
 
     /// <summary>

@@ -172,5 +172,15 @@ namespace Com.RelationalAI
             var res = this.UserPutAsync(request).Result;
             return new Tuple<UserInfoProtocol, string>(res.User, res.Private_key);
         }
+
+        public ICollection<ComputeEventInfo> ListComputeEvents(string computeId)
+        {
+            return this.ListComputeEventsAsync(computeId).Result.Events;
+        }
+
+        public GetAccountCreditsResponse GetAccountCreditUsage(Period period=Period.Current_month)
+        {
+            return this.AccountCreditsGetAsync(period).Result;
+        }
     }
 }
