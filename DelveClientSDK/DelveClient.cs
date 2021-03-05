@@ -74,6 +74,17 @@ namespace Com.RelationalAI
                 var tokenSource = new CancellationTokenSource();
                 AsyncLocalKeepAliveCancellationTokenSource.Value = tokenSource;
                 CancellationToken ct = tokenSource.Token;
+
+                /** 
+                 * TODO: currently we swallo exceptions in KeepClientAlive.
+                 * If we want to throw, then we need to change this to asynchronously handle the throw
+                 * e.g.
+                 * try {
+                     await this.KeepClientAlive(client, url, ct).ConfigureAwait(false);
+                 } catch (Exception e) {
+                     // Handle here
+                 }
+                 **/
                 var keep_alive_task = this.KeepClientAlive(client, url, ct).ConfigureAwait(false);
             }
         }
@@ -341,10 +352,12 @@ namespace Com.RelationalAI
                 ct.ThrowIfCancellationRequested();
                 await Task.Delay(HttpClientFactory.KEEP_ALIVE_INTERVAL*1000);
                 ct.ThrowIfCancellationRequested();
+
                 try {
                     await Task.Run(() => this.KeepAliveProbe(client_, ct));
-                } catch {
-                    //ignore the error
+                } catch (Exception e) {
+                    // ignore. But I think we might want to throw? 
+                    Logger.Error("KeepAliveProbe failed with exception: " + e.Message);
                 }
             }
         }
@@ -357,10 +370,19 @@ namespace Com.RelationalAI
             request.RequestUri = new System.Uri(this.BaseUrl, System.UriKind.RelativeOrAbsolute);
             request.Version =  System.Net.HttpVersion.Version20;
 
+            var keepaliveFailureCnt = 0;
             try {
                 await client_.SendAsync(request, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
-            } catch {
-                //ignore the error
+            } catch (Exception e) {
+                keepaliveFailureCnt++;
+                // KEEP_ALIVE_RETRIES may be too big here (16) for the interval of 3 minutes
+                if ( keepaliveFailureCnt < HttpClientFactory.KEEP_ALIVE_RETRIES ) {
+                    Logger.Warning("KeepAliveProbe failed to send request: " + e.Message);
+                } else {
+                    Logger.Error("KeepAliveProbe failed to send request: "  + e.Message);
+                    Logger.Error("KeepAliveProbe retry exceeded max. Throwing");
+                    throw e;
+                }
            }
         }
 
