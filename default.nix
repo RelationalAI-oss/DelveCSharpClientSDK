@@ -24,12 +24,12 @@ stdenv.mkDerivation rec {
 
     # disable default-source so nuget does not try to download from online-repo
     nuget sources Disable -Name "nuget.org"
-    # add all dependencies to source called 'sdk'
+    # add all dependencies to source called 'deps'
     for package in ${toString deps}; do
-      nuget add $package -Source sdk
+      nuget add $package -Source $HOME/deps
     done
 
-    dotnet restore --source sdk DelveClientSDK.sln
+    dotnet restore --source $HOME/deps DelveClientSDK.sln
     dotnet build --no-restore -c Release DelveClientSDK.sln
   '';
 
