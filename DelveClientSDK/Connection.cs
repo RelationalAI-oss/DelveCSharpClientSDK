@@ -516,8 +516,8 @@ namespace Com.RelationalAI
     ///
     /// Executing a transaction on the rAI Cloud requires a compute. A compute is where the actual
     /// database processing is taking place. Each database operation has to be directed to a
-    /// compute, either implicitly or explicitly. When a compute is specified in `CloudConnetion`,
-    /// it will be used for all transactions using this connetion. Otherwise, the default compute
+    /// compute, either implicitly or explicitly. When a compute is specified in `CloudConnection`,
+    /// it will be used for all transactions using this connection. Otherwise, the default compute
     /// will be picked to fulfill the transaction. A default compute can be set through
     /// `createDatabase` (implicitly) or through `setDefaultCompute` (explicitly).
     /// </summary>
