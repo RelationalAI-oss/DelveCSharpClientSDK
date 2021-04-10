@@ -1829,6 +1829,9 @@ namespace Com.RelationalAI
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public TransactionMode Mode { get; set; } = Com.RelationalAI.TransactionMode.OPEN;
     
+        [Newtonsoft.Json.JsonProperty("nowait_durable", Required = Newtonsoft.Json.Required.Always)]
+        public bool Nowait_durable { get; set; } = false;
+    
         [Newtonsoft.Json.JsonProperty("readonly", Required = Newtonsoft.Json.Required.Always)]
         public bool Readonly { get; set; } = false;
     
