@@ -108,7 +108,9 @@ namespace Com.RelationalAI
             // =============================================================================
             conn = connFunc();
             conn.CreateDatabase(overwrite: true);
-            Assert.True(new HashSet<string>() { "intrinsics", "stdlib", "ml" }.SetEquals(conn.ListSource().Keys));
+
+            // Check that the installed sources is non-empty
+            Assert.True(conn.ListSource().Keys.Any());
 
             // query
             // =============================================================================
