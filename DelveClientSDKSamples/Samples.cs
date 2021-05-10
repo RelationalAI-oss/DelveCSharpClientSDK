@@ -11,8 +11,8 @@ namespace DelveClientSDKSamples
             LocalWorkflow workflow = new LocalWorkflow();
             workflow.runLocalWorkflow();
 
-            //CloudWorkflow cloudWorkflow = new CloudWorkflow();
-            //cloudWorkflow.runCloudWorkflow();
+            CloudWorkflow cloudWorkflow = new CloudWorkflow();
+            cloudWorkflow.runCloudWorkflow();
         }
     }
 }
