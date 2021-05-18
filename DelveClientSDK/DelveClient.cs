@@ -459,8 +459,6 @@ namespace Com.RelationalAI
         {
             this.conn = conn;
 
-            Console.WriteLine("==> Current Action: " + JObject.FromObject(action).ToString());
-
             var xact = new Transaction();
             xact.Mode = mode;
             xact.Dbname = conn.DbName;
